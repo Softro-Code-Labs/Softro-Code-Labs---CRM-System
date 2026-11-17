@@ -29,8 +29,8 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
   {
     title: "Sales",
     items: [
-      { label: "Leads", href: "/leads", icon: Target, soon: true },
-      { label: "Deals", href: "/deals", icon: Briefcase, soon: true },
+      { label: "Leads", href: "/leads", icon: Target, permission: "lead:view" },
+      { label: "Deals", href: "/deals", icon: Briefcase, permission: "deal:view" },
       { label: "Quotes", href: "/quotes", icon: FileText, soon: true },
     ],
   },

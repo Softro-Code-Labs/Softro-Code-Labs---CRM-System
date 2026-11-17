@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Building2, Link2, Mail, Pencil, Phone, Smartphone, Star } from "lucide-react";
+import { Building2, Link2, Mail, Pencil, Phone, Plus, Smartphone, Star } from "lucide-react";
+import { DEAL_STATUS_TONE, LANGUAGE_LABELS } from "@/lib/crm-meta";
+import { WhatsAppButton } from "@/components/crm/whatsapp-button";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
-import { formatDate, fullName } from "@/lib/utils";
+import { formatDate, formatMoney, fullName } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +29,14 @@ export default async function ContactPage({ params }: Props) {
   const { id } = await params;
   const contact = await db.contact.findUnique({
     where: { id },
-    include: { company: { select: { id: true, name: true } }, owner: { select: { name: true } } },
+    include: {
+      company: { select: { id: true, name: true } },
+      owner: { select: { name: true } },
+      deals: {
+        orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+        select: { id: true, title: true, value: true, currency: true, status: true, stage: { select: { name: true } } },
+      },
+    },
   });
   if (!contact) notFound();
   const name = fullName(contact);
@@ -91,11 +100,15 @@ export default async function ContactPage({ params }: Props) {
                 ))}
               </ul>
             )}
+            <div className="mt-4">
+              <WhatsAppButton phone={contact.mobile ?? contact.phone} size="sm" />
+            </div>
           </Card>
           <Card>
             <dl className="divide-y divide-slate-100">
               {[
                 ["Owner", contact.owner?.name],
+                ["Language", LANGUAGE_LABELS[contact.language]],
                 ["Created", formatDate(contact.createdAt)],
                 ["Last updated", formatDate(contact.updatedAt)],
               ].map(([label, value]) => (
@@ -110,7 +123,36 @@ export default async function ContactPage({ params }: Props) {
 
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader title="Activity timeline" description="Calls, emails, meetings and notes arrive in the next build step." />
+            <CardHeader
+              title={`Deals (${contact.deals.length})`}
+              action={
+                can(user.role, "deal:create") && (
+                  <LinkButton href={`/deals/new?contactId=${contact.id}`} size="sm" variant="secondary">
+                    <Plus className="size-4" aria-hidden /> New deal
+                  </LinkButton>
+                )
+              }
+            />
+            {contact.deals.length ? (
+              <ul className="divide-y divide-slate-100">
+                {contact.deals.map((d) => (
+                  <li key={d.id}>
+                    <Link href={`/deals/${d.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-slate-50">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900">{d.title}</p>
+                        <p className="text-xs text-slate-500">{d.stage.name}</p>
+                      </div>
+                      <Badge tone={DEAL_STATUS_TONE[d.status]}>{formatMoney(d.value, d.currency)}</Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CardBody className="text-sm text-slate-500">No deals with {contact.firstName} yet.</CardBody>
+            )}
+          </Card>
+          <Card className="mt-6">
+            <CardHeader title="Activity timeline" description="Calls, emails, meetings and notes arrive in Step 3." />
             <CardBody className="text-sm text-slate-500">Nothing logged yet for {contact.firstName}.</CardBody>
           </Card>
         </div>

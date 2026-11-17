@@ -39,6 +39,8 @@ enum LeadStatus {
 }
 
 enum LeadSource {
+  WEBSITE_FORM // "Start your project" form on softrocodelabs.com (via /api/leads)
+  WHATSAPP
   WEBSITE
   REFERRAL
   LINKEDIN
@@ -49,6 +51,25 @@ enum LeadSource {
   PARTNER
   UPWORK_FIVERR
   OTHER
+}
+
+// Matches the services on softrocodelabs.com and its "What would you like to build?" form
+enum ServiceType {
+  WEBSITE_WEB_APP
+  MOBILE_APP
+  ONLINE_STORE
+  BUSINESS_SYSTEM // ERP, CRM, inventory/POS, booking systems
+  AI_AUTOMATION
+  CUSTOM_SOFTWARE
+  SAAS_PLATFORM // SaaS, LMS, cloud platforms
+  LAB_PRODUCT // Softro's own products, e.g. Surelane
+  MAINTENANCE_SUPPORT
+  NOT_SURE
+}
+
+enum PreferredLanguage {
+  ENGLISH
+  SINHALA
 }
 
 enum DealStatus {
@@ -132,7 +153,7 @@ model Company {
 }
 
 model Contact {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   firstName   String
   lastName    String?
   email       String?
@@ -141,11 +162,12 @@ model Contact {
   jobTitle    String?
   department  String?
   linkedinUrl String?
-  isPrimary   Boolean  @default(false) // primary contact for the company
+  isPrimary   Boolean           @default(false) // primary contact for the company
+  language    PreferredLanguage @default(ENGLISH)
   companyId   String?
   ownerId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
   owner      User?      @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
@@ -163,23 +185,29 @@ model Contact {
 // ─────────────────────────────────────────────────────────────
 
 model Lead {
-  id             String     @id @default(cuid())
-  title          String // e.g. "E-commerce mobile app for ABC Retail"
-  contactName    String?
-  email          String?
-  phone          String?
-  companyName    String?
-  source         LeadSource @default(OTHER)
-  status         LeadStatus @default(NEW)
-  estimatedValue Decimal?   @db.Decimal(14, 2)
-  currency       String     @default("LKR")
-  description    String?
-  ownerId        String?
-  companyId      String? // set when linked to an existing company
-  convertedAt    DateTime?
-  convertedDeal  Deal?      @relation("LeadConversion")
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id               String            @id @default(cuid())
+  title            String // e.g. "E-commerce mobile app for ABC Retail"
+  contactName      String?
+  email            String?
+  phone            String?
+  whatsapp         String?
+  companyName      String?
+  language         PreferredLanguage @default(ENGLISH)
+  source           LeadSource        @default(OTHER)
+  serviceType      ServiceType?
+  status           LeadStatus        @default(NEW)
+  respondBy        DateTime? // reply promise: 2 working days after the enquiry
+  respondedAt      DateTime? // first reply sent to the lead
+  disqualifyReason String?
+  estimatedValue   Decimal?          @db.Decimal(14, 2)
+  currency         String            @default("LKR")
+  description      String?
+  ownerId          String?
+  companyId        String? // set when linked to an existing company
+  convertedAt      DateTime?
+  convertedDeal    Deal?             @relation("LeadConversion")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   owner      User?      @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
@@ -188,6 +216,7 @@ model Lead {
 
   @@index([status])
   @@index([ownerId])
+  @@index([respondBy])
 }
 
 model Pipeline {
@@ -219,23 +248,25 @@ model PipelineStage {
 }
 
 model Deal {
-  id                String     @id @default(cuid())
+  id                String       @id @default(cuid())
   title             String
-  value             Decimal    @default(0) @db.Decimal(14, 2)
-  currency          String     @default("LKR")
-  status            DealStatus @default(OPEN)
+  value             Decimal      @default(0) @db.Decimal(14, 2)
+  currency          String       @default("LKR")
+  status            DealStatus   @default(OPEN)
+  serviceType       ServiceType?
   pipelineId        String
   stageId           String
+  stageChangedAt    DateTime     @default(now())
   companyId         String?
   contactId         String?
   ownerId           String?
-  leadId            String?    @unique
+  leadId            String?      @unique
   expectedCloseDate DateTime?
   closedAt          DateTime?
   lostReason        String?
   description       String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
   stage      PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)

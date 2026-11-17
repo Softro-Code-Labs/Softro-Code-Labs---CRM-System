@@ -48,6 +48,8 @@ Open http://localhost:3000 and sign in with the admin account from `.env`:
 | `npm run db:studio` | Browse the database in Prisma Studio |
 | `npm run db:seed` | Create the admin user and default pipeline (safe to re-run) |
 
+> The project also has a `pnpm-lock.yaml`; with pnpm use `pnpm install`, `pnpm dev`, `pnpm db:migrate --name <change>` and so on.
+
 ---
 
 ## Project structure
@@ -86,6 +88,51 @@ src/
 - Every create, update, delete, login and logout is written to the `AuditLog` table.
 - Security headers are set in `next.config.ts`.
 
+## Updating your database after pulling new code
+
+When `prisma/schema.prisma` changes (as in Step 2), create and apply a migration, then re-run the seed:
+
+```bash
+pnpm db:migrate --name leads_and_deals   # or: npm run db:migrate -- --name leads_and_deals
+pnpm db:seed                              # updates the pipeline stages if no deals exist yet
+```
+
+## Sales pipeline (Step 2)
+
+- **Leads** are new enquiries. Each one gets a **reply-by deadline 2 working days** after it arrives (Mon–Fri, Sri Lanka time; public holidays are not counted yet). Overdue leads are flagged in red on the dashboard and in **Leads → Needs reply**.
+- Moving a lead past *New*, or clicking **Mark as replied**, records the reply.
+- **Convert to deal** creates the deal and can also create the client company and contact in one step.
+- **Deals** move through the *Softro Projects* pipeline: Discovery call → Proposal & quote → Design approval → Won / Lost. Drag cards on the board (or use the stage bar on a deal). Winning a deal turns a prospect company into a customer.
+- Totals are shown per currency (LKR, USD, …). Different currencies are never added together.
+
+## Website form → CRM
+
+`POST /api/leads` creates a lead from the "Start your project" form on softrocodelabs.com.
+
+1. Set `WEBSITE_LEAD_API_KEY` (and optionally `WEBSITE_LEAD_OWNER_EMAIL`) in the CRM's `.env`.
+2. In the **website's server code** (a Next.js route handler or server action, never in browser JavaScript), forward the form:
+
+```ts
+await fetch(`${process.env.CRM_URL}/api/leads`, {
+  method: "POST",
+  headers: {
+    "content-type": "application/json",
+    "x-api-key": process.env.CRM_LEAD_API_KEY!,      // same value as WEBSITE_LEAD_API_KEY
+    "x-visitor-ip": visitorIp,                        // optional, used for rate limiting
+  },
+  body: JSON.stringify({
+    name: "Saman Kumara",
+    contact: "077 123 4567",            // "Email or WhatsApp number"
+    service: "Business system",         // the option they picked on the form
+    message: "We need a POS for our hardware shop…",
+    language: "si",                     // "en" or "si" (Sinhala page)
+    website: "",                        // the hidden "Company website" honeypot field
+  }),
+});
+```
+
+Responses: `201` created · `401` wrong key · `422` invalid data · `429` too many submissions.
+
 ## Deploying
 
 1. Set `DATABASE_URL`, a strong random `SESSION_SECRET` (48+ characters) and `DEFAULT_CURRENCY` on the server.
@@ -100,8 +147,8 @@ src/
 | Step | Scope | Status |
 |---|---|---|
 | **1. Foundation** | Project setup, data model, auth & roles, app layout, dashboard, Companies, Contacts, audit log | ✅ Done |
-| **2. Sales pipeline** | Leads (capture, qualify, convert to deal) · Deals with a Kanban pipeline board · pipeline stages · won/lost tracking | ⏭ Next |
-| **3. Activities & notes** | Calls, meetings, emails and tasks with due dates · "My tasks" view · activity timeline on every record · notes | |
+| **2. Sales pipeline** | Leads (WhatsApp, website form, referrals…) with a 2-working-day reply tracker · convert lead → deal · drag-and-drop deals board · won/lost tracking · website form API | ✅ Done |
+| **3. Activities & notes** | Calls, meetings, emails and tasks with due dates · "My tasks" view · activity timeline on every record · notes | ⏭ Next |
 | **4. Team & settings** | User management (invite, roles, deactivate, reset password) · profile & password change · pipeline/stage editor · company settings | |
 | **5. Quotes & proposals** | Service/product catalogue · quotations with line items, tax and discounts · PDF export · quote → deal link | |
 | **6. Contracts & support** | AMC / SLA / retainer contracts with renewal alerts · support tickets linked to clients | |

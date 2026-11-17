@@ -5,7 +5,8 @@ import { Globe, Mail, MapPin, Pencil, Phone, Plus, Star, Users } from "lucide-re
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
-import { formatDate, fullName, humanize } from "@/lib/utils";
+import { formatDate, formatMoney, formatMoneyTotals, fullName, humanize } from "@/lib/utils";
+import { DEAL_STATUS_TONE, LEAD_STATUS_LABELS, LEAD_STATUS_TONE } from "@/lib/crm-meta";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,15 @@ export default async function CompanyPage({ params }: Props) {
     where: { id },
     include: {
       owner: { select: { name: true } },
+      deals: {
+        orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+        select: { id: true, title: true, value: true, currency: true, status: true, stage: { select: { name: true } } },
+      },
+      leads: {
+        where: { status: { not: "CONVERTED" } },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, title: true, status: true, createdAt: true },
+      },
       contacts: {
         orderBy: [{ isPrimary: "desc" }, { firstName: "asc" }],
         select: { id: true, firstName: true, lastName: true, jobTitle: true, email: true, phone: true, isPrimary: true },
@@ -128,11 +138,51 @@ export default async function CompanyPage({ params }: Props) {
           </Card>
 
           <Card>
-            <CardHeader title="Deals, activities & notes" description="Arriving in the next build steps." />
-            <CardBody className="text-sm text-slate-500">
-              The sales pipeline, activity timeline and notes for {company.name} will appear here.
-            </CardBody>
+            <CardHeader
+              title={`Deals (${company.deals.length})`}
+              description={company.deals.length ? `Won so far: ${formatMoneyTotals(company.deals.filter((d) => d.status === "WON"))}` : undefined}
+              action={
+                can(user.role, "deal:create") && (
+                  <LinkButton href={`/deals/new?companyId=${company.id}`} size="sm" variant="secondary">
+                    <Plus className="size-4" aria-hidden /> New deal
+                  </LinkButton>
+                )
+              }
+            />
+            {company.deals.length ? (
+              <ul className="divide-y divide-slate-100">
+                {company.deals.map((d) => (
+                  <li key={d.id}>
+                    <Link href={`/deals/${d.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-slate-50">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900">{d.title}</p>
+                        <p className="text-xs text-slate-500">{d.stage.name}</p>
+                      </div>
+                      <Badge tone={DEAL_STATUS_TONE[d.status]}>{formatMoney(d.value, d.currency)}</Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CardBody className="text-sm text-slate-500">No deals with {company.name} yet.</CardBody>
+            )}
           </Card>
+
+          {company.leads.length > 0 && (
+            <Card>
+              <CardHeader title={`Open leads (${company.leads.length})`} />
+              <ul className="divide-y divide-slate-100">
+                {company.leads.map((l) => (
+                  <li key={l.id}>
+                    <Link href={`/leads/${l.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-slate-50">
+                      <span className="truncate text-sm font-medium text-slate-900">{l.title}</span>
+                      <Badge tone={LEAD_STATUS_TONE[l.status]}>{LEAD_STATUS_LABELS[l.status]}</Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
         </div>
 
         <div className="space-y-6">
