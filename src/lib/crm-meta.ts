@@ -75,3 +75,19 @@ export const LANGUAGE_OPTIONS = options(LANGUAGE_LABELS);
 
 export const CURRENCIES = ["LKR", "USD", "EUR", "GBP", "AUD", "AED"] as const;
 export const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c, label: c }));
+
+export const ACTIVITY_TYPE_LABELS: Record<import("@/generated/prisma/enums").ActivityType, string> = {
+  CALL: "Call",
+  WHATSAPP: "WhatsApp",
+  EMAIL: "Email",
+  MEETING: "Meeting",
+  TASK: "Task",
+};
+export const ACTIVITY_TYPE_OPTIONS = options(ACTIVITY_TYPE_LABELS);
+
+export const PRIORITY_LABELS: Record<import("@/generated/prisma/enums").ActivityPriority, string> = {
+  LOW: "Low",
+  MEDIUM: "Medium",
+  HIGH: "High",
+};
+export const PRIORITY_OPTIONS = options(PRIORITY_LABELS);

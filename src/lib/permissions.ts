@@ -28,6 +28,13 @@ export const PERMISSIONS = {
   "deal:update": ["ADMIN", "MANAGER", "SALES"],
   "deal:delete": ["ADMIN", "MANAGER"],
 
+  // Activities (calls, WhatsApp, meetings, tasks) and notes
+  "activity:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
+  "activity:create": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
+  // Anyone who can create can tick off their own tasks and delete their own entries;
+  // managers can manage everyone's.
+  "activity:manage-all": ["ADMIN", "MANAGER"],
+
   "user:manage": ["ADMIN"],
 } as const satisfies Record<string, readonly Role[]>;
 

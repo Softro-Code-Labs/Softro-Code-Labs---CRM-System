@@ -14,11 +14,12 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 6. [Deals: projects we're trying to win](#6-deals-projects-were-trying-to-win)
 7. [Companies](#7-companies)
 8. [Contacts](#8-contacts)
-9. [The dashboard](#9-the-dashboard)
-10. [Enquiries from our website](#10-enquiries-from-our-website)
-11. [Good habits and data rules](#11-good-habits-and-data-rules)
-12. [Questions and problems](#12-questions-and-problems)
-13. [Coming soon](#13-coming-soon)
+9. [Activities, tasks and notes](#9-activities-tasks-and-notes)
+10. [The dashboard](#10-the-dashboard)
+11. [Enquiries from our website](#11-enquiries-from-our-website)
+12. [Good habits and data rules](#12-good-habits-and-data-rules)
+13. [Questions and problems](#13-questions-and-problems)
+14. [Coming soon](#14-coming-soon)
 
 ---
 
@@ -38,7 +39,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 
 | Area | Where | What it's for |
 |---|---|---|
-| **Sidebar** (left) | Dashboard, Leads, Deals, Companies, Contacts | Main sections. Items marked **Soon** are being built. |
+| **Sidebar** (left) | Dashboard, Leads, Deals, Companies, Contacts, Activities | Main sections. Items marked **Soon** are being built. |
 | **Top bar** | Your name, role and sign-out button | On a phone, tap **☰** to open the sidebar. |
 | **Page header** | Title, breadcrumbs, main buttons | Breadcrumbs (e.g. *Deals › Website for Lanka Spices*) take you back a level. |
 
@@ -59,6 +60,8 @@ Each person has one role. Ask an admin if you need more access.
 | Add and edit deals, move stages, mark won or lost | ✅ | ✅ | ✅ | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
 | Add and edit contacts | ✅ | ✅ | ✅ | ✅ | — |
+| Add notes, log calls and chats, schedule tasks | ✅ | ✅ | ✅ | ✅ | — |
+| Tick off or delete **anyone's** tasks and notes | ✅ | ✅ | — | — | — |
 | Delete leads, deals, companies or contacts | ✅ | ✅ | — | — | — |
 | Manage users | ✅ | — | — | — | — |
 
@@ -70,10 +73,11 @@ If a button is missing, your role doesn't allow that action. Every change is rec
 
 A good routine takes about 10 minutes:
 
-1. **Open the Dashboard.** Check **Leads waiting for a reply**. If the card is red, some leads are past our 2-working-day promise.
-2. **Reply to waiting leads** (WhatsApp, call or email), then click **Mark as replied** on each one.
-3. **Open Deals → My deals.** Move any deal whose situation has changed to the right stage. Look for cards with a **red close date** (overdue) or many days in the same stage.
-4. **Log anything new** from yesterday: a WhatsApp enquiry, a referral, a new contact at a client.
+1. **Open the Dashboard.** Check **My tasks for today** and **Leads waiting for a reply**. If the leads card is red, some leads are past our 2-working-day promise.
+2. **Reply to waiting leads** (WhatsApp, call or email), then **log it** in the lead's Activity box. Logging a call, WhatsApp, email or meeting marks the lead as replied for you.
+3. **Work through your tasks** and tick each one off. Schedule the next follow-up before you move on.
+4. **Open Deals → My deals.** Move any deal whose situation has changed to the right stage. Look for cards with a **red close date** (overdue) or many days in the same stage.
+5. **Log anything new** from yesterday: a WhatsApp enquiry, a referral, a new contact at a client.
 
 ---
 
@@ -87,7 +91,7 @@ Our website promises a reply **within 2 working days**. The CRM tracks this for 
 
 - Every new lead gets a **reply-by deadline**: 2 working days later, Monday to Friday, Sri Lanka time. Enquiries made at the weekend count from Monday morning.
 - The lead shows **Reply in 1 day** (grey), **Reply in 5 hours** (amber, less than a day left) or **Reply overdue** (red).
-- The deadline stops counting as soon as someone clicks **Mark as replied**, or moves the lead to *Contacted* or *Qualified*.
+- The deadline stops counting as soon as someone clicks **Mark as replied**, **logs a call, WhatsApp, email or meeting** on the lead, or moves it to *Contacted* or *Qualified*.
 
 > Public holidays and poya days aren't counted yet. Around holidays, reply sooner rather than later.
 
@@ -229,11 +233,57 @@ The people we talk to at each company.
 
 ---
 
-## 9. The dashboard
+## 9. Activities, tasks and notes
+
+Every lead, deal, company and contact page has an **Activity** box. It's the history of everything we've said and done with that client, plus what's coming up.
+
+### Add to the timeline
+
+The box has three tabs:
+
+| Tab | Use it for | Example |
+|---|---|---|
+| **Note** | Background or decisions the team should know | *Prefers to talk after 6 pm. Budget approved by their director.* |
+| **Log a call, chat or meeting** | Something that **already happened**: a call, WhatsApp chat, email or meeting | *WhatsApp: sent the proposal PDF, they'll reply Friday* |
+| **Schedule a task** | Something **to do later**, with a due date and time, an owner and a priority | *Call: follow up on the quote, tomorrow 10:00* |
+
+- Scheduled tasks default to the **next working day at 10:00**. Change the date and time as needed (Sri Lanka time).
+- You can assign a task to a colleague. It then shows in *their* task list.
+- **High** priority tasks get an amber label.
+
+### How it fits together
+
+- Something logged on a **deal** also appears on that deal's **company** and **contact**, so a company page shows the whole relationship.
+- A **deal** also shows everything from the **lead** it came from, so nothing is lost when you convert.
+- On a **lead**, logging a call, WhatsApp, email or meeting counts as **our reply** and stops the 2-working-day clock.
+
+### Upcoming and history
+
+- **Upcoming:** open tasks, soonest first. Overdue ones are in **red**. Click the **circle** to tick one off.
+- **History:** everything done and every note, newest first.
+- To delete a note or activity, hover over it and click the **bin** icon. You can delete your own; managers and admins can delete anyone's.
+
+### The Activities page
+
+**Activities** in the sidebar is your to-do list across all clients:
+
+| Tab | Shows |
+|---|---|
+| **Overdue** | Open tasks past their due time (red count) |
+| **Today** | Due later today, plus open tasks with no date |
+| **Upcoming** | Due tomorrow or later |
+| **Done** | Completed in the last 30 days |
+
+Switch **Mine / Everyone** to see the whole team's tasks, and filter by type (Call, WhatsApp, Email, Meeting, Task). Each item links back to its lead, deal, company or contact.
+
+---
+
+## 10. The dashboard
 
 | Card | What it shows |
 |---|---|
 | **Leads waiting for a reply** | Open leads nobody has replied to. Turns **red** when any are overdue. |
+| **My tasks for today** | Your overdue tasks and tasks due today. Tick them off right there. |
 | **Open pipeline** | Total value of open deals |
 | **Won this month** | Deals won since the 1st |
 | **Customers** | Companies we've worked with |
@@ -245,22 +295,23 @@ Click any card to go to the full list behind it.
 
 ---
 
-## 10. Enquiries from our website
+## 11. Enquiries from our website
 
 The **Start your project** form on softrocodelabs.com sends each enquiry to **two** places:
 
 1. An **email** to our inbox, as before.
 2. A **new lead** in the CRM with source **Website form**, the service they picked, their language (from the English or Sinhala site) and their message. The reply-by deadline starts straight away.
 
-You don't need to type website enquiries in by hand. Just reply, then **Mark as replied**. If the same person also messages you on WhatsApp, update the existing lead instead of making a second one.
+You don't need to type website enquiries in by hand. Just reply, then **log your reply** in the lead's Activity box (or click **Mark as replied**). If the same person also messages you on WhatsApp, update the existing lead instead of making a second one.
 
 ---
 
-## 11. Good habits and data rules
+## 12. Good habits and data rules
 
 - **One lead per enquiry, one company per business.** Search before adding so we don't get duplicates.
 - **Write titles people can scan:** *Mobile app for a tuition class in Kandy* beats *New enquiry*.
 - **Keep stages current.** An out-of-date board gives a wrong forecast.
+- **Log every client conversation** (one line is enough), and **always schedule the next step** before you leave a lead or deal.
 - **Always give reasons** for *Not a fit* and *Lost*. They show where we can improve.
 - **Set yourself as owner** of the leads and deals you're handling, so *My deals* is accurate.
 - **Client data is confidential.** Don't export, screenshot or share it outside Softro. Don't store passwords, bank or card details in notes.
@@ -268,7 +319,7 @@ You don't need to type website enquiries in by hand. Just reply, then **Mark as 
 
 ---
 
-## 12. Questions and problems
+## 13. Questions and problems
 
 | Problem | What to do |
 |---|---|
@@ -278,15 +329,16 @@ You don't need to type website enquiries in by hand. Just reply, then **Mark as 
 | I can't drag a deal | On phones, use the stage dropdown on the card. Won and lost deals must be reopened first. |
 | The CRM is slow to open the first time in the morning | Normal on the test site: the database wakes up after being idle. |
 | "Something went wrong" | Try again. If it keeps happening, send the admin the page address and the *Ref* code shown. |
-| I entered something wrong | Click **Edit** and fix it. Only managers and admins can delete. |
+| I entered something wrong | Click **Edit** and fix it. Only managers and admins can delete records. |
+| I can't tick off a task | Only the person it's assigned to, the person who created it, or a manager can. |
+| I need to change a task's date | For now, delete it and schedule a new one. Editing tasks is coming. |
 
 ---
 
-## 13. Coming soon
+## 14. Coming soon
 
 These are planned and shown as **Soon** in the sidebar:
 
-- **Activities & notes:** log calls, meetings, emails and tasks with due dates, a "My tasks" list, and a timeline on every lead, deal, company and contact.
 - **Settings:** add team members, change roles, reset passwords, edit pipeline stages.
 - **Quotes:** build quotations with line items and tax, and export them as PDF.
 - **Support & contracts:** maintenance contracts with renewal reminders, and support tickets.

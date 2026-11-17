@@ -150,8 +150,8 @@ Responses: `201` created · `401` wrong key · `422` invalid data · `429` too m
 |---|---|---|
 | **1. Foundation** | Project setup, data model, auth & roles, app layout, dashboard, Companies, Contacts, audit log | ✅ Done |
 | **2. Sales pipeline** | Leads (WhatsApp, website form, referrals…) with a 2-working-day reply tracker · convert lead → deal · drag-and-drop deals board · won/lost tracking · website form API | ✅ Done |
-| **3. Activities & notes** | Calls, meetings, emails and tasks with due dates · "My tasks" view · activity timeline on every record · notes | ⏭ Next |
-| **4. Team & settings** | User management (invite, roles, deactivate, reset password) · profile & password change · pipeline/stage editor · company settings | |
+| **3. Activities & notes** | Notes · log calls, WhatsApp, emails and meetings · scheduled tasks with due dates and owners · timeline on every record · Activities page (overdue/today/upcoming/done) · dashboard "My tasks" | ✅ Done |
+| **4. Team & settings** | User management (invite, roles, deactivate, reset password) · profile & password change · pipeline/stage editor · company settings | ⏭ Next |
 | **5. Quotes & proposals** | Service/product catalogue · quotations with line items, tax and discounts · PDF export · quote → deal link | |
 | **6. Contracts & support** | AMC / SLA / retainer contracts with renewal alerts · support tickets linked to clients | |
 | **7. Reports & dashboard** | Pipeline forecast · win rate · revenue by client/service · team performance · CSV export | |

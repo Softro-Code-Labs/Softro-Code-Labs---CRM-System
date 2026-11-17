@@ -22,6 +22,7 @@ import { ReplyBadge } from "@/components/crm/reply-badge";
 import { WhatsAppButton } from "@/components/crm/whatsapp-button";
 import { deleteLead } from "../actions";
 import { LeadActions } from "./lead-actions";
+import { RecordTimeline } from "@/components/crm/record-timeline";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -114,6 +115,7 @@ export default async function LeadPage({ params }: Props) {
             <CardHeader title="Their idea / requirements" />
             <CardBody className="text-sm whitespace-pre-line text-ink-700">{lead.description || <span className="text-ink-400">No details yet.</span>}</CardBody>
           </Card>
+          <RecordTimeline target={{ leadId: lead.id, dealId: null, companyId: null, contactId: null }} user={user} />
         </div>
 
         <div className="space-y-6">

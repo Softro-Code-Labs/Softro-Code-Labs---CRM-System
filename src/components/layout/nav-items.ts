@@ -39,7 +39,7 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
     items: [
       { label: "Companies", href: "/companies", icon: Building2, permission: "company:view" },
       { label: "Contacts", href: "/contacts", icon: Users, permission: "contact:view" },
-      { label: "Activities", href: "/activities", icon: CalendarCheck, soon: true },
+      { label: "Activities", href: "/activities", icon: CalendarCheck, permission: "activity:view" },
       { label: "Support", href: "/support", icon: LifeBuoy, soon: true },
     ],
   },
