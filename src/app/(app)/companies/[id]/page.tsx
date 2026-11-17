@@ -6,7 +6,9 @@ import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, formatMoneyTotals, fullName, humanize } from "@/lib/utils";
-import { DEAL_STATUS_TONE, LEAD_STATUS_LABELS, LEAD_STATUS_TONE } from "@/lib/crm-meta";
+import { BILLING_CYCLE_SHORT, DEAL_STATUS_TONE, LEAD_STATUS_LABELS, LEAD_STATUS_TONE, TICKET_STATUS_LABELS, TICKET_STATUS_TONE } from "@/lib/crm-meta";
+import { ContractStateBadge } from "@/components/crm/contract-state-badge";
+import { SlaBadge } from "@/components/crm/sla-badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +37,15 @@ export default async function CompanyPage({ params }: Props) {
       deals: {
         orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
         select: { id: true, title: true, value: true, currency: true, status: true, stage: { select: { name: true } } },
+      },
+      contracts: {
+        orderBy: [{ status: "asc" }, { endDate: "asc" }],
+        select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true, amount: true, currency: true, billingCycle: true },
+      },
+      tickets: {
+        where: { status: { in: ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"] } },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, number: true, subject: true, status: true, priority: true, responseDueAt: true, firstResponseAt: true },
       },
       leads: {
         where: { status: { not: "CONVERTED" } },
@@ -184,6 +195,71 @@ export default async function CompanyPage({ params }: Props) {
               </ul>
             </Card>
           )}
+
+          <Card>
+            <CardHeader
+              title={`Contracts (${company.contracts.length})`}
+              action={
+                can(user.role, "contract:manage") && (
+                  <LinkButton href={`/contracts/new?companyId=${company.id}`} size="sm" variant="secondary">
+                    <Plus className="size-4" aria-hidden /> New contract
+                  </LinkButton>
+                )
+              }
+            />
+            {company.contracts.length ? (
+              <ul className="divide-y divide-ink-100">
+                {company.contracts.map((c) => (
+                  <li key={c.id}>
+                    <Link href={`/contracts/${c.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-ink-50">
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-ink-900">{c.title}</span>
+                        <span className="text-xs text-ink-500">
+                          <span className="font-mono">{c.number}</span> · {formatMoney(c.amount, c.currency)} {BILLING_CYCLE_SHORT[c.billingCycle]}
+                        </span>
+                      </span>
+                      <ContractStateBadge contract={c} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CardBody className="text-sm text-ink-500">No maintenance, hosting or support contracts yet.</CardBody>
+            )}
+          </Card>
+
+          <Card>
+            <CardHeader
+              title={`Open support tickets (${company.tickets.length})`}
+              action={
+                can(user.role, "ticket:create") && (
+                  <LinkButton href={`/support/new?companyId=${company.id}`} size="sm" variant="secondary">
+                    <Plus className="size-4" aria-hidden /> New ticket
+                  </LinkButton>
+                )
+              }
+            />
+            {company.tickets.length ? (
+              <ul className="divide-y divide-ink-100">
+                {company.tickets.map((t) => (
+                  <li key={t.id}>
+                    <Link href={`/support/${t.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-ink-50">
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-ink-900">{t.subject}</span>
+                        <span className="font-mono text-xs text-ink-500">{t.number}</span>
+                      </span>
+                      <span className="flex gap-1.5">
+                        <SlaBadge ticket={t} compact />
+                        <Badge tone={TICKET_STATUS_TONE[t.status]}>{TICKET_STATUS_LABELS[t.status]}</Badge>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CardBody className="text-sm text-ink-500">No open tickets.</CardBody>
+            )}
+          </Card>
 
           <RecordTimeline target={{ leadId: null, dealId: null, companyId: company.id, contactId: null }} user={user} />
         </div>

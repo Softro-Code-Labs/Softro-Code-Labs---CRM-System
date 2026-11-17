@@ -42,6 +42,14 @@ export const PERMISSIONS = {
   "product:manage": ["ADMIN", "MANAGER"],
   "org:manage": ["ADMIN"],
 
+  "contract:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
+  "contract:manage": ["ADMIN", "MANAGER", "SALES"],
+  "contract:delete": ["ADMIN", "MANAGER"],
+  "ticket:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
+  "ticket:create": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
+  "ticket:update": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
+  "ticket:delete": ["ADMIN", "MANAGER"],
+
   "settings:view": ["ADMIN", "MANAGER"],
   "user:manage": ["ADMIN"],
   "pipeline:manage": ["ADMIN", "MANAGER"],
@@ -67,6 +75,6 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   ADMIN: "Everything, including team members and the audit log",
   MANAGER: "Everything except team members; can delete records and edit the pipeline",
   SALES: "Works leads and deals; adds companies, contacts and activities",
-  SUPPORT: "Adds leads, contacts and activities; read-only on deals",
+  SUPPORT: "Handles support tickets; adds leads, contacts and activities; read-only on deals",
   VIEWER: "Read-only access",
 };

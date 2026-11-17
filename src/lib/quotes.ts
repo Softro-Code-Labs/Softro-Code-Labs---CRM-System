@@ -2,17 +2,12 @@ import "server-only";
 import { db } from "@/lib/db";
 import type { Prisma } from "@/generated/prisma/client";
 import { quoteTotals } from "@/lib/quote-math";
+import { nextNumber } from "@/lib/numbering";
 import type { QuoteInput } from "@/lib/validation/quote";
 
-/** Next quote number for the year, e.g. Q-2026-0007. Safe when two people save at once. */
-export async function nextQuoteNumber(tx: Prisma.TransactionClient, date = new Date()) {
-  const year = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Colombo", year: "numeric" }).format(date);
-  const counter = await tx.counter.upsert({
-    where: { key: `quote-${year}` },
-    create: { key: `quote-${year}`, value: 1 },
-    update: { value: { increment: 1 } },
-  });
-  return `Q-${year}-${String(counter.value).padStart(4, "0")}`;
+/** Next quote number for the year, e.g. Q-2026-0007. */
+export function nextQuoteNumber(tx: Prisma.TransactionClient, date = new Date()) {
+  return nextNumber(tx, "Q", date);
 }
 
 /** Turns validated input into the rows and totals we store. */
