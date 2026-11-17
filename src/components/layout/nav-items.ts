@@ -47,7 +47,7 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
   },
   {
     title: "Insights",
-    items: [{ label: "Reports", href: "/reports", icon: BarChart3, soon: true }],
+    items: [{ label: "Reports", href: "/reports", icon: BarChart3, permission: "report:view" }],
   },
   {
     title: "Admin",

@@ -12,8 +12,8 @@ import { FilterSelect } from "@/components/ui/filter-select";
 export const metadata: Metadata = { title: "Audit log" };
 
 const PAGE_SIZE = 50;
-const ACTION_TONE: Record<string, BadgeTone> = { create: "green", update: "blue", delete: "red", login: "gray", logout: "gray" };
-const ENTITIES = ["Company", "Contact", "Lead", "Deal", "Activity", "Note", "User", "PipelineStage"];
+const ACTION_TONE: Record<string, BadgeTone> = { create: "green", update: "blue", delete: "red", login: "gray", logout: "gray", export: "amber" };
+const ENTITIES = ["Company", "Contact", "Lead", "Deal", "Activity", "Note", "Quote", "Product", "Contract", "Ticket", "Report", "User", "PipelineStage", "OrgSettings"];
 
 export default async function AuditPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requirePermission("audit:view");

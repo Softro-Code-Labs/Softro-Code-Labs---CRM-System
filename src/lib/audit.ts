@@ -4,7 +4,7 @@ import type { Prisma } from "@/generated/prisma/client";
 
 export async function audit(entry: {
   actorId: string | null;
-  action: "create" | "update" | "delete" | "login" | "logout";
+  action: "create" | "update" | "delete" | "login" | "logout" | "export";
   entity: string;
   entityId?: string | null;
   summary?: string;
