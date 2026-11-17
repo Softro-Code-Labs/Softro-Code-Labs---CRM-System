@@ -15,6 +15,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { LinkButton } from "@/components/ui/button";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { deleteContact } from "../actions";
+import { RecordTimeline } from "@/components/crm/record-timeline";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -151,10 +152,9 @@ export default async function ContactPage({ params }: Props) {
               <CardBody className="text-sm text-ink-500">No deals with {contact.firstName} yet.</CardBody>
             )}
           </Card>
-          <Card className="mt-6">
-            <CardHeader title="Activity timeline" description="Calls, emails, meetings and notes arrive in Step 3." />
-            <CardBody className="text-sm text-ink-500">Nothing logged yet for {contact.firstName}.</CardBody>
-          </Card>
+          <div className="mt-6">
+            <RecordTimeline target={{ leadId: null, dealId: null, companyId: null, contactId: contact.id }} user={user} />
+          </div>
         </div>
       </div>
     </>

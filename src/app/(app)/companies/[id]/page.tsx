@@ -14,6 +14,7 @@ import { LinkButton } from "@/components/ui/button";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { companyTypeTone } from "../company-meta";
 import { deleteCompany } from "../actions";
+import { RecordTimeline } from "@/components/crm/record-timeline";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -183,6 +184,8 @@ export default async function CompanyPage({ params }: Props) {
               </ul>
             </Card>
           )}
+
+          <RecordTimeline target={{ leadId: null, dealId: null, companyId: company.id, contactId: null }} user={user} />
         </div>
 
         <div className="space-y-6">

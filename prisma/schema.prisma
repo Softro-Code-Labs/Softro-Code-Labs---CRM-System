@@ -80,6 +80,7 @@ enum DealStatus {
 
 enum ActivityType {
   CALL
+  WHATSAPP
   EMAIL
   MEETING
   TASK
@@ -306,11 +307,12 @@ model Activity {
 
   assignedTo User?    @relation("ActivityAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdBy  User?    @relation("ActivityCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  company    Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
   lead       Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
   deal       Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
 
+  // History survives if a company or contact is deleted; it's removed with its lead or deal.
   @@index([assignedToId, completedAt, dueAt])
   @@index([companyId])
   @@index([contactId])
@@ -330,8 +332,8 @@ model Note {
   updatedAt DateTime @updatedAt
 
   author  User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contact Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
   lead    Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
   deal    Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
 

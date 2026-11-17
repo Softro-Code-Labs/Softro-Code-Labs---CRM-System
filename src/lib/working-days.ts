@@ -46,3 +46,23 @@ export function startOfColomboMonth(now = new Date()) {
   const local = new Date(now.getTime() + COLOMBO_OFFSET_MS);
   return new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), 1) - COLOMBO_OFFSET_MS);
 }
+
+/** "yyyy-mm-ddThh:mm" in Sri Lanka time, for <input type="datetime-local">. */
+export function toColomboInput(date: Date) {
+  return new Date(date.getTime() + COLOMBO_OFFSET_MS).toISOString().slice(0, 16);
+}
+
+/** Default due time for a new task: the next working day at 10:00, Sri Lanka time. */
+export function nextWorkingDayAt10(now = new Date()) {
+  const next = addWorkingDays(now, 1);
+  const local = new Date(next.getTime() + COLOMBO_OFFSET_MS);
+  local.setUTCHours(10, 0, 0, 0);
+  return new Date(local.getTime() - COLOMBO_OFFSET_MS);
+}
+
+/** Start and end of today, Sri Lanka time. */
+export function colomboDayBounds(now = new Date()) {
+  const local = new Date(now.getTime() + COLOMBO_OFFSET_MS);
+  const start = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate()) - COLOMBO_OFFSET_MS);
+  return { start, end: new Date(start.getTime() + DAY_MS) };
+}

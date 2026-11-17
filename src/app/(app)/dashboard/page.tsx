@@ -10,7 +10,10 @@ import { PageHeader } from "@/components/ui/page-header";
 import { ReplyBadge } from "@/components/crm/reply-badge";
 import { cn, formatDate, formatMoney, formatMoneyTotals } from "@/lib/utils";
 import { LEAD_SOURCE_LABELS, OPEN_LEAD_STATUSES } from "@/lib/crm-meta";
-import { startOfColomboMonth } from "@/lib/working-days";
+import { colomboDayBounds, startOfColomboMonth } from "@/lib/working-days";
+import { activitySelect } from "@/lib/activities";
+import { DoneCheckbox } from "@/components/crm/activity-controls";
+import { ACTIVITY_ICONS, ActivityContext, formatWhen } from "@/components/crm/record-timeline";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -21,8 +24,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const monthStart = startOfColomboMonth(now);
   const pipeline = await getDefaultPipeline();
 
+  const { end: endOfToday } = colomboDayBounds(now);
   const waitingWhere = { status: { in: OPEN_LEAD_STATUSES }, respondedAt: null };
-  const [waitingCount, overdueCount, waitingLeads, openLeadCount, openDeals, wonThisMonth, customerCount, recentWins] = await Promise.all([
+  const myTasksWhere = { assignedToId: user.id, completedAt: null, OR: [{ dueAt: { lt: endOfToday } }, { dueAt: null }] };
+  const [myTasks, myTaskCount, waitingCount, overdueCount, waitingLeads, openLeadCount, openDeals, wonThisMonth, customerCount, recentWins] = await Promise.all([
+    db.activity.findMany({ where: myTasksWhere, select: activitySelect, orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }], take: 6 }),
+    db.activity.count({ where: myTasksWhere }),
     db.lead.count({ where: waitingWhere }),
     db.lead.count({ where: { ...waitingWhere, respondBy: { lt: now } } }),
     db.lead.findMany({
@@ -93,6 +100,38 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader
+            title={`My tasks for today (${myTaskCount})`}
+            description="Overdue and due today, assigned to you."
+            action={<Link href="/activities" className="text-xs font-medium text-brand-700 hover:underline">All activities</Link>}
+          />
+          {myTasks.length ? (
+            <ul className="divide-y divide-ink-100">
+              {myTasks.map((a) => {
+                const Icon = ACTIVITY_ICONS[a.type];
+                const overdue = a.dueAt && a.dueAt < now;
+                return (
+                  <li key={a.id} className="flex items-start gap-3 px-5 py-3">
+                    <DoneCheckbox id={a.id} done={false} canToggle label={a.subject} />
+                    <div className="min-w-0 flex-1">
+                      <p className="flex items-center gap-2 truncate text-sm font-medium text-ink-900">
+                        <Icon className="size-4 shrink-0 text-ink-400" aria-hidden /> {a.subject}
+                      </p>
+                      <p className={cn("text-xs", overdue ? "font-medium text-red-600" : "text-ink-500")}>
+                        {a.dueAt ? `${overdue ? "Overdue · " : ""}${formatWhen(a.dueAt)}` : "No due date"}
+                      </p>
+                      <ActivityContext activity={a} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <CardBody className="text-sm text-ink-500">Nothing due today. Schedule follow-ups from any lead or deal.</CardBody>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader
             title="Reply within 2 working days"
             description="Leads nobody has replied to yet, most urgent first."
             action={<Link href="/leads?tab=needs-reply" className="text-xs font-medium text-brand-600 hover:underline">View all</Link>}
@@ -137,7 +176,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </CardBody>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card>
           <CardHeader title="Recent wins" />
           {recentWins.length ? (
             <ul className="divide-y divide-ink-100">

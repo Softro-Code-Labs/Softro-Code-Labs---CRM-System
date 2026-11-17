@@ -15,6 +15,7 @@ import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { WhatsAppButton } from "@/components/crm/whatsapp-button";
 import { deleteDeal } from "../actions";
 import { CloseDealButtons, StageBar } from "./deal-controls";
+import { RecordTimeline } from "@/components/crm/record-timeline";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -92,10 +93,7 @@ export default async function DealPage({ params }: Props) {
             <CardHeader title="Scope & notes" />
             <CardBody className="text-sm whitespace-pre-line text-ink-700">{deal.description || <span className="text-ink-400">No scope written yet.</span>}</CardBody>
           </Card>
-          <Card>
-            <CardHeader title="Activities & notes" description="Calls, meetings, tasks and notes arrive in Step 3." />
-            <CardBody className="text-sm text-ink-500">Nothing logged yet.</CardBody>
-          </Card>
+          <RecordTimeline target={{ leadId: null, dealId: deal.id, companyId: null, contactId: null }} user={user} />
         </div>
 
         <div className="space-y-6">
