@@ -15,6 +15,24 @@ const DEFAULT_STAGES = [
   { name: "Lost", probability: 0, isLost: true },
 ];
 
+// Starting point for quotes. Edit these in Settings → Company details.
+const ORG_DEFAULTS = {
+  companyName: "Softro Code Labs",
+  address: "No. 30, Robert De Zoysa Mawatha, Walagedara, Balapitiya, Sri Lanka",
+  phone: "077 278 0771",
+  email: "hello@softrocodelabs.com",
+  website: "https://www.softrocodelabs.com",
+  quoteFooter: "Thank you for considering Softro Code Labs.",
+  defaultTerms: [
+    "Starting point only: review and replace with your real terms in Settings → Company details.",
+    "",
+    "• Payment: [x]% advance to start, balance on delivery.",
+    "• Timeline: confirmed after the design is approved.",
+    "• Includes: [n] rounds of design revisions; changes outside this scope are quoted separately.",
+    "• Support: [n] days of free bug fixes after launch.",
+  ].join("\n"),
+};
+
 async function main() {
   const email = (process.env.SEED_ADMIN_EMAIL ?? "admin@softrocodelabs.com").toLowerCase();
   const password = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe@123";
@@ -28,6 +46,14 @@ async function main() {
       data: { email, name, role: "ADMIN", passwordHash: await bcrypt.hash(password, 12), mustChangePassword: true },
     });
     console.log(`✔ Created admin user: ${email}`);
+  }
+
+  const org = await db.orgSettings.findUnique({ where: { id: "default" } });
+  if (org) {
+    console.log("✔ Company details already set");
+  } else {
+    await db.orgSettings.create({ data: { id: "default", ...ORG_DEFAULTS } });
+    console.log("✔ Added company details for quotes (edit in Settings → Company details)");
   }
 
   const pipeline = await db.pipeline.findFirst({

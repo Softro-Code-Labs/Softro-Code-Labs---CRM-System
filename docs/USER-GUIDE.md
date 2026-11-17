@@ -15,13 +15,14 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 7. [Companies](#7-companies)
 8. [Contacts](#8-contacts)
 9. [Activities, tasks and notes](#9-activities-tasks-and-notes)
-10. [The dashboard](#10-the-dashboard)
-11. [Enquiries from our website](#11-enquiries-from-our-website)
-12. [Your profile and password](#12-your-profile-and-password)
-13. [Settings (admins and managers)](#13-settings-admins-and-managers)
-14. [Good habits and data rules](#14-good-habits-and-data-rules)
-15. [Questions and problems](#15-questions-and-problems)
-16. [Coming soon](#16-coming-soon)
+10. [Quotes](#10-quotes)
+11. [The dashboard](#11-the-dashboard)
+12. [Enquiries from our website](#12-enquiries-from-our-website)
+13. [Your profile and password](#13-your-profile-and-password)
+14. [Settings (admins and managers)](#14-settings-admins-and-managers)
+15. [Good habits and data rules](#15-good-habits-and-data-rules)
+16. [Questions and problems](#16-questions-and-problems)
+17. [Coming soon](#17-coming-soon)
 
 ---
 
@@ -47,7 +48,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 
 | Area | Where | What it's for |
 |---|---|---|
-| **Sidebar** (left) | Dashboard, Leads, Deals, Companies, Contacts, Activities | Main sections. Items marked **Soon** are being built. |
+| **Sidebar** (left) | Dashboard, Leads, Deals, Quotes, Companies, Contacts, Activities | Main sections. Items marked **Soon** are being built. |
 | **Top bar** | Your name, role and sign-out button | On a phone, tap **☰** to open the sidebar. |
 | **Page header** | Title, breadcrumbs, main buttons | Breadcrumbs (e.g. *Deals › Website for Lanka Spices*) take you back a level. |
 
@@ -66,12 +67,15 @@ Each person has one role. Ask an admin if you need more access.
 | Edit leads, mark replied, qualify | ✅ | ✅ | ✅ | — | — |
 | Convert a lead to a deal | ✅ | ✅ | ✅ | — | — |
 | Add and edit deals, move stages, mark won or lost | ✅ | ✅ | ✅ | — | — |
+| Create, edit and send quotes; download PDFs | ✅ | ✅ | ✅ | view and download only | view and download only |
+| Delete sent quotes (anyone can delete their own drafts) | ✅ | ✅ | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
 | Add and edit contacts | ✅ | ✅ | ✅ | ✅ | — |
 | Add notes, log calls and chats, schedule tasks | ✅ | ✅ | ✅ | ✅ | — |
 | Tick off or delete **anyone's** tasks and notes | ✅ | ✅ | — | — | — |
 | Delete leads, deals, companies or contacts | ✅ | ✅ | — | — | — |
-| Edit the sales pipeline stages | ✅ | ✅ | — | — | — |
+| Edit the sales pipeline stages, and the services & prices list | ✅ | ✅ | — | — | — |
+| Edit company details used on quotes | ✅ | — | — | — | — |
 | Add team members, change roles, reset passwords | ✅ | — | — | — | — |
 | See the audit log | ✅ | — | — | — | — |
 
@@ -288,7 +292,49 @@ Switch **Mine / Everyone** to see the whole team's tasks, and filter by type (Ca
 
 ---
 
-## 10. The dashboard
+## 10. Quotes
+
+A **quote** (quotation) is the price we send a client for a project: line items, totals and our terms, as a branded PDF.
+
+### Create a quote
+
+1. Open the **deal** and click **New quote** in the *Quotes* box. The title, client and contact are filled in for you. (You can also use **Quotes → New quote**.)
+2. Check the **client company** and **Attention of** (contact). Every quote needs a company or a contact.
+3. Add **line items**:
+   - **Add from catalogue…** adds a standard service with its price (see *Services & prices* in section 14). You can still change the price for this client.
+   - **Add line** adds a blank line for anything custom.
+   - For each line set the **name**, optional **details** (printed under the name), **qty**, **per** (project, hour, month…), **price** and optional **line discount %**. Use the arrows to reorder.
+4. Set a **discount %** for the whole quote, and **tax** if we charge it (e.g. *VAT 18%*). The totals update as you type.
+5. Check the **quote date**, **valid until**, **introduction** and **terms**.
+6. **Internal notes** are only for the team and are **never printed**.
+7. Click **Create quote**. It gets the next number (e.g. **Q-2026-0007**) and starts as a **Draft**.
+
+### Send it
+
+- **View PDF** opens the quote in a new tab. **Download PDF** saves it (e.g. *Q-2026-0007 Lanka Spices.pdf*) so you can attach it to an email or send it on WhatsApp.
+- After sending it, click **Mark as sent**. A note is added to the deal's timeline.
+
+### Track the answer
+
+| Status | Meaning | Buttons |
+|---|---|---|
+| **Draft** | Being prepared, not sent yet | Edit, Mark as sent, Duplicate, Delete |
+| **Sent** | With the client | **Accepted**, **Declined**, Back to draft, Edit |
+| **Accepted** | Client said yes | Undo, New version |
+| **Declined** | Client said no | Undo, New version |
+
+- **Accepted** also sets the deal's **value** to the quote total and adds a note to the deal. Then move the deal on (e.g. *Design approval*) or **Mark won**.
+- A sent quote past its *valid until* date shows **Past valid date**. Follow up or send a new version.
+- **Accepted and declined quotes are locked.** To change prices, click **New version**. It copies the quote as a new draft with a new number and today's date.
+
+### Tax and currency
+
+- Quotes can be in **LKR, USD, EUR, GBP, AUD or AED**. Prices aren't converted, so check catalogue prices if you change the currency.
+- Our default tax rate is set in **Settings → Company details**. If unsure whether to charge VAT on a quote (for example for overseas clients), ask your manager or accountant.
+
+---
+
+## 11. The dashboard
 
 | Card | What it shows |
 |---|---|
@@ -305,7 +351,7 @@ Click any card to go to the full list behind it.
 
 ---
 
-## 11. Enquiries from our website
+## 12. Enquiries from our website
 
 The **Start your project** form on softrocodelabs.com sends each enquiry to **two** places:
 
@@ -316,7 +362,7 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 12. Your profile and password
+## 13. Your profile and password
 
 Click **your name** at the top right to open **My profile**:
 
@@ -326,7 +372,7 @@ Click **your name** at the top right to open **My profile**:
 
 ---
 
-## 13. Settings (admins and managers)
+## 14. Settings (admins and managers)
 
 **Settings** appears in the sidebar for admins and managers.
 
@@ -348,13 +394,26 @@ Click **your name** at the top right to open **My profile**:
 - **Remove** a stage with the bin icon. Only stages with **no deals** can be removed, so move their deals first.
 - *Won* and *Lost* are built in. You can rename them, but they're always last, at 100% and 0%.
 
+### Company details (admins)
+
+The details printed on every quote: company name, address, phone, email, website, **BR number** and **TIN/VAT number** (leave empty if not registered). It also holds the **quote defaults**: tax label and default rate, how many days quotes are valid for, **default terms**, **bank details** for advance payments, and a footer line.
+
+> The default terms are only a starting point. Replace the [x] and [n] placeholders with Softro's real payment and revision terms before sending your first quote.
+
+### Services & prices (admins and managers)
+
+Your **catalogue** of standard services, e.g. *Business website (5 pages)*, LKR 150,000 per project, or *Hosting & support*, LKR 5,000 per month. Each has a name, price, currency, unit ("per") and an optional description that's printed on quotes.
+
+- **Edit** with the pencil icon.
+- **Archive** a service you no longer sell. It disappears from *Add from catalogue…* but old quotes keep it. **Restore** brings it back.
+
 ### Audit log (admins)
 
 A read-only record of every sign-in and every create, update and delete: who, what and when (Sri Lanka time). Filter by type of record or by person. Website enquiries show as *Website / system*.
 
 ---
 
-## 14. Good habits and data rules
+## 15. Good habits and data rules
 
 - **One lead per enquiry, one company per business.** Search before adding so we don't get duplicates.
 - **Write titles people can scan:** *Mobile app for a tuition class in Kandy* beats *New enquiry*.
@@ -367,7 +426,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 15. Questions and problems
+## 16. Questions and problems
 
 | Problem | What to do |
 |---|---|
@@ -382,14 +441,15 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 | I entered something wrong | Click **Edit** and fix it. Only managers and admins can delete records. |
 | I can't tick off a task | Only the person it's assigned to, the person who created it, or a manager can. |
 | I need to change a task's date | For now, delete it and schedule a new one. Editing tasks is coming. |
+| I can't edit a quote | Accepted and declined quotes are locked. Click **New version**. |
+| "Every line needs a name" | A quote line is empty. Fill it in or remove it with the bin icon. |
 
 ---
 
-## 16. Coming soon
+## 17. Coming soon
 
 These are planned and shown as **Soon** in the sidebar:
 
-- **Quotes:** build quotations with line items and tax, and export them as PDF.
 - **Support & contracts:** maintenance contracts with renewal reminders, and support tickets.
 - **Reports:** win rate, revenue by service and client, team performance.
 

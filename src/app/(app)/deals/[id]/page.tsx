@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Building2, Mail, Pencil, Phone, Target, User } from "lucide-react";
+import { Building2, Mail, Pencil, Phone, Plus, Target, User } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
-import { DEAL_STATUS_TONE, SERVICE_TYPE_LABELS } from "@/lib/crm-meta";
+import { DEAL_STATUS_TONE, QUOTE_STATUS_LABELS, QUOTE_STATUS_TONE, SERVICE_TYPE_LABELS } from "@/lib/crm-meta";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,7 @@ export default async function DealPage({ params }: Props) {
       contact: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, mobile: true, jobTitle: true } },
       owner: { select: { name: true } },
       lead: { select: { id: true, title: true, createdAt: true } },
+      quotes: { orderBy: { createdAt: "desc" }, select: { id: true, number: true, title: true, status: true, total: true, currency: true, issueDate: true } },
     },
   });
   if (!deal) notFound();
@@ -92,6 +93,40 @@ export default async function DealPage({ params }: Props) {
           <Card>
             <CardHeader title="Scope & notes" />
             <CardBody className="text-sm whitespace-pre-line text-ink-700">{deal.description || <span className="text-ink-400">No scope written yet.</span>}</CardBody>
+          </Card>
+          <Card>
+            <CardHeader
+              title={`Quotes (${deal.quotes.length})`}
+              action={
+                can(user.role, "quote:create") && (
+                  <LinkButton href={`/quotes/new?dealId=${deal.id}`} size="sm" variant="secondary">
+                    <Plus className="size-4" aria-hidden /> New quote
+                  </LinkButton>
+                )
+              }
+            />
+            {deal.quotes.length ? (
+              <ul className="divide-y divide-ink-100">
+                {deal.quotes.map((q) => (
+                  <li key={q.id}>
+                    <Link href={`/quotes/${q.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-ink-50">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink-900">{q.title}</p>
+                        <p className="font-mono text-xs text-ink-500">
+                          {q.number} · {formatDate(q.issueDate)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium tabular-nums">{formatMoney(q.total, q.currency)}</span>
+                        <Badge tone={QUOTE_STATUS_TONE[q.status]}>{QUOTE_STATUS_LABELS[q.status]}</Badge>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CardBody className="text-sm text-ink-500">No quotes yet. Create one when the client is ready for prices.</CardBody>
+            )}
           </Card>
           <RecordTimeline target={{ leadId: null, dealId: deal.id, companyId: null, contactId: null }} user={user} />
         </div>
