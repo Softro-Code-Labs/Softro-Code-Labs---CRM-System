@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifyTicket } from "@/lib/integrations/notify";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
@@ -63,6 +65,7 @@ export async function saveTicket(id: string | null, _prev: FormState, formData: 
       },
     });
     await audit({ actorId: user.id, action: "update", entity: "Ticket", entityId: id, summary: `${ticket.number} ${ticket.subject}` });
+    if (ticket.assignedToId && ticket.assignedToId !== existing.assignedToId) after(() => notifyTicket(id, user.id, "assigned"));
     refresh(ticket);
     redirect(`/support/${id}`);
   }
@@ -81,6 +84,7 @@ export async function saveTicket(id: string | null, _prev: FormState, formData: 
     }),
   );
   await audit({ actorId: user.id, action: "create", entity: "Ticket", entityId: ticket.id, summary: `${ticket.number} ${ticket.subject}` });
+  after(() => notifyTicket(ticket.id, user.id, "created"));
   refresh(ticket);
   redirect(`/support/${ticket.id}`);
 }
@@ -110,7 +114,10 @@ export async function assignTicket(id: string, assignedToId: string): Promise<{ 
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const assignee = assignedToId ? await db.user.findFirst({ where: { id: assignedToId, isActive: true }, select: { id: true, name: true } }) : null;
   if (assignedToId && !assignee) return { message: "That person can't be assigned." };
+  const before = await db.ticket.findUnique({ where: { id }, select: { assignedToId: true } });
+  if (!before) return { message: "This ticket no longer exists." };
   const ticket = await db.ticket.update({ where: { id }, data: { assignedToId: assignee?.id ?? null } });
+  if (assignee && assignee.id !== before.assignedToId) after(() => notifyTicket(id, user.id, "assigned"));
   await audit({ actorId: user.id, action: "update", entity: "Ticket", entityId: id, summary: `${ticket.number}: assigned to ${assignee?.name ?? "nobody"}` });
   refresh(ticket);
   return {};

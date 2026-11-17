@@ -57,6 +57,7 @@ export const PERMISSIONS = {
   "user:manage": ["ADMIN"],
   "pipeline:manage": ["ADMIN", "MANAGER"],
   "audit:view": ["ADMIN"],
+  "integration:manage": ["ADMIN"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;
