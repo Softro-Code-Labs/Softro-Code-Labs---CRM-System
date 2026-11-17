@@ -170,6 +170,11 @@ model User {
   emailNotifications Boolean   @default(true) // email me when something is assigned to me
   dailyDigest        Boolean   @default(true) // 8 am summary on working days
   calendarTokenHash  String?   @unique // SHA-256 of the private calendar feed token
+  // Two-step sign-in (authenticator app)
+  totpSecret         String? // AES-256-GCM encrypted base32 secret
+  totpEnabledAt      DateTime?
+  totpLastStep       Int? // last accepted 30-second step, so a code can't be used twice
+  recoveryCodeHashes String[]  @default([]) // SHA-256 of unused one-time recovery codes
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -554,6 +559,7 @@ model OrgSettings {
   chatNotifyTickets   Boolean   @default(true) // urgent and high-priority tickets
   digestLastRunAt     DateTime?
   digestLastSent      Int?
+  requireTwoFactor    Boolean   @default(false) // admins and managers must use two-step sign-in
   updatedAt           DateTime  @updatedAt
 }
 
@@ -653,4 +659,32 @@ model TicketComment {
   author User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([ticketId, createdAt])
+}
+
+/// Fixed-window counters for rate limiting (sign-in attempts, website form, 2FA codes).
+/// Stored in the database so limits hold across serverless instances.
+model RateLimit {
+  key     String   @id // e.g. "login:ip:1.2.3.4"
+  count   Int      @default(0)
+  resetAt DateTime
+
+  @@index([resetAt])
+}
+
+/// Server errors, grouped by fingerprint so a repeating error is one row with a count.
+model ErrorEvent {
+  id          String    @id @default(cuid())
+  fingerprint String    @unique
+  message     String
+  stack       String?
+  path        String?
+  method      String?
+  digest      String?
+  count       Int       @default(1)
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  alertedAt   DateTime?
+  resolvedAt  DateTime?
+
+  @@index([lastSeenAt])
 }

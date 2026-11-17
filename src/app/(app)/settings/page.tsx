@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building, ChevronRight, History, KanbanSquare, Package, Plug, UserCircle, Users } from "lucide-react";
+import { Activity, Building, ChevronRight, History, KanbanSquare, Package, Plug, ShieldCheck, UserCircle, Users } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { can, type Permission } from "@/lib/permissions";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,8 +14,10 @@ const SECTIONS: { href: string; title: string; description: string; icon: typeof
   { href: "/settings/company", title: "Company details", description: "Softro's address, BR and VAT numbers, bank details and quote terms.", icon: Building, permission: "org:manage" },
   { href: "/settings/products", title: "Services & prices", description: "Your standard services and prices, ready to add to quotes.", icon: Package, permission: "product:manage" },
   { href: "/settings/integrations", title: "Integrations", description: "Email, team chat, website form, morning summaries and calendar links.", icon: Plug, permission: "integration:manage" },
+  { href: "/settings/security", title: "Security", description: "Two-step sign-in rules and who has it switched on.", icon: ShieldCheck, permission: "security:manage" },
+  { href: "/settings/system", title: "System health", description: "Errors, database status, configuration checks and backups.", icon: Activity, permission: "system:view" },
   { href: "/settings/audit", title: "Audit log", description: "Who did what and when: sign-ins, changes and deletions.", icon: History, permission: "audit:view" },
-  { href: "/settings/profile", title: "My profile", description: "Your details, password, email notifications and calendar link.", icon: UserCircle },
+  { href: "/settings/profile", title: "My profile", description: "Your details, password, two-step sign-in, email notifications and calendar link.", icon: UserCircle },
 ];
 
 export default async function SettingsPage() {

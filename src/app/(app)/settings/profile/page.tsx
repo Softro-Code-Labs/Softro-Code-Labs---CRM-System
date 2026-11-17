@@ -10,12 +10,16 @@ import { PasswordForm } from "@/components/crm/password-form";
 import { ProfileForm } from "./profile-form";
 import { CalendarCard, NotificationsCard } from "./notifications-card";
 import { emailConfigured } from "@/lib/integrations/email";
+import { TwoFactorCard } from "./two-factor-card";
+import { TWO_FACTOR_ROLES, twoFactorPolicy } from "@/lib/security/two-factor";
 
 export const metadata: Metadata = { title: "My profile" };
 
-export default async function ProfilePage() {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ recovery?: string }> }) {
   const me = await requireActiveUser();
   const user = await db.user.findUniqueOrThrow({ where: { id: me.id } });
+  const { recovery } = await searchParams;
+  const required = TWO_FACTOR_ROLES.includes(user.role) && (await twoFactorPolicy()).required;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -43,6 +47,13 @@ export default async function ProfilePage() {
         <CardBody className="flex flex-wrap items-center gap-3 text-sm text-ink-600">
           <Badge tone="brand">{ROLE_LABELS[user.role]}</Badge>
           {ROLE_DESCRIPTIONS[user.role]}. Ask an admin to change it.
+        </CardBody>
+      </Card>
+      <Card id="two-step">
+        <CardHeader title="Two-step sign-in" />
+        <CardBody>
+          {recovery && <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">You signed in with a recovery code. If you&apos;ve lost your phone, turn two-step sign-in off and on again with your new phone, or make new recovery codes.</p>}
+          <TwoFactorCard enabled={Boolean(user.totpEnabledAt)} recoveryLeft={user.recoveryCodeHashes.length} required={required} />
         </CardBody>
       </Card>
       <Card>

@@ -45,12 +45,14 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
             isActive={user.isActive}
             isLocked={Boolean(user.lockedUntil && user.lockedUntil > now)}
             isSelf={user.id === me.id}
+            hasTwoFactor={Boolean(user.totpEnabledAt)}
           />
         </CardBody>
-        <dl className="grid grid-cols-2 gap-px border-t border-ink-100 bg-ink-100 text-sm sm:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-px border-t border-ink-100 bg-ink-100 text-sm sm:grid-cols-5">
           {[
             ["Last sign-in", user.lastLoginAt ? formatDate(user.lastLoginAt) : "Never"],
             ["Password changed", user.passwordChangedAt ? formatDate(user.passwordChangedAt) : user.mustChangePassword ? "Temporary" : "—"],
+            ["Two-step sign-in", user.totpEnabledAt ? "On" : "Off"],
             ["Owns", `${user._count.ownedLeads} leads · ${user._count.ownedDeals} deals`],
             ["Open tasks", String(user._count.assignedActivities)],
           ].map(([label, value]) => (

@@ -3,6 +3,7 @@ import { after, NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { notifyNewWebsiteLead } from "@/lib/integrations/notify";
+import { LIMITS, rateLimit } from "@/lib/security/rate-limit";
 import { websiteLeadSchema } from "@/lib/validation/lead";
 import { addWorkingDays, REPLY_WITHIN_WORKING_DAYS } from "@/lib/working-days";
 import { SERVICE_TYPE_LABELS } from "@/lib/crm-meta";
@@ -40,20 +41,6 @@ function keyMatches(given: string | null) {
   return timingSafeEqual(a, b);
 }
 
-// Simple per-IP limit: 10 submissions per 10 minutes per server instance.
-const WINDOW_MS = 10 * 60 * 1000;
-const LIMIT = 10;
-const hits = new Map<string, number[]>();
-
-function rateLimited(ip: string) {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  recent.push(now);
-  hits.set(ip, recent);
-  if (hits.size > 5000) hits.clear();
-  return recent.length > LIMIT;
-}
-
 export async function POST(request: NextRequest) {
   if (!keyMatches(request.headers.get("x-api-key"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -61,8 +48,10 @@ export async function POST(request: NextRequest) {
 
   // The website forwards the visitor's IP so the limit applies per visitor.
   const ip = request.headers.get("x-visitor-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (rateLimited(ip)) {
-    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+  // Stored in the database, so the limit holds across all serverless instances.
+  const limit = await rateLimit(`lead:ip:${ip.slice(0, 64)}`, LIMITS.websiteLeadPerIp.limit, LIMITS.websiteLeadPerIp.windowSeconds);
+  if (!limit.ok) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
   }
 
   let body: unknown;

@@ -7,7 +7,7 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
     <div className="mx-auto max-w-md py-20 text-center">
       <h1 className="text-lg font-semibold text-ink-900">Something went wrong</h1>
       <p className="mt-2 text-sm text-ink-500">
-        An unexpected error occurred. Please try again.
+        An unexpected error occurred and the admins have been told. Please try again.
       </p>
       {error.digest && <p className="mt-1 font-mono text-xs text-ink-400">Ref: {error.digest}</p>}
       <Button className="mt-6" onClick={reset}>
