@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
 // Optimistic check only: redirects visitors without a valid session cookie.
-// Real authorization happens in the Data Access Layer (src/lib/auth.ts).
+// Real authorization happens in the Data Access Layer (src/lib/auth.ts), which
+// also rejects cookies from before a password reset or role change. That's why
+// signed-in visitors to /login are redirected by the login page itself, not here.
 const PUBLIC_PATHS = ["/login"];
 const SESSION_COOKIE = "softro_session";
 
@@ -26,10 +28,6 @@ export async function proxy(request: NextRequest) {
     const url = new URL("/login", request.url);
     if (pathname !== "/") url.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
-  }
-
-  if (isPublic && loggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

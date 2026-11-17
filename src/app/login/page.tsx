@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { LoginForm } from "./login-form";
+import { redirect } from "next/navigation";
 import { SoftroCrmLogo } from "@/components/brand/logo";
+import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
+  const user = await getCurrentUser();
+  if (user) redirect(user.mustChangePassword ? "/change-password" : "/dashboard");
 
   return (
     <main className="relative flex min-h-full items-center justify-center overflow-hidden bg-ink-950 px-4 py-12">

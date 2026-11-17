@@ -49,6 +49,6 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
   },
   {
     title: "Admin",
-    items: [{ label: "Settings", href: "/settings", icon: Settings, permission: "user:manage", soon: true }],
+    items: [{ label: "Settings", href: "/settings", icon: Settings, permission: "settings:view" }],
   },
 ];

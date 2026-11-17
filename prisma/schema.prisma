@@ -106,6 +106,12 @@ model User {
   jobTitle     String?
   phone        String?
   lastLoginAt  DateTime?
+  // Security
+  mustChangePassword Boolean   @default(false) // set for new users and after an admin reset
+  sessionVersion     Int       @default(0) // bump to sign the user out everywhere
+  failedLoginCount   Int       @default(0)
+  lockedUntil        DateTime? // temporary lock after too many wrong passwords
+  passwordChangedAt  DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 

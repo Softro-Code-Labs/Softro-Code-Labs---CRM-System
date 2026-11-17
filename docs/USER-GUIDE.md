@@ -17,9 +17,11 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 9. [Activities, tasks and notes](#9-activities-tasks-and-notes)
 10. [The dashboard](#10-the-dashboard)
 11. [Enquiries from our website](#11-enquiries-from-our-website)
-12. [Good habits and data rules](#12-good-habits-and-data-rules)
-13. [Questions and problems](#13-questions-and-problems)
-14. [Coming soon](#14-coming-soon)
+12. [Your profile and password](#12-your-profile-and-password)
+13. [Settings (admins and managers)](#13-settings-admins-and-managers)
+14. [Good habits and data rules](#14-good-habits-and-data-rules)
+15. [Questions and problems](#15-questions-and-problems)
+16. [Coming soon](#16-coming-soon)
 
 ---
 
@@ -29,7 +31,13 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 2. Enter your work email and password, then click **Sign in**.
 3. You stay signed in for 7 days on that browser. To sign out, click the **arrow icon** at the top right.
 
-**Forgot your password?** Ask a CRM admin to reset it. There's no self-service reset yet.
+**Your first sign-in:** your admin gives you a **temporary password** (it looks like `Softro-k7Mq-9xTe-Rw4p`). After signing in with it you'll be asked to **choose your own password** before you can use the CRM.
+
+**Password rules:** at least 10 characters, with letters and numbers, and not containing your email name. A short sentence works well, e.g. *Galle sunset 2026*.
+
+**Too many wrong passwords:** after 5 wrong tries your account is locked for 15 minutes. Wait, or ask an admin to unlock it.
+
+**Forgot your password?** Ask an admin to **reset** it. You'll get a new temporary password and must choose a new one when you sign in.
 
 **On a shared computer?** Always sign out when you're done.
 
@@ -63,7 +71,9 @@ Each person has one role. Ask an admin if you need more access.
 | Add notes, log calls and chats, schedule tasks | ✅ | ✅ | ✅ | ✅ | — |
 | Tick off or delete **anyone's** tasks and notes | ✅ | ✅ | — | — | — |
 | Delete leads, deals, companies or contacts | ✅ | ✅ | — | — | — |
-| Manage users | ✅ | — | — | — | — |
+| Edit the sales pipeline stages | ✅ | ✅ | — | — | — |
+| Add team members, change roles, reset passwords | ✅ | — | — | — | — |
+| See the audit log | ✅ | — | — | — | — |
 
 If a button is missing, your role doesn't allow that action. Every change is recorded with your name in the system's audit log.
 
@@ -306,7 +316,45 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 12. Good habits and data rules
+## 12. Your profile and password
+
+Click **your name** at the top right to open **My profile**:
+
+- Update your **name, job title and phone / WhatsApp**.
+- See your **role** and what it allows.
+- **Change your password:** enter your current password, then the new one twice. This signs you out on **every other device** (handy if you used a shared computer).
+
+---
+
+## 13. Settings (admins and managers)
+
+**Settings** appears in the sidebar for admins and managers.
+
+### Team members (admins)
+
+- **Add team member:** enter their name, work email, job title and role. The CRM creates a **temporary password** and shows it **once**. Click **Copy sign-in message** and send it to them privately (e.g. on WhatsApp). They'll set their own password on first sign-in.
+- **Change role:** open the person, pick a new role and **Save changes**. They're signed out so the new permissions apply straight away.
+- **Reset password:** gives them a new temporary password and signs them out everywhere. Use it when someone forgets their password.
+- **Unlock sign-in:** shown when someone is locked out after too many wrong passwords.
+- **Deactivate:** for people who leave. They're signed out and can't sign in, but everything they created stays. Reassign their open deals and tasks first. **Reactivate** brings them back.
+- Status labels on the list: **Active**, **Temporary password** (hasn't signed in and changed it yet), **Locked** and **Deactivated**.
+- Safety rules: you can't deactivate yourself or remove your own admin rights, and there must always be at least one active admin.
+
+### Sales pipeline (admins and managers)
+
+- **Rename** a stage or change its **win %**, then click **Save** on that row.
+- Use the **arrows** to change the order of open stages.
+- **Add stage** puts a new stage just before *Won*.
+- **Remove** a stage with the bin icon. Only stages with **no deals** can be removed, so move their deals first.
+- *Won* and *Lost* are built in. You can rename them, but they're always last, at 100% and 0%.
+
+### Audit log (admins)
+
+A read-only record of every sign-in and every create, update and delete: who, what and when (Sri Lanka time). Filter by type of record or by person. Website enquiries show as *Website / system*.
+
+---
+
+## 14. Good habits and data rules
 
 - **One lead per enquiry, one company per business.** Search before adding so we don't get duplicates.
 - **Write titles people can scan:** *Mobile app for a tuition class in Kandy* beats *New enquiry*.
@@ -319,11 +367,13 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 13. Questions and problems
+## 15. Questions and problems
 
 | Problem | What to do |
 |---|---|
 | "You don't have access to that page" | Your role doesn't allow it. Ask an admin if you need it. |
+| I was suddenly signed out | Normal after your password was reset, your role changed, or you changed your password on another device. Sign in again. |
+| "Too many wrong passwords" | Wait 15 minutes, or ask an admin to unlock you or reset your password. |
 | A button I expect is missing | Same as above: it depends on your role. |
 | A lead shows *Reply overdue* but we did reply | Open it and click **Mark as replied**. |
 | I can't drag a deal | On phones, use the stage dropdown on the card. Won and lost deals must be reopened first. |
@@ -335,11 +385,10 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 14. Coming soon
+## 16. Coming soon
 
 These are planned and shown as **Soon** in the sidebar:
 
-- **Settings:** add team members, change roles, reset passwords, edit pipeline stages.
 - **Quotes:** build quotations with line items and tax, and export them as PDF.
 - **Support & contracts:** maintenance contracts with renewal reminders, and support tickets.
 - **Reports:** win rate, revenue by service and client, team performance.
