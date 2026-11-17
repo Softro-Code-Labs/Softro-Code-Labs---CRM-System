@@ -107,3 +107,61 @@ export const QUOTE_STATUS_TONE: Record<import("@/generated/prisma/enums").QuoteS
 
 /** Common units for quote lines. People can also type their own. */
 export const QUOTE_UNITS = ["project", "hour", "day", "month", "year", "page", "screen", "licence", "user", "item"];
+
+type E = typeof import("@/generated/prisma/enums");
+type ContractType = E["ContractType"][keyof E["ContractType"]];
+type ContractStatus = E["ContractStatus"][keyof E["ContractStatus"]];
+type BillingCycle = E["BillingCycle"][keyof E["BillingCycle"]];
+type TicketStatus = E["TicketStatus"][keyof E["TicketStatus"]];
+type TicketPriority = E["TicketPriority"][keyof E["TicketPriority"]];
+type TicketChannel = E["TicketChannel"][keyof E["TicketChannel"]];
+
+export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
+  MAINTENANCE: "Maintenance (AMC)",
+  SUPPORT: "Support / SLA",
+  HOSTING: "Hosting & domain",
+  RETAINER: "Development retainer",
+  SUBSCRIPTION: "Subscription (SaaS / Lab product)",
+  OTHER: "Other",
+};
+export const CONTRACT_TYPE_OPTIONS = options(CONTRACT_TYPE_LABELS);
+
+export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = { ACTIVE: "Active", PAUSED: "Paused", ENDED: "Ended", CANCELLED: "Cancelled" };
+export const CONTRACT_STATUS_TONE: Record<ContractStatus, BadgeTone> = { ACTIVE: "green", PAUSED: "amber", ENDED: "gray", CANCELLED: "red" };
+
+export const BILLING_CYCLE_LABELS: Record<BillingCycle, string> = { MONTHLY: "Monthly", QUARTERLY: "Quarterly", YEARLY: "Yearly", ONE_TIME: "One-time" };
+export const BILLING_CYCLE_OPTIONS = options(BILLING_CYCLE_LABELS);
+export const BILLING_CYCLE_SHORT: Record<BillingCycle, string> = { MONTHLY: "/ month", QUARTERLY: "/ quarter", YEARLY: "/ year", ONE_TIME: "one-time" };
+
+export const TICKET_STATUS_LABELS: Record<TicketStatus, string> = {
+  OPEN: "Open",
+  IN_PROGRESS: "In progress",
+  WAITING_ON_CLIENT: "Waiting on client",
+  RESOLVED: "Resolved",
+  CLOSED: "Closed",
+};
+export const TICKET_STATUS_OPTIONS = options(TICKET_STATUS_LABELS);
+export const TICKET_STATUS_TONE: Record<TicketStatus, BadgeTone> = {
+  OPEN: "blue",
+  IN_PROGRESS: "purple",
+  WAITING_ON_CLIENT: "amber",
+  RESOLVED: "green",
+  CLOSED: "gray",
+};
+export const OPEN_TICKET_STATUSES: TicketStatus[] = ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"];
+
+export const TICKET_PRIORITY_LABELS: Record<TicketPriority, string> = { LOW: "Low", MEDIUM: "Medium", HIGH: "High", URGENT: "Urgent" };
+export const TICKET_PRIORITY_OPTIONS = options(TICKET_PRIORITY_LABELS);
+export const TICKET_PRIORITY_TONE: Record<TicketPriority, BadgeTone> = { LOW: "gray", MEDIUM: "blue", HIGH: "amber", URGENT: "red" };
+/** First-response target when the client has no contract SLA. */
+export const DEFAULT_RESPONSE_HOURS: Record<TicketPriority, number> = { URGENT: 4, HIGH: 24, MEDIUM: 48, LOW: 72 };
+
+export const TICKET_CHANNEL_LABELS: Record<TicketChannel, string> = {
+  WHATSAPP: "WhatsApp",
+  EMAIL: "Email",
+  PHONE: "Phone",
+  WEBSITE: "Website",
+  IN_PERSON: "In person",
+  OTHER: "Other",
+};
+export const TICKET_CHANNEL_OPTIONS = options(TICKET_CHANNEL_LABELS);

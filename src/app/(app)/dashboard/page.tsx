@@ -13,6 +13,7 @@ import { LEAD_SOURCE_LABELS, OPEN_LEAD_STATUSES } from "@/lib/crm-meta";
 import { colomboDayBounds, startOfColomboMonth } from "@/lib/working-days";
 import { activitySelect } from "@/lib/activities";
 import { DoneCheckbox } from "@/components/crm/activity-controls";
+import { ContractStateBadge } from "@/components/crm/contract-state-badge";
 import { ACTIVITY_ICONS, ActivityContext, formatWhen } from "@/components/crm/record-timeline";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -27,6 +28,23 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const { end: endOfToday } = colomboDayBounds(now);
   const waitingWhere = { status: { in: OPEN_LEAD_STATUSES }, respondedAt: null };
   const myTasksWhere = { assignedToId: user.id, completedAt: null, OR: [{ dueAt: { lt: endOfToday } }, { dueAt: null }] };
+  const in45 = new Date(now.getTime() + 45 * 86_400_000);
+  const [renewals, ticketCounts] = await Promise.all([
+    db.contract.findMany({
+      where: { status: "ACTIVE", endDate: { not: null, lte: in45 } },
+      orderBy: { endDate: "asc" },
+      take: 6,
+      select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true, company: { select: { name: true } } },
+    }),
+    Promise.all([
+      db.ticket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"] } } }),
+      db.ticket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"] }, assignedToId: user.id } }),
+      db.ticket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"] }, firstResponseAt: null, responseDueAt: { lt: now } } }),
+      db.ticket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"] }, priority: "URGENT" } }),
+    ]),
+  ]);
+  const [openTickets, myTickets, overdueTickets, urgentTickets] = ticketCounts;
+
   const [myTasks, myTaskCount, waitingCount, overdueCount, waitingLeads, openLeadCount, openDeals, wonThisMonth, customerCount, recentWins] = await Promise.all([
     db.activity.findMany({ where: myTasksWhere, select: activitySelect, orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }], take: 6 }),
     db.activity.count({ where: myTasksWhere }),
@@ -177,6 +195,44 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </Card>
 
         <Card>
+          <CardHeader title="Contracts ending soon" description="Active contracts ending in the next 45 days." action={<Link href="/contracts?tab=renew" className="text-xs font-medium text-brand-700 hover:underline">All renewals</Link>} />
+          {renewals.length ? (
+            <ul className="divide-y divide-ink-100">
+              {renewals.map((c) => (
+                <li key={c.id}>
+                  <Link href={`/contracts/${c.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-ink-50">
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-ink-900">{c.title}</span>
+                      <span className="text-xs text-ink-500">{c.company.name} · ends {formatDate(c.endDate)}</span>
+                    </span>
+                    <ContractStateBadge contract={c} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <CardBody className="text-sm text-ink-500">No contracts ending in the next 45 days.</CardBody>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader title="Support" action={<Link href="/support" className="text-xs font-medium text-brand-700 hover:underline">Open support</Link>} />
+          <div className="grid grid-cols-2 gap-px bg-ink-100">
+            {[
+              { label: "Open tickets", value: openTickets, href: "/support" },
+              { label: "Assigned to me", value: myTickets, href: "/support?tab=mine" },
+              { label: "Reply overdue", value: overdueTickets, href: "/support?tab=overdue", alert: overdueTickets > 0 },
+              { label: "Urgent", value: urgentTickets, href: "/support?priority=URGENT", alert: urgentTickets > 0 },
+            ].map((s) => (
+              <Link key={s.label} href={s.href} className={cn("bg-white px-5 py-4 hover:bg-ink-50", s.alert && "bg-red-50/60")}>
+                <p className="text-xs text-ink-500">{s.label}</p>
+                <p className={cn("mt-1 text-2xl font-semibold", s.alert ? "text-red-600" : "text-ink-900")}>{s.value}</p>
+              </Link>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="lg:col-span-2">
           <CardHeader title="Recent wins" />
           {recentWins.length ? (
             <ul className="divide-y divide-ink-100">

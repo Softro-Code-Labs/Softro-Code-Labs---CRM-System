@@ -15,6 +15,7 @@ import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { WhatsAppButton } from "@/components/crm/whatsapp-button";
 import { deleteDeal } from "../actions";
 import { CloseDealButtons, StageBar } from "./deal-controls";
+import { ContractStateBadge } from "@/components/crm/contract-state-badge";
 import { RecordTimeline } from "@/components/crm/record-timeline";
 
 type Props = { params: Promise<{ id: string }> };
@@ -37,6 +38,7 @@ export default async function DealPage({ params }: Props) {
       contact: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, mobile: true, jobTitle: true } },
       owner: { select: { name: true } },
       lead: { select: { id: true, title: true, createdAt: true } },
+      contracts: { orderBy: { createdAt: "desc" }, select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true } },
       quotes: { orderBy: { createdAt: "desc" }, select: { id: true, number: true, title: true, status: true, total: true, currency: true, issueDate: true } },
     },
   });
@@ -128,6 +130,38 @@ export default async function DealPage({ params }: Props) {
               <CardBody className="text-sm text-ink-500">No quotes yet. Create one when the client is ready for prices.</CardBody>
             )}
           </Card>
+          {(deal.status === "WON" || deal.contracts.length > 0) && (
+            <Card>
+              <CardHeader
+                title={`Ongoing contracts (${deal.contracts.length})`}
+                description={deal.contracts.length ? undefined : "Project won. Set up maintenance, hosting or support so renewals are tracked."}
+                action={
+                  can(user.role, "contract:manage") &&
+                  deal.companyId && (
+                    <LinkButton href={`/contracts/new?dealId=${deal.id}`} size="sm" variant="secondary">
+                      <Plus className="size-4" aria-hidden /> New contract
+                    </LinkButton>
+                  )
+                }
+              />
+              {deal.contracts.length > 0 ? (
+                <ul className="divide-y divide-ink-100">
+                  {deal.contracts.map((c) => (
+                    <li key={c.id}>
+                      <Link href={`/contracts/${c.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-ink-50">
+                        <span className="truncate text-sm font-medium text-ink-900">
+                          <span className="font-mono text-xs text-ink-500">{c.number}</span> {c.title}
+                        </span>
+                        <ContractStateBadge contract={c} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : !deal.companyId ? (
+                <CardBody className="text-sm text-ink-500">Link this deal to a company first; contracts belong to a company.</CardBody>
+              ) : null}
+            </Card>
+          )}
           <RecordTimeline target={{ leadId: null, dealId: deal.id, companyId: null, contactId: null }} user={user} />
         </div>
 

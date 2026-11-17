@@ -16,13 +16,15 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 8. [Contacts](#8-contacts)
 9. [Activities, tasks and notes](#9-activities-tasks-and-notes)
 10. [Quotes](#10-quotes)
-11. [The dashboard](#11-the-dashboard)
-12. [Enquiries from our website](#12-enquiries-from-our-website)
-13. [Your profile and password](#13-your-profile-and-password)
-14. [Settings (admins and managers)](#14-settings-admins-and-managers)
-15. [Good habits and data rules](#15-good-habits-and-data-rules)
-16. [Questions and problems](#16-questions-and-problems)
-17. [Coming soon](#17-coming-soon)
+11. [Contracts: maintenance, hosting and support](#11-contracts-maintenance-hosting-and-support)
+12. [Support tickets](#12-support-tickets)
+13. [The dashboard](#13-the-dashboard)
+14. [Enquiries from our website](#14-enquiries-from-our-website)
+15. [Your profile and password](#15-your-profile-and-password)
+16. [Settings (admins and managers)](#16-settings-admins-and-managers)
+17. [Good habits and data rules](#17-good-habits-and-data-rules)
+18. [Questions and problems](#18-questions-and-problems)
+19. [Coming soon](#19-coming-soon)
 
 ---
 
@@ -48,7 +50,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 
 | Area | Where | What it's for |
 |---|---|---|
-| **Sidebar** (left) | Dashboard, Leads, Deals, Quotes, Companies, Contacts, Activities | Main sections. Items marked **Soon** are being built. |
+| **Sidebar** (left) | Dashboard, Leads, Deals, Quotes, Companies, Contacts, Activities, Contracts, Support | Main sections. Items marked **Soon** are being built. |
 | **Top bar** | Your name, role and sign-out button | On a phone, tap **☰** to open the sidebar. |
 | **Page header** | Title, breadcrumbs, main buttons | Breadcrumbs (e.g. *Deals › Website for Lanka Spices*) take you back a level. |
 
@@ -62,13 +64,17 @@ Each person has one role. Ask an admin if you need more access.
 
 | You can… | Admin | Manager | Sales | Support | Viewer |
 |---|:-:|:-:|:-:|:-:|:-:|
-| See the dashboard, leads, deals, companies and contacts | ✅ | ✅ | ✅ | ✅ | ✅ |
+| See the dashboard, leads, deals, companies, contacts, contracts and tickets | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Add leads | ✅ | ✅ | ✅ | ✅ | — |
 | Edit leads, mark replied, qualify | ✅ | ✅ | ✅ | — | — |
 | Convert a lead to a deal | ✅ | ✅ | ✅ | — | — |
 | Add and edit deals, move stages, mark won or lost | ✅ | ✅ | ✅ | — | — |
 | Create, edit and send quotes; download PDFs | ✅ | ✅ | ✅ | view and download only | view and download only |
 | Delete sent quotes (anyone can delete their own drafts) | ✅ | ✅ | — | — | — |
+| Add, renew, pause and cancel contracts | ✅ | ✅ | ✅ | view only | view only |
+| Delete contracts | ✅ | ✅ | — | — | — |
+| Create tickets, reply, change status and assignee | ✅ | ✅ | ✅ | ✅ | view only |
+| Delete tickets | ✅ | ✅ | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
 | Add and edit contacts | ✅ | ✅ | ✅ | ✅ | — |
 | Add notes, log calls and chats, schedule tasks | ✅ | ✅ | ✅ | ✅ | — |
@@ -91,7 +97,8 @@ A good routine takes about 10 minutes:
 2. **Reply to waiting leads** (WhatsApp, call or email), then **log it** in the lead's Activity box. Logging a call, WhatsApp, email or meeting marks the lead as replied for you.
 3. **Work through your tasks** and tick each one off. Schedule the next follow-up before you move on.
 4. **Open Deals → My deals.** Move any deal whose situation has changed to the right stage. Look for cards with a **red close date** (overdue) or many days in the same stage.
-5. **Log anything new** from yesterday: a WhatsApp enquiry, a referral, a new contact at a client.
+5. **Open Support → Mine.** Reply to anything marked *Reply overdue* or with an amber reply time first, and log each reply on the ticket.
+6. **Log anything new** from yesterday: a WhatsApp enquiry, a referral, a new contact at a client.
 
 ---
 
@@ -334,7 +341,88 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 
 ---
 
-## 11. The dashboard
+## 11. Contracts: maintenance, hosting and support
+
+A **contract** is ongoing paid work for a client after a project: website maintenance, hosting, a support retainer, a software subscription. Contracts make sure renewals are never missed and show how much recurring income we have.
+
+### Add a contract
+
+Go to **Contracts → New contract**, or click **New contract** on a company, or on a deal once it's **Won**.
+
+| Field | What to enter |
+|---|---|
+| **Title** | Short and clear, e.g. *Website maintenance & hosting* |
+| **Company** | Required. Contracts always belong to a company. |
+| **Type** | Maintenance, Support, Hosting, Retainer, Subscription or Other |
+| **Start and end date** | The period the client has paid or agreed for. Leave the end date empty for open-ended contracts. |
+| **Amount and billing** | e.g. LKR 25,000 **Monthly**. The Contracts page converts everything to a monthly figure for the total. |
+| **Remind me (days before end)** | Days before the end date to start the renewal (default 30) |
+| **First response within (hours)** | The response time we promised. Tickets under this contract use it. Leave empty for our standard times. |
+| **Support hours included / month** | If the contract has a monthly limit |
+| **Scope** | What's included and what isn't. This settles arguments later. |
+
+Each contract gets a number like **C-2026-0001**.
+
+### Renewal reminders
+
+When a contract has an end date, the CRM creates a **high-priority task** for the contract owner: *Renew contract C-…*, due on the reminder date. It shows on their dashboard and in Activities. If you change the dates, the task moves with them.
+
+The contract shows **Ends in N days** in amber once the reminder date has passed, and **Past end date** in red if nobody renewed it.
+
+### Renew, pause or cancel
+
+On the contract's page:
+
+- **Renew for another period** creates the next contract (same terms, new dates, new number), marks the old one **Ended**, ticks off the renewal task and moves any open tickets to the new contract. You land on the new contract's edit page: update the price or scope if they changed.
+- **Pause** for a client who has stopped temporarily. **Reactivate** brings it back.
+- **Cancel contract** when the client has left. It asks you to confirm.
+
+### The Contracts page
+
+Tabs: **Active**, **Renewing soon**, **Ended** and **All**. The cards at the top show active contracts, **monthly recurring value** (per currency) and how many are due for renewal now.
+
+---
+
+## 12. Support tickets
+
+A **ticket** is one client problem or request: *"Checkout page shows 500 error"*, *"Please add new product photos"*. Log every request that comes in by WhatsApp, email, phone or in person, so nothing is forgotten and response times are tracked.
+
+### Create a ticket
+
+Go to **Support → New ticket**, or click **New ticket** on a company or contract.
+
+- Choose the **company** or **contact**, and the **contract** if the work is covered by one. Tickets without a contract may be billable.
+- Set the **priority** and where it **came in** (WhatsApp, email…).
+- The ticket is assigned to you unless you pick someone else. It gets a number like **T-2026-0001**.
+
+### First-reply times (SLA)
+
+Every ticket has a **first reply due** time. If the contract has a promised response time, that is used. Otherwise:
+
+| Priority | First reply within |
+|---|---|
+| Urgent | 4 hours |
+| High | 24 hours |
+| Medium | 48 hours |
+| Low | 72 hours |
+
+The badge on the ticket shows the time left, e.g. **Reply in 3 hours** (amber when under 4 hours), **Reply overdue** in red, and afterwards **Replied on time** or **Replied late**.
+
+### Work a ticket
+
+- **Log your replies.** Write what you told the client and keep **"This is a reply sent to the client"** ticked. The first reply stops the SLA clock and moves the ticket to *In progress*.
+- **Internal notes:** untick the box. Use these for causes, fixes and anything the team should know.
+- Use the **WhatsApp** button to message the contact directly.
+- Change the **status** with the buttons at the top: *Open → In progress → Waiting on client → Resolved → Closed*. Use *Waiting on client* when you need something from them.
+- Change who it's **assigned** to with the dropdown on the right.
+
+### The Support page
+
+Tabs: **Open**, **Mine**, **Reply overdue**, **Waiting on client**, **Resolved** and **All**, with a priority filter and search. Open tickets are sorted by priority, then by the reply deadline.
+
+---
+
+## 13. The dashboard
 
 | Card | What it shows |
 |---|---|
@@ -345,13 +433,15 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 | **Customers** | Companies we've worked with |
 | **Reply within 2 working days** | The most urgent waiting leads. Click one to open it. |
 | **Pipeline by stage** | How many deals, and how much value, sit in each stage |
+| **Contracts ending soon** | Active contracts ending in the next 45 days |
+| **Support** | Open tickets, tickets assigned to you, replies overdue and urgent tickets |
 | **Recent wins** | The latest won deals |
 
 Click any card to go to the full list behind it.
 
 ---
 
-## 12. Enquiries from our website
+## 14. Enquiries from our website
 
 The **Start your project** form on softrocodelabs.com sends each enquiry to **two** places:
 
@@ -362,7 +452,7 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 13. Your profile and password
+## 15. Your profile and password
 
 Click **your name** at the top right to open **My profile**:
 
@@ -372,7 +462,7 @@ Click **your name** at the top right to open **My profile**:
 
 ---
 
-## 14. Settings (admins and managers)
+## 16. Settings (admins and managers)
 
 **Settings** appears in the sidebar for admins and managers.
 
@@ -413,7 +503,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 15. Good habits and data rules
+## 17. Good habits and data rules
 
 - **One lead per enquiry, one company per business.** Search before adding so we don't get duplicates.
 - **Write titles people can scan:** *Mobile app for a tuition class in Kandy* beats *New enquiry*.
@@ -426,7 +516,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 16. Questions and problems
+## 18. Questions and problems
 
 | Problem | What to do |
 |---|---|
@@ -442,15 +532,16 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 | I can't tick off a task | Only the person it's assigned to, the person who created it, or a manager can. |
 | I need to change a task's date | For now, delete it and schedule a new one. Editing tasks is coming. |
 | I can't edit a quote | Accepted and declined quotes are locked. Click **New version**. |
+| I can't delete a company | It has contracts. Delete or move them first, or set the company type to *Former customer*. |
+| A ticket says *Reply overdue* but I replied | Add your reply on the ticket with **"This is a reply sent to the client"** ticked. |
 | "Every line needs a name" | A quote line is empty. Fill it in or remove it with the bin icon. |
 
 ---
 
-## 17. Coming soon
+## 19. Coming soon
 
 These are planned and shown as **Soon** in the sidebar:
 
-- **Support & contracts:** maintenance contracts with renewal reminders, and support tickets.
 - **Reports:** win rate, revenue by service and client, team performance.
 
 This guide will be updated as each one is released.

@@ -93,6 +93,53 @@ enum QuoteStatus {
   DECLINED
 }
 
+enum ContractType {
+  MAINTENANCE // AMC / maintenance after a project
+  SUPPORT // support hours or SLA
+  HOSTING // hosting, domain, servers
+  RETAINER // monthly development retainer
+  SUBSCRIPTION // SaaS / Lab product subscription, e.g. Surelane
+  OTHER
+}
+
+enum ContractStatus {
+  ACTIVE
+  PAUSED
+  ENDED // finished or replaced by a renewal
+  CANCELLED
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ONE_TIME
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CLIENT
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketChannel {
+  WHATSAPP
+  EMAIL
+  PHONE
+  WEBSITE
+  IN_PERSON
+  OTHER
+}
+
 enum ActivityPriority {
   LOW
   MEDIUM
@@ -122,15 +169,19 @@ model User {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  ownedCompanies     Company[]  @relation("CompanyOwner")
-  ownedContacts      Contact[]  @relation("ContactOwner")
-  ownedLeads         Lead[]     @relation("LeadOwner")
-  ownedDeals         Deal[]     @relation("DealOwner")
-  assignedActivities Activity[] @relation("ActivityAssignee")
-  createdActivities  Activity[] @relation("ActivityCreator")
+  ownedCompanies     Company[]       @relation("CompanyOwner")
+  ownedContacts      Contact[]       @relation("ContactOwner")
+  ownedLeads         Lead[]          @relation("LeadOwner")
+  ownedDeals         Deal[]          @relation("DealOwner")
+  assignedActivities Activity[]      @relation("ActivityAssignee")
+  createdActivities  Activity[]      @relation("ActivityCreator")
   notes              Note[]
   auditLogs          AuditLog[]
   quotes             Quote[]
+  ownedContracts     Contract[]      @relation("ContractOwner")
+  assignedTickets    Ticket[]        @relation("TicketAssignee")
+  createdTickets     Ticket[]        @relation("TicketCreator")
+  ticketComments     TicketComment[]
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -162,6 +213,8 @@ model Company {
   activities Activity[]
   notes      Note[]
   quotes     Quote[]
+  contracts  Contract[]
+  tickets    Ticket[]
 
   @@index([name])
   @@index([type])
@@ -191,6 +244,8 @@ model Contact {
   activities Activity[]
   notes      Note[]
   quotes     Quote[]
+  contracts  Contract[]
+  tickets    Ticket[]
 
   @@index([companyId])
   @@index([email])
@@ -294,6 +349,7 @@ model Deal {
   activities Activity[]
   notes      Note[]
   quotes     Quote[]
+  contracts  Contract[]
 
   @@index([stageId])
   @@index([status])
@@ -488,4 +544,102 @@ model OrgSettings {
   bankDetails         String?
   quoteFooter         String?
   updatedAt           DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// Contracts & support
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * An ongoing agreement with a client: maintenance, hosting, retainer, subscription…
+ */
+model Contract {
+  id                String         @id @default(cuid())
+  number            String         @unique // C-2026-0001
+  title             String
+  type              ContractType   @default(MAINTENANCE)
+  status            ContractStatus @default(ACTIVE)
+  companyId         String
+  contactId         String?
+  dealId            String?
+  ownerId           String?
+  startDate         DateTime
+  endDate           DateTime? // empty = open-ended
+  billingCycle      BillingCycle   @default(MONTHLY)
+  amount            Decimal        @default(0) @db.Decimal(14, 2) // per billing cycle
+  currency          String         @default("LKR")
+  autoRenew         Boolean        @default(false)
+  renewalNoticeDays Int            @default(30)
+  responseTimeHours Int? // SLA: first response to a support ticket
+  includedHours     Decimal?       @db.Decimal(8, 2) // support hours per month
+  scope             String? // what's covered, printed nowhere, for the team
+  renewedFromId     String?        @unique
+  renewalTaskId     String? // the "renew this contract" task we created
+  endedAt           DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contact     Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  deal        Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  owner       User?     @relation("ContractOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  renewedFrom Contract? @relation("ContractRenewal", fields: [renewedFromId], references: [id], onDelete: SetNull)
+  renewedTo   Contract? @relation("ContractRenewal")
+  tickets     Ticket[]
+
+  @@index([status, endDate])
+  @@index([companyId])
+}
+
+/**
+ * A client support request.
+ */
+model Ticket {
+  id              String         @id @default(cuid())
+  number          String         @unique // T-2026-0001
+  subject         String
+  description     String?
+  status          TicketStatus   @default(OPEN)
+  priority        TicketPriority @default(MEDIUM)
+  channel         TicketChannel  @default(WHATSAPP)
+  companyId       String?
+  contactId       String?
+  contractId      String?
+  assignedToId    String?
+  createdById     String?
+  responseDueAt   DateTime? // SLA: when we must first reply by
+  firstResponseAt DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  company    Company?        @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact    Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contract   Contract?       @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  assignedTo User?           @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?           @relation("TicketCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  comments   TicketComment[]
+
+  @@index([status, priority])
+  @@index([assignedToId, status])
+  @@index([companyId])
+  @@index([contractId])
+}
+
+model TicketComment {
+  id            String   @id @default(cuid())
+  ticketId      String
+  authorId      String?
+  body          String
+  /**
+   * true = a reply we sent the client (counts as our response); false = internal note
+   */
+  isClientReply Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId, createdAt])
 }
