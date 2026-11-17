@@ -66,3 +66,8 @@ export function colomboDayBounds(now = new Date()) {
   const start = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate()) - COLOMBO_OFFSET_MS);
   return { start, end: new Date(start.getTime() + DAY_MS) };
 }
+
+/** Saturday or Sunday in Sri Lanka. */
+export function isColomboWeekend(now = new Date()) {
+  return [0, 6].includes(colomboWeekday(now));
+}

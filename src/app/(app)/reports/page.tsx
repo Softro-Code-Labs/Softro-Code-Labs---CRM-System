@@ -75,6 +75,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                 { href: exportHref("leads"), label: "Leads", hint: "Received in the period" },
                 { href: exportHref("tickets"), label: "Support tickets", hint: "Opened in the period" },
                 { href: exportHref("team"), label: "Team performance", hint: "The team table below" },
+                { href: exportHref("quotes"), label: "Accepted quotes", hint: "Line by line, with VAT, for accounts" },
               ]}
             />
           )

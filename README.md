@@ -135,6 +135,19 @@ await fetch(`${process.env.CRM_URL}/api/leads`, {
 
 Responses: `201` created · `401` wrong key · `422` invalid data · `429` too many submissions.
 
+## Integrations (Step 8)
+
+Set these in Vercel → Settings → Environment Variables (and in `.env` locally), then redeploy:
+
+| Variable | What it's for |
+|---|---|
+| `APP_URL` | Public address of the CRM, e.g. `https://crm.softrocodelabs.com`. Used for links in emails and calendar events. |
+| `RESEND_API_KEY` | Resend API key with sending access (same account as the website). |
+| `EMAIL_FROM` | Sender, on a domain verified in Resend, e.g. `Softro CRM <crm@softrocodelabs.com>`. |
+| `CRON_SECRET` | Random text, 16+ characters. Vercel sends it to `/api/cron/daily-digest` (schedule in `vercel.json`: 02:30 UTC = 8:00 am Sri Lanka, Mon–Fri). |
+
+The team chat webhook is set in the app (**Settings → Integrations**), not in env vars. Without `RESEND_API_KEY` emails are skipped and logged, so local development works without an account.
+
 ## Deploying
 
 1. Set `DATABASE_URL`, a strong random `SESSION_SECRET` (48+ characters) and `DEFAULT_CURRENCY` on the server.
@@ -155,5 +168,5 @@ Responses: `201` created · `401` wrong key · `422` invalid data · `429` too m
 | **5. Quotes & proposals** | Services & prices catalogue · quotes with line items, discounts and tax · numbered Q-YYYY-NNNN · draft/sent/accepted/declined · branded PDF (Geist + Softro logo) · accepted quote updates deal value · company details & bank info | ✅ Done |
 | **6. Contracts & support** | Maintenance / hosting / retainer contracts numbered C-YYYY-NNNN · renewal tasks before the end date · one-click renew, pause, cancel · monthly recurring value · support tickets T-YYYY-NNNN with first-reply SLA, replies & internal notes, status and assignee · company, deal and dashboard cards | ✅ Done |
 | **7. Reports & dashboard** | Reports page with period & person filters · won revenue by month · win rate, average deal, time to win · revenue by service & client · lost reasons · 6-month weighted pipeline forecast · lead sources & reply times · team performance · support SLA & recurring revenue · CSV export (audited) | ✅ Done |
-| **8. Integrations** | Email (Gmail/Outlook) · website lead capture form/API · Slack or WhatsApp notifications · accounting export | ⏭ Next |
-| **9. Hardening** | Automated tests (Playwright) · rate limiting on login · 2FA · backups · error monitoring · CI/CD | |
+| **8. Integrations** | Email via Resend (assignment emails, new website enquiry alerts with reply-to) · 8 am morning summary (Vercel Cron) · team chat alerts (Slack, Google Chat, Discord, Teams) · private calendar feed for Google Calendar/Outlook · accepted-quotes accounting export · Settings → Integrations with test buttons | ✅ Done |
+| **9. Hardening** | Automated tests (Playwright) · rate limiting on login · 2FA · backups · error monitoring · CI/CD | ⏭ Next |

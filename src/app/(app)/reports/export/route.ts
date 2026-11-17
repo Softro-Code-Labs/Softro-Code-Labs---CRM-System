@@ -17,7 +17,7 @@ import { resolvePeriod, teamReport, toCsv } from "@/lib/reports";
 
 export const runtime = "nodejs";
 
-const TYPES = ["deals", "leads", "tickets", "team"] as const;
+const TYPES = ["deals", "leads", "tickets", "team", "quotes"] as const;
 type ExportType = (typeof TYPES)[number];
 
 /** Colombo date and time as "yyyy-mm-dd hh:mm", which Excel and Google Sheets read as a date. */
@@ -98,6 +98,29 @@ export async function GET(request: NextRequest) {
         t.firstResponseAt && t.responseDueAt ? (t.firstResponseAt <= t.responseDueAt ? "Yes" : "No") : "",
         t.firstResponseAt ? ((t.firstResponseAt.getTime() - t.createdAt.getTime()) / 3_600_000).toFixed(1) : "", stamp(t.resolvedAt),
       ]),
+    );
+  } else if (type === "quotes") {
+    // Accounting: one row per quote line, accepted quotes only, with quote totals repeated on each line.
+    const quotes = await db.quote.findMany({
+      where: { status: "ACCEPTED", acceptedAt: inPeriod, ...(ownerId && { createdById: ownerId }) },
+      orderBy: [{ acceptedAt: "asc" }, { number: "asc" }],
+      include: {
+        company: { select: { name: true, email: true, addressLine: true } },
+        contact: { select: { firstName: true, lastName: true, email: true } },
+        deal: { select: { title: true } },
+        items: { orderBy: { position: "asc" } },
+      },
+    });
+    rows = quotes.length;
+    csv = toCsv(
+      ["Quote number", "Issue date", "Accepted date", "Customer", "Customer contact", "Customer email", "Customer address", "Quote title", "Line", "Item", "Description", "Quantity", "Unit", "Unit price", "Line discount %", "Line total", "Quote discount %", "Tax", "Tax rate %", "Subtotal", "Discount", "Tax amount", "Total", "Currency", "Deal"],
+      quotes.flatMap((q) =>
+        (q.items.length ? q.items : [null]).map((i, n) => [
+          q.number, toDateInput(q.issueDate), stamp(q.acceptedAt).slice(0, 10), q.company?.name ?? (q.contact ? fullName(q.contact) : ""), q.contact ? fullName(q.contact) : "",
+          q.contact?.email ?? q.company?.email, q.company?.addressLine, q.title, i ? n + 1 : "", i?.title, i?.description, i ? money(i.quantity) : "", i?.unit, i ? money(i.unitPrice) : "",
+          i ? money(i.discountPercent) : "", i ? money(i.lineTotal) : "", money(q.discountPercent), q.taxLabel, money(q.taxRate), money(q.subtotal), money(q.discountTotal), money(q.taxTotal), money(q.total), q.currency, q.deal?.title,
+        ]),
+      ),
     );
   } else {
     const team = await teamReport({ period });

@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifyDealWon } from "@/lib/integrations/notify";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
@@ -127,6 +129,7 @@ async function closeDeal(id: string, outcome: "WON" | "LOST", lostReason: string
     }
   });
   await audit({ actorId: user.id, action: "update", entity: "Deal", entityId: id, summary: `${deal.title}: marked ${outcome.toLowerCase()}`, meta: lostReason ? { lostReason } : undefined });
+  if (outcome === "WON" && deal.status !== "WON") after(() => notifyDealWon(id, user.id));
   revalidateDeal(id, deal.companyId);
 }
 

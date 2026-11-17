@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifyTaskAssigned } from "@/lib/integrations/notify";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { authorizeAction, FORBIDDEN_MESSAGE } from "@/lib/auth";
@@ -89,6 +91,7 @@ export async function scheduleActivity(target: Target, _prev: FormState, formDat
     data: { ...links, ...parsed.data, assignedToId: assignee?.id ?? user.id, createdById: user.id },
   });
   await audit({ actorId: user.id, action: "create", entity: "Activity", entityId: activity.id, summary: `Scheduled: ${activity.subject}` });
+  if (activity.assignedToId !== user.id) after(() => notifyTaskAssigned(activity.id, user.id));
   revalidate(links);
   return { ok: true };
 }

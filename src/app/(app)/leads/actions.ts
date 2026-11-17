@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { notifyLeadAssigned } from "@/lib/integrations/notify";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { authorizeAction, FORBIDDEN_MESSAGE } from "@/lib/auth";
@@ -45,6 +47,7 @@ export async function createLead(_prev: FormState, formData: FormData): Promise<
     },
   });
   await audit({ actorId: user.id, action: "create", entity: "Lead", entityId: lead.id, summary: lead.title });
+  if (lead.ownerId && lead.ownerId !== user.id) after(() => notifyLeadAssigned(lead.id, user.id));
 
   revalidateLead();
   redirect(`/leads/${lead.id}`);
@@ -59,7 +62,7 @@ export async function updateLead(id: string, _prev: FormState, formData: FormDat
   if (!parsed.success) return { errors: zodErrors(parsed.error), values };
   if (!(await companyExists(parsed.data.companyId))) return { errors: { companyId: ["That company no longer exists."] }, values };
 
-  const existing = await db.lead.findUnique({ where: { id }, select: { status: true, respondedAt: true } });
+  const existing = await db.lead.findUnique({ where: { id }, select: { status: true, respondedAt: true, ownerId: true } });
   if (!existing) return { message: "This lead no longer exists." };
   if (existing.status === "CONVERTED" && parsed.data.status !== "CONVERTED") {
     return { errors: { status: ["This lead was converted to a deal. Edit the deal instead."] }, values };
@@ -79,6 +82,7 @@ export async function updateLead(id: string, _prev: FormState, formData: FormDat
     },
   });
   await audit({ actorId: user.id, action: "update", entity: "Lead", entityId: id, summary: lead.title });
+  if (lead.ownerId && lead.ownerId !== existing.ownerId) after(() => notifyLeadAssigned(id, user.id));
 
   revalidateLead(id);
   redirect(`/leads/${id}`);

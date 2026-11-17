@@ -19,13 +19,14 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 11. [Contracts: maintenance, hosting and support](#11-contracts-maintenance-hosting-and-support)
 12. [Support tickets](#12-support-tickets)
 13. [Reports](#13-reports)
-14. [The dashboard](#14-the-dashboard)
-15. [Enquiries from our website](#15-enquiries-from-our-website)
-16. [Your profile and password](#16-your-profile-and-password)
-17. [Settings (admins and managers)](#17-settings-admins-and-managers)
-18. [Good habits and data rules](#18-good-habits-and-data-rules)
-19. [Questions and problems](#19-questions-and-problems)
-20. [Coming soon](#20-coming-soon)
+14. [Emails, team chat and your calendar](#14-emails-team-chat-and-your-calendar)
+15. [The dashboard](#15-the-dashboard)
+16. [Enquiries from our website](#16-enquiries-from-our-website)
+17. [Your profile and password](#17-your-profile-and-password)
+18. [Settings (admins and managers)](#18-settings-admins-and-managers)
+19. [Good habits and data rules](#19-good-habits-and-data-rules)
+20. [Questions and problems](#20-questions-and-problems)
+21. [Coming soon](#21-coming-soon)
 
 ---
 
@@ -458,7 +459,37 @@ Reports are only as good as what's entered. Always mark deals **Won** or **Lost*
 
 ---
 
-## 14. The dashboard
+## 14. Emails, team chat and your calendar
+
+### Emails you'll get
+
+Emails come from **Softro CRM** to your work address. You get one when:
+
+- someone else gives you a **lead**, **task**, **call**, **meeting** or **support ticket** (urgent tickets say *[Urgent]* in the subject)
+- a **new enquiry from the website** is assigned to you. Reply straight from the email: it goes to the client.
+
+You're never emailed about something you did yourself.
+
+**Morning summary:** at 8 am on working days you get one email listing overdue and today's tasks, leads waiting for a reply, tickets needing a first reply and deals past their close date. Overdue items are in red. If nothing is due, no email is sent.
+
+Turn either off under **My profile → Notifications**. **Email me today's summary now** shows you what it looks like.
+
+### Team chat
+
+If an admin has connected Slack, Google Chat, Discord or Teams, the team channel gets a short message when a **website enquiry** arrives, a **deal is won** 🎉, or an **urgent or high-priority ticket** is opened.
+
+### Your tasks in Google Calendar or Outlook
+
+1. Go to **My profile → Calendar → Create my calendar link** and click **Copy**.
+2. **Google Calendar** (on a computer): *Other calendars* → **+** → **From URL** → paste → **Add calendar**. It then shows on your phone too.
+   **Outlook:** *Add calendar* → **Subscribe from web** → paste.
+3. Your open tasks, calls and meetings appear at their due time and update about every hour.
+
+The calendar is read-only: tick tasks off in the CRM. The link is shown once and is private. If it's ever shared by mistake, click **Make a new link** (the old one stops working) or **Turn off**.
+
+---
+
+## 15. The dashboard
 
 | Card | What it shows |
 |---|---|
@@ -477,7 +508,7 @@ Click any card to go to the full list behind it.
 
 ---
 
-## 15. Enquiries from our website
+## 16. Enquiries from our website
 
 The **Start your project** form on softrocodelabs.com sends each enquiry to **two** places:
 
@@ -488,7 +519,7 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 16. Your profile and password
+## 17. Your profile and password
 
 Click **your name** at the top right to open **My profile**:
 
@@ -498,7 +529,7 @@ Click **your name** at the top right to open **My profile**:
 
 ---
 
-## 17. Settings (admins and managers)
+## 18. Settings (admins and managers)
 
 **Settings** appears in the sidebar for admins and managers.
 
@@ -533,13 +564,23 @@ Your **catalogue** of standard services, e.g. *Business website (5 pages)*, LKR 
 - **Edit** with the pencil icon.
 - **Archive** a service you no longer sell. It disappears from *Add from catalogue…* but old quotes keep it. **Restore** brings it back.
 
+### Integrations (admins)
+
+**Settings → Integrations** shows what's connected, with a test button for each:
+
+- **Email (Resend):** needs `RESEND_API_KEY` and `EMAIL_FROM` set in Vercel. Use **Send me a test email** to check.
+- **Team chat:** create an *incoming webhook* for a channel in Slack, Google Chat, Discord or Teams, paste its address, choose what to post, then **Send a test message**. The address is never shown again in full. Paste a new one to change it, or **Disconnect**.
+- **Website enquiry form:** shows who new enquiries go to and when the last one arrived. If it says "isn't a CRM user", fix `WEBSITE_LEAD_OWNER_EMAIL`.
+- **Morning summary:** needs `CRON_SECRET` in Vercel. Shows when it last ran. **Send today's summaries now** sends them by hand (only once a day).
+- **Accounting export:** accepted quotes, line by line with VAT, from **Reports → Export CSV → Accepted quotes**.
+
 ### Audit log (admins)
 
 A read-only record of every sign-in and every create, update and delete: who, what and when (Sri Lanka time). Filter by type of record or by person. Website enquiries show as *Website / system*.
 
 ---
 
-## 18. Good habits and data rules
+## 19. Good habits and data rules
 
 - **One lead per enquiry, one company per business.** Search before adding so we don't get duplicates.
 - **Write titles people can scan:** *Mobile app for a tuition class in Kandy* beats *New enquiry*.
@@ -552,7 +593,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 19. Questions and problems
+## 20. Questions and problems
 
 | Problem | What to do |
 |---|---|
@@ -571,12 +612,14 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 | I can't delete a company | It has contracts. Delete or move them first, or set the company type to *Former customer*. |
 | A ticket says *Reply overdue* but I replied | Add your reply on the ticket with **"This is a reply sent to the client"** ticked. |
 | A report number looks wrong | Check the period and person filters first. Then check the deals behind it: won or lost status, close date, value and currency. |
+| I'm not getting CRM emails | Check **My profile → Notifications** is on and look in Spam. Ask an admin to check **Settings → Integrations → Email**. |
+| My calendar doesn't show new tasks | Google refreshes subscribed calendars every few hours, Outlook about hourly. Only tasks with a due date that aren't done appear. |
 | "Every line needs a name" | A quote line is empty. Fill it in or remove it with the bin icon. |
 
 ---
 
-## 20. Coming soon
+## 21. Coming soon
 
-Planned next: **integrations**, such as email, WhatsApp or Slack notifications, and accounting export.
+Ideas for later: two-way Gmail/Outlook email sync and WhatsApp Business messages from inside the CRM. Tell the admin what would help you most.
 
-This guide will be updated as each one is released.
+This guide will be updated as new features are released.

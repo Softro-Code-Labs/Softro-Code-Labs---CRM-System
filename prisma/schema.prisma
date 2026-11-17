@@ -166,6 +166,10 @@ model User {
   failedLoginCount   Int       @default(0)
   lockedUntil        DateTime? // temporary lock after too many wrong passwords
   passwordChangedAt  DateTime?
+  // Notifications & integrations
+  emailNotifications Boolean   @default(true) // email me when something is assigned to me
+  dailyDigest        Boolean   @default(true) // 8 am summary on working days
+  calendarTokenHash  String?   @unique // SHA-256 of the private calendar feed token
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -543,7 +547,14 @@ model OrgSettings {
   defaultTerms        String?
   bankDetails         String?
   quoteFooter         String?
-  updatedAt           DateTime @updatedAt
+  // Team chat (Slack, Google Chat, Discord or Teams incoming webhook)
+  chatWebhookUrl      String?
+  chatNotifyLeads     Boolean   @default(true) // new website leads
+  chatNotifyWins      Boolean   @default(true) // deals won
+  chatNotifyTickets   Boolean   @default(true) // urgent and high-priority tickets
+  digestLastRunAt     DateTime?
+  digestLastSent      Int?
+  updatedAt           DateTime  @updatedAt
 }
 
 // ─────────────────────────────────────────────────────────────

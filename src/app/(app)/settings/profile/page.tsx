@@ -8,6 +8,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PasswordForm } from "@/components/crm/password-form";
 import { ProfileForm } from "./profile-form";
+import { CalendarCard, NotificationsCard } from "./notifications-card";
+import { emailConfigured } from "@/lib/integrations/email";
 
 export const metadata: Metadata = { title: "My profile" };
 
@@ -22,6 +24,18 @@ export default async function ProfilePage() {
         <CardHeader title="Your details" />
         <CardBody>
           <ProfileForm initial={{ name: user.name, jobTitle: user.jobTitle ?? "", phone: user.phone ?? "" }} />
+        </CardBody>
+      </Card>
+      <Card>
+        <CardHeader title="Notifications" description={`Emails go to ${user.email}.`} />
+        <CardBody>
+          <NotificationsCard initial={{ emailNotifications: user.emailNotifications, dailyDigest: user.dailyDigest }} emailReady={emailConfigured()} />
+        </CardBody>
+      </Card>
+      <Card>
+        <CardHeader title="Calendar" />
+        <CardBody>
+          <CalendarCard hasLink={Boolean(user.calendarTokenHash)} />
         </CardBody>
       </Card>
       <Card>
