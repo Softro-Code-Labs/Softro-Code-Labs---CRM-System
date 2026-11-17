@@ -87,7 +87,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Se
       />
 
       <Card>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 px-5 py-3">
           <div className="flex flex-wrap gap-1">
             {[{ value: "", label: "All" }, ...COMPANY_TYPE_OPTIONS].map((opt) => (
               <Link
@@ -95,7 +95,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Se
                 href={filterHref(opt.value || undefined)}
                 className={cn(
                   "rounded-md px-2.5 py-1 text-xs font-medium",
-                  (type ?? "") === opt.value ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-100",
+                  (type ?? "") === opt.value ? "bg-ink-900 text-ink-50" : "text-ink-600 hover:bg-ink-100",
                 )}
               >
                 {opt.label}
@@ -120,8 +120,8 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Se
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100 text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-medium tracking-wide text-slate-500 uppercase">
+            <table className="min-w-full divide-y divide-ink-100 text-sm">
+              <thead className="bg-ink-50 text-left text-xs font-medium tracking-wide text-ink-500 uppercase">
                 <tr>
                   <th className="px-5 py-3">Company</th>
                   <th className="px-5 py-3">Type</th>
@@ -131,22 +131,22 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Se
                   <th className="px-5 py-3">Added</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-ink-100">
                 {companies.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50">
+                  <tr key={c.id} className="hover:bg-ink-50">
                     <td className="px-5 py-3">
-                      <Link href={`/companies/${c.id}`} className="font-medium text-slate-900 hover:text-brand-700">
+                      <Link href={`/companies/${c.id}`} className="font-medium text-ink-900 hover:text-brand-700">
                         {c.name}
                       </Link>
-                      <p className="text-xs text-slate-500">{c.industry ?? "—"}</p>
+                      <p className="text-xs text-ink-500">{c.industry ?? "—"}</p>
                     </td>
                     <td className="px-5 py-3">
                       <Badge tone={companyTypeTone[c.type]}>{humanize(c.type)}</Badge>
                     </td>
-                    <td className="px-5 py-3 text-slate-600">{[c.city, c.country].filter(Boolean).join(", ") || "—"}</td>
-                    <td className="px-5 py-3 text-right text-slate-600 tabular-nums">{c._count.contacts}</td>
-                    <td className="px-5 py-3 text-slate-600">{c.owner?.name ?? "—"}</td>
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-500">{formatDate(c.createdAt)}</td>
+                    <td className="px-5 py-3 text-ink-600">{[c.city, c.country].filter(Boolean).join(", ") || "—"}</td>
+                    <td className="px-5 py-3 text-right text-ink-600 tabular-nums">{c._count.contacts}</td>
+                    <td className="px-5 py-3 text-ink-600">{c.owner?.name ?? "—"}</td>
+                    <td className="px-5 py-3 whitespace-nowrap text-ink-500">{formatDate(c.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

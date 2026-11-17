@@ -78,7 +78,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
       />
 
       <Card>
-        <div className="flex justify-end border-b border-slate-100 px-5 py-3">
+        <div className="flex justify-end border-b border-ink-100 px-5 py-3">
           <SearchInput placeholder="Search name, email, company…" />
         </div>
 
@@ -97,8 +97,8 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100 text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-medium tracking-wide text-slate-500 uppercase">
+            <table className="min-w-full divide-y divide-ink-100 text-sm">
+              <thead className="bg-ink-50 text-left text-xs font-medium tracking-wide text-ink-500 uppercase">
                 <tr>
                   <th className="px-5 py-3">Name</th>
                   <th className="px-5 py-3">Company</th>
@@ -107,26 +107,26 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
                   <th className="px-5 py-3">Added</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-ink-100">
                 {contacts.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50">
+                  <tr key={c.id} className="hover:bg-ink-50">
                     <td className="px-5 py-3">
-                      <Link href={`/contacts/${c.id}`} className="flex items-center gap-1.5 font-medium text-slate-900 hover:text-brand-700">
+                      <Link href={`/contacts/${c.id}`} className="flex items-center gap-1.5 font-medium text-ink-900 hover:text-brand-700">
                         {fullName(c)}
                         {c.isPrimary && <Star className="size-3.5 fill-amber-400 text-amber-400" aria-label="Primary contact" />}
                       </Link>
-                      <p className="text-xs text-slate-500">{c.jobTitle ?? "—"}</p>
+                      <p className="text-xs text-ink-500">{c.jobTitle ?? "—"}</p>
                     </td>
                     <td className="px-5 py-3">
                       {c.company ? (
-                        <Link href={`/companies/${c.company.id}`} className="text-slate-700 hover:text-brand-700">
+                        <Link href={`/companies/${c.company.id}`} className="text-ink-700 hover:text-brand-700">
                           {c.company.name}
                         </Link>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-ink-400">—</span>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-slate-600">
+                    <td className="px-5 py-3 text-ink-600">
                       {c.email ? (
                         <a href={`mailto:${c.email}`} className="hover:text-brand-700">
                           {c.email}
@@ -135,8 +135,8 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
                         "—"
                       )}
                     </td>
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-600">{c.mobile ?? c.phone ?? "—"}</td>
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-500">{formatDate(c.createdAt)}</td>
+                    <td className="px-5 py-3 whitespace-nowrap text-ink-600">{c.mobile ?? c.phone ?? "—"}</td>
+                    <td className="px-5 py-3 whitespace-nowrap text-ink-500">{formatDate(c.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

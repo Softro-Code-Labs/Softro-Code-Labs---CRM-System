@@ -89,7 +89,7 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
   };
 
   const pill = (active: boolean) =>
-    cn("rounded-md px-2.5 py-1 text-xs font-medium", active ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800");
+    cn("rounded-md px-2.5 py-1 text-xs font-medium", active ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-800");
 
   return (
     <>
@@ -107,31 +107,31 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
 
       <div className="mb-5 grid gap-4 sm:grid-cols-3">
         <Card className="p-4">
-          <p className="text-xs font-medium text-slate-500">Open pipeline ({openDeals.length})</p>
-          <p className="mt-1 text-lg font-semibold text-slate-900">{formatMoneyTotals(openDeals)}</p>
+          <p className="text-xs font-medium text-ink-500">Open pipeline ({openDeals.length})</p>
+          <p className="mt-1 text-lg font-semibold text-ink-900">{formatMoneyTotals(openDeals)}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs font-medium text-slate-500">Weighted forecast</p>
-          <p className="mt-1 text-lg font-semibold text-slate-900">{formatMoneyTotals(weighted)}</p>
+          <p className="text-xs font-medium text-ink-500">Weighted forecast</p>
+          <p className="mt-1 text-lg font-semibold text-ink-900">{formatMoneyTotals(weighted)}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs font-medium text-slate-500">Won this month ({wonThisMonth.length})</p>
+          <p className="text-xs font-medium text-ink-500">Won this month ({wonThisMonth.length})</p>
           <p className="mt-1 text-lg font-semibold text-emerald-700">{formatMoneyTotals(wonThisMonth)}</p>
         </Card>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+          <div className="inline-flex rounded-lg border border-ink-200 bg-ink-100 p-1">
             <Link href={linkWith({ view: "board" })} className={pill(view === "board")}>Board</Link>
             <Link href={linkWith({ view: "list" })} className={pill(view === "list")}>List</Link>
           </div>
-          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+          <div className="inline-flex rounded-lg border border-ink-200 bg-ink-100 p-1">
             <Link href={linkWith({ owner: "all" })} className={pill(owner === "all")}>All deals</Link>
             <Link href={linkWith({ owner: "me" })} className={pill(owner === "me")}>My deals</Link>
           </div>
           {view === "list" && (
-            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+            <div className="inline-flex rounded-lg border border-ink-200 bg-ink-100 p-1">
               {(["OPEN", "WON", "LOST", "all"] as const).map((s) => (
                 <Link key={s} href={linkWith({ status: s, page: undefined })} className={pill(status === s)}>
                   {s === "all" ? "All" : s.charAt(0) + s.slice(1).toLowerCase()}
@@ -204,8 +204,8 @@ async function DealList({ where, page, params, canCreate }: { where: Prisma.Deal
         />
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100 text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-medium tracking-wide text-slate-500 uppercase">
+          <table className="min-w-full divide-y divide-ink-100 text-sm">
+            <thead className="bg-ink-50 text-left text-xs font-medium tracking-wide text-ink-500 uppercase">
               <tr>
                 <th className="px-5 py-3">Deal</th>
                 <th className="px-5 py-3">Stage</th>
@@ -214,23 +214,23 @@ async function DealList({ where, page, params, canCreate }: { where: Prisma.Deal
                 <th className="px-5 py-3">Close date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-ink-100">
               {deals.map((d) => (
-                <tr key={d.id} className="hover:bg-slate-50">
+                <tr key={d.id} className="hover:bg-ink-50">
                   <td className="px-5 py-3">
-                    <Link href={`/deals/${d.id}`} className="font-medium text-slate-900 hover:text-brand-700">
+                    <Link href={`/deals/${d.id}`} className="font-medium text-ink-900 hover:text-brand-700">
                       {d.title}
                     </Link>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-ink-500">
                       {[d.company?.name, d.serviceType && SERVICE_TYPE_SHORT[d.serviceType]].filter(Boolean).join(" · ") || "—"}
                     </p>
                   </td>
                   <td className="px-5 py-3">
-                    {d.status === "OPEN" ? <span className="text-slate-700">{d.stage.name}</span> : <Badge tone={DEAL_STATUS_TONE[d.status]}>{d.stage.name}</Badge>}
+                    {d.status === "OPEN" ? <span className="text-ink-700">{d.stage.name}</span> : <Badge tone={DEAL_STATUS_TONE[d.status]}>{d.stage.name}</Badge>}
                   </td>
                   <td className="px-5 py-3 text-right whitespace-nowrap tabular-nums">{formatMoney(d.value, d.currency)}</td>
-                  <td className="px-5 py-3 text-slate-600">{d.owner?.name ?? "—"}</td>
-                  <td className="px-5 py-3 whitespace-nowrap text-slate-500">{formatDate(d.closedAt ?? d.expectedCloseDate)}</td>
+                  <td className="px-5 py-3 text-ink-600">{d.owner?.name ?? "—"}</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-ink-500">{formatDate(d.closedAt ?? d.expectedCloseDate)}</td>
                 </tr>
               ))}
             </tbody>

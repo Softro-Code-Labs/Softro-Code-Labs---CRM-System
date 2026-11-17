@@ -40,7 +40,7 @@ export function LeadForm({ action, lead, companies, owners, defaultOwnerId, defa
       <FormMessage message={state.message} />
 
       <Card className="p-6">
-        <h2 className="mb-5 text-sm font-semibold text-slate-900">Enquiry</h2>
+        <h2 className="mb-5 text-sm font-semibold text-ink-900">Enquiry</h2>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField
             label="Title"
@@ -83,7 +83,7 @@ export function LeadForm({ action, lead, companies, owners, defaultOwnerId, defa
       </Card>
 
       <Card className="p-6">
-        <h2 className="mb-5 text-sm font-semibold text-slate-900">Who is it from?</h2>
+        <h2 className="mb-5 text-sm font-semibold text-ink-900">Who is it from?</h2>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="Contact name" name="contactName" defaultValue={v("contactName")} error={e.contactName} />
           <SelectField label="Preferred language" name="language" options={LANGUAGE_OPTIONS} defaultValue={v("language", "ENGLISH")} error={e.language} />

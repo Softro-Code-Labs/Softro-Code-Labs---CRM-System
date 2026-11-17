@@ -75,16 +75,16 @@ export function DealBoard({ stages, deals, canMove }: { stages: BoardStage[]; de
                 if (id) move(id, stage.id);
               }}
               className={cn(
-                "flex w-80 shrink-0 flex-col rounded-xl border bg-slate-100/70 transition-colors",
-                dragOver === stage.id ? "border-brand-400 bg-brand-50" : "border-slate-200",
+                "flex w-80 shrink-0 flex-col rounded-xl border bg-ink-100/70 transition-colors",
+                dragOver === stage.id ? "border-brand-400 bg-brand-50" : "border-ink-200",
               )}
             >
-              <header className="border-b border-slate-200 px-4 py-3">
+              <header className="border-b border-ink-200 px-4 py-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-slate-900">{stage.name}</h2>
-                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-600">{columnDeals.length}</span>
+                  <h2 className="text-sm font-semibold text-ink-900">{stage.name}</h2>
+                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-ink-600">{columnDeals.length}</span>
                 </div>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-ink-500">
                   {totals(columnDeals)} · {stage.probability}% likely
                 </p>
               </header>
@@ -97,31 +97,31 @@ export function DealBoard({ stages, deals, canMove }: { stages: BoardStage[]; de
                       e.dataTransfer.setData("text/deal-id", deal.id);
                       e.dataTransfer.effectAllowed = "move";
                     }}
-                    className={cn("group rounded-lg border border-slate-200 bg-white p-3 shadow-sm", canMove && "cursor-grab active:cursor-grabbing")}
+                    className={cn("group rounded-lg border border-ink-200 bg-white p-3 shadow-sm", canMove && "cursor-grab active:cursor-grabbing")}
                   >
                     <div className="flex items-start gap-2">
-                      {canMove && <GripVertical className="mt-0.5 size-4 shrink-0 text-slate-300 group-hover:text-slate-400" aria-hidden />}
+                      {canMove && <GripVertical className="mt-0.5 size-4 shrink-0 text-ink-300 group-hover:text-ink-400" aria-hidden />}
                       <div className="min-w-0 flex-1">
-                        <Link href={`/deals/${deal.id}`} className="block text-sm font-medium text-slate-900 hover:text-brand-700">
+                        <Link href={`/deals/${deal.id}`} className="block text-sm font-medium text-ink-900 hover:text-brand-700">
                           {deal.title}
                         </Link>
                         {deal.companyName && (
-                          <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-500">
+                          <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-ink-500">
                             <Building2 className="size-3" aria-hidden /> {deal.companyName}
                           </p>
                         )}
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="text-sm font-semibold text-slate-800 tabular-nums">{formatMoney(deal.value, deal.currency)}</span>
+                          <span className="text-sm font-semibold text-ink-800 tabular-nums">{formatMoney(deal.value, deal.currency)}</span>
                           {deal.serviceType && (
-                            <span className="rounded bg-brand-50 px-1.5 py-0.5 text-[11px] font-medium text-brand-700">{SERVICE_TYPE_SHORT[deal.serviceType]}</span>
+                            <span className="rounded bg-ink-100 px-1.5 py-0.5 text-[11px] font-medium text-ink-700">{SERVICE_TYPE_SHORT[deal.serviceType]}</span>
                           )}
                         </div>
-                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+                        <div className="mt-2 flex items-center justify-between text-[11px] text-ink-500">
                           <span>{deal.ownerName ?? "Unassigned"}</span>
                           <span title="Days in this stage">{deal.daysInStage}d in stage</span>
                         </div>
                         {deal.closeDate && (
-                          <p className={cn("mt-1 flex items-center gap-1 text-[11px]", deal.closeOverdue ? "font-medium text-red-600" : "text-slate-500")}>
+                          <p className={cn("mt-1 flex items-center gap-1 text-[11px]", deal.closeOverdue ? "font-medium text-red-600" : "text-ink-500")}>
                             <CalendarClock className="size-3" aria-hidden /> Close {deal.closeDate}
                           </p>
                         )}
@@ -131,7 +131,7 @@ export function DealBoard({ stages, deals, canMove }: { stages: BoardStage[]; de
                             <select
                               value={deal.stageId}
                               onChange={(e) => move(deal.id, e.target.value)}
-                              className="w-full rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs"
+                              className="w-full rounded border border-ink-200 bg-ink-50 px-2 py-1 text-xs"
                             >
                               {stages.map((s) => (
                                 <option key={s.id} value={s.id}>
@@ -146,7 +146,7 @@ export function DealBoard({ stages, deals, canMove }: { stages: BoardStage[]; de
                   </li>
                 ))}
                 {columnDeals.length === 0 && (
-                  <li className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-4 text-center text-xs text-slate-400">
+                  <li className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-ink-200 p-4 text-center text-xs text-ink-400">
                     {canMove ? "Drag deals here" : "No deals"}
                   </li>
                 )}

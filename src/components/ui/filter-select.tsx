@@ -21,7 +21,7 @@ export function FilterSelect({ param, label, options }: { param: string; label: 
         const qs = params.toString();
         router.replace(qs ? `${pathname}?${qs}` : pathname);
       }}
-      className="h-9 rounded-lg border border-slate-300 bg-white px-2.5 text-sm text-slate-700 shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+      className="h-9 rounded-lg border border-ink-300 bg-white px-2.5 text-sm text-ink-700 shadow-sm focus:border-ink-700 focus:ring-2 focus:ring-ink-900/10 focus:outline-none"
     >
       <option value="">{label}</option>
       {options.map((o) => (

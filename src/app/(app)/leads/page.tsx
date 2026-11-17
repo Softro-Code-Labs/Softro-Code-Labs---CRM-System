@@ -133,14 +133,14 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       />
 
       <Card>
-        <div className="flex flex-wrap gap-1 border-b border-slate-100 px-5 pt-3">
+        <div className="flex flex-wrap gap-1 border-b border-ink-100 px-5 pt-3">
           {TABS.map((t) => (
             <Link
               key={t.value}
               href={tabHref(t.value)}
               className={cn(
                 "-mb-px flex items-center gap-1.5 border-b-2 px-3 pb-2.5 text-sm font-medium",
-                tab === t.value ? "border-brand-600 text-brand-700" : "border-transparent text-slate-500 hover:text-slate-800",
+                tab === t.value ? "border-brand-600 text-brand-700" : "border-transparent text-ink-500 hover:text-ink-800",
               )}
             >
               {t.label}
@@ -150,7 +150,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             </Link>
           ))}
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 px-5 py-3">
           <div className="flex flex-wrap gap-2">
             <FilterSelect param="source" label="All sources" options={LEAD_SOURCE_OPTIONS} />
             <FilterSelect param="service" label="All services" options={SERVICE_TYPE_OPTIONS} />
@@ -173,8 +173,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100 text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-medium tracking-wide text-slate-500 uppercase">
+            <table className="min-w-full divide-y divide-ink-100 text-sm">
+              <thead className="bg-ink-50 text-left text-xs font-medium tracking-wide text-ink-500 uppercase">
                 <tr>
                   <th className="px-5 py-3">Lead</th>
                   <th className="px-5 py-3">Source</th>
@@ -184,19 +184,19 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                   <th className="px-5 py-3">Received</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-ink-100">
                 {leads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-slate-50">
+                  <tr key={lead.id} className="hover:bg-ink-50">
                     <td className="px-5 py-3">
-                      <Link href={`/leads/${lead.id}`} className="font-medium text-slate-900 hover:text-brand-700">
+                      <Link href={`/leads/${lead.id}`} className="font-medium text-ink-900 hover:text-brand-700">
                         {lead.title}
                       </Link>
-                      <p className="flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
+                      <p className="flex flex-wrap items-center gap-x-2 text-xs text-ink-500">
                         <span>{[lead.contactName, lead.companyName].filter(Boolean).join(" · ") || "—"}</span>
-                        {lead.serviceType && <span className="text-brand-600">{SERVICE_TYPE_SHORT[lead.serviceType]}</span>}
+                        {lead.serviceType && <span className="font-medium text-ink-600">{SERVICE_TYPE_SHORT[lead.serviceType]}</span>}
                       </p>
                     </td>
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-600">{LEAD_SOURCE_LABELS[lead.source]}</td>
+                    <td className="px-5 py-3 whitespace-nowrap text-ink-600">{LEAD_SOURCE_LABELS[lead.source]}</td>
                     <td className="px-5 py-3">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <Badge tone={LEAD_STATUS_TONE[lead.status]}>{LEAD_STATUS_LABELS[lead.status]}</Badge>
@@ -205,11 +205,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                         )}
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-right whitespace-nowrap text-slate-600 tabular-nums">
+                    <td className="px-5 py-3 text-right whitespace-nowrap text-ink-600 tabular-nums">
                       {lead.estimatedValue ? formatMoney(lead.estimatedValue, lead.currency) : "—"}
                     </td>
-                    <td className="px-5 py-3 text-slate-600">{lead.owner?.name ?? "—"}</td>
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-500">{formatDate(lead.createdAt)}</td>
+                    <td className="px-5 py-3 text-ink-600">{lead.owner?.name ?? "—"}</td>
+                    <td className="px-5 py-3 whitespace-nowrap text-ink-500">{formatDate(lead.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

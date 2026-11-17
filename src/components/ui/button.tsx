@@ -8,10 +8,10 @@ const base =
   "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:pointer-events-none disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-brand-600 text-white shadow-sm hover:bg-brand-700",
-  secondary: "border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-50",
+  primary: "bg-ink-900 text-ink-50 shadow-sm hover:bg-ink-700",
+  secondary: "border border-ink-300 bg-white text-ink-700 shadow-sm hover:bg-ink-50",
   danger: "bg-red-600 text-white shadow-sm hover:bg-red-700",
-  ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+  ghost: "text-ink-600 hover:bg-ink-100 hover:text-ink-900",
 };
 
 const sizes: Record<Size, string> = {

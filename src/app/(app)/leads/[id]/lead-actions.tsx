@@ -57,7 +57,7 @@ export function LeadActions({ id, status, responded }: { id: string; status: Lea
             autoFocus
             placeholder="Why? e.g. budget too low"
             aria-label="Reason the lead is not a fit"
-            className="h-8 min-w-56 flex-1 rounded-lg border border-slate-300 px-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+            className="h-8 min-w-56 flex-1 rounded-lg border border-ink-300 px-3 text-sm focus:border-ink-700 focus:ring-2 focus:ring-ink-900/10 focus:outline-none"
           />
           <Button size="sm" variant="danger" type="submit" disabled={pending}>
             Mark unqualified

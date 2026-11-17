@@ -68,9 +68,9 @@ export default async function DealPage({ params }: Props) {
       />
 
       <div className="mb-6 flex flex-wrap items-center gap-4">
-        <p className="text-2xl font-semibold text-slate-900 tabular-nums">{formatMoney(deal.value, deal.currency)}</p>
+        <p className="text-2xl font-semibold text-ink-900 tabular-nums">{formatMoney(deal.value, deal.currency)}</p>
         <Badge tone={DEAL_STATUS_TONE[deal.status]}>{deal.status === "OPEN" ? deal.stage.name : deal.status === "WON" ? "Won" : "Lost"}</Badge>
-        {deal.status === "LOST" && deal.lostReason && <span className="text-sm text-slate-500">Reason: {deal.lostReason}</span>}
+        {deal.status === "LOST" && deal.lostReason && <span className="text-sm text-ink-500">Reason: {deal.lostReason}</span>}
         <div className="ml-auto">
           <CloseDealButtons dealId={deal.id} status={deal.status} canEdit={canEdit} />
         </div>
@@ -90,31 +90,31 @@ export default async function DealPage({ params }: Props) {
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader title="Scope & notes" />
-            <CardBody className="text-sm whitespace-pre-line text-slate-700">{deal.description || <span className="text-slate-400">No scope written yet.</span>}</CardBody>
+            <CardBody className="text-sm whitespace-pre-line text-ink-700">{deal.description || <span className="text-ink-400">No scope written yet.</span>}</CardBody>
           </Card>
           <Card>
             <CardHeader title="Activities & notes" description="Calls, meetings, tasks and notes arrive in Step 3." />
-            <CardBody className="text-sm text-slate-500">Nothing logged yet.</CardBody>
+            <CardBody className="text-sm text-ink-500">Nothing logged yet.</CardBody>
           </Card>
         </div>
 
         <div className="space-y-6">
           <Card className="p-5">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900">Client</h2>
+            <h2 className="mb-3 text-sm font-semibold text-ink-900">Client</h2>
             {deal.company ? (
-              <Link href={`/companies/${deal.company.id}`} className="flex items-center gap-2 text-sm font-medium text-slate-800 hover:text-brand-700">
-                <Building2 className="size-4 text-slate-400" aria-hidden /> {deal.company.name}
+              <Link href={`/companies/${deal.company.id}`} className="flex items-center gap-2 text-sm font-medium text-ink-800 hover:text-brand-700">
+                <Building2 className="size-4 text-ink-400" aria-hidden /> {deal.company.name}
               </Link>
             ) : (
-              <p className="text-sm text-slate-500">No company linked.</p>
+              <p className="text-sm text-ink-500">No company linked.</p>
             )}
             {deal.contact && (
-              <div className="mt-4 border-t border-slate-100 pt-4 text-sm">
-                <Link href={`/contacts/${deal.contact.id}`} className="flex items-center gap-2 font-medium text-slate-800 hover:text-brand-700">
-                  <User className="size-4 text-slate-400" aria-hidden /> {fullName(deal.contact)}
+              <div className="mt-4 border-t border-ink-100 pt-4 text-sm">
+                <Link href={`/contacts/${deal.contact.id}`} className="flex items-center gap-2 font-medium text-ink-800 hover:text-brand-700">
+                  <User className="size-4 text-ink-400" aria-hidden /> {fullName(deal.contact)}
                 </Link>
-                {deal.contact.jobTitle && <p className="ml-6 text-xs text-slate-500">{deal.contact.jobTitle}</p>}
-                <ul className="mt-2 ml-6 space-y-1 text-slate-600">
+                {deal.contact.jobTitle && <p className="ml-6 text-xs text-ink-500">{deal.contact.jobTitle}</p>}
+                <ul className="mt-2 ml-6 space-y-1 text-ink-600">
                   {deal.contact.email && (
                     <li>
                       <a href={`mailto:${deal.contact.email}`} className="flex items-center gap-1.5 hover:text-brand-700">
@@ -137,17 +137,17 @@ export default async function DealPage({ params }: Props) {
             )}
           </Card>
           <Card>
-            <dl className="divide-y divide-slate-100">
+            <dl className="divide-y divide-ink-100">
               {details.filter(([, v]) => v !== null).map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 px-5 py-2.5 text-sm">
-                  <dt className="text-slate-500">{label}</dt>
-                  <dd className="text-right font-medium text-slate-900">{value || "—"}</dd>
+                  <dt className="text-ink-500">{label}</dt>
+                  <dd className="text-right font-medium text-ink-900">{value || "—"}</dd>
                 </div>
               ))}
             </dl>
           </Card>
           {deal.lead && (
-            <Link href={`/leads/${deal.lead.id}`} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm hover:text-brand-700">
+            <Link href={`/leads/${deal.lead.id}`} className="flex items-center gap-2 rounded-xl border border-ink-200 bg-white px-4 py-3 text-sm text-ink-600 shadow-sm hover:text-brand-700">
               <Target className="size-4" aria-hidden /> From lead received {formatDate(deal.lead.createdAt)}
             </Link>
           )}

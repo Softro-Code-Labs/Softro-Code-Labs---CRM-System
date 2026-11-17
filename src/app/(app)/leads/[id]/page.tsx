@@ -86,7 +86,7 @@ export default async function LeadPage({ params }: Props) {
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <Badge tone={LEAD_STATUS_TONE[lead.status]}>{LEAD_STATUS_LABELS[lead.status]}</Badge>
         {lead.status !== "CONVERTED" && lead.status !== "UNQUALIFIED" && <ReplyBadge respondBy={lead.respondBy} respondedAt={lead.respondedAt} />}
-        {lead.status === "UNQUALIFIED" && lead.disqualifyReason && <span className="text-sm text-slate-500">Reason: {lead.disqualifyReason}</span>}
+        {lead.status === "UNQUALIFIED" && lead.disqualifyReason && <span className="text-sm text-ink-500">Reason: {lead.disqualifyReason}</span>}
       </div>
 
       {lead.convertedDeal && (
@@ -112,16 +112,16 @@ export default async function LeadPage({ params }: Props) {
           )}
           <Card>
             <CardHeader title="Their idea / requirements" />
-            <CardBody className="text-sm whitespace-pre-line text-slate-700">{lead.description || <span className="text-slate-400">No details yet.</span>}</CardBody>
+            <CardBody className="text-sm whitespace-pre-line text-ink-700">{lead.description || <span className="text-ink-400">No details yet.</span>}</CardBody>
           </Card>
         </div>
 
         <div className="space-y-6">
           <Card className="p-5">
-            <p className="font-semibold text-slate-900">{lead.contactName ?? "Unknown contact"}</p>
+            <p className="font-semibold text-ink-900">{lead.contactName ?? "Unknown contact"}</p>
             {(lead.company || lead.companyName) && (
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-600">
-                <Building2 className="size-4 text-slate-400" aria-hidden />
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-600">
+                <Building2 className="size-4 text-ink-400" aria-hidden />
                 {lead.company ? (
                   <Link href={`/companies/${lead.company.id}`} className="hover:text-brand-700">
                     {lead.company.name}
@@ -134,15 +134,15 @@ export default async function LeadPage({ params }: Props) {
             <ul className="mt-4 space-y-2 text-sm">
               {lead.email && (
                 <li>
-                  <a href={`mailto:${lead.email}`} className="flex items-center gap-2 text-slate-700 hover:text-brand-700">
-                    <Mail className="size-4 text-slate-400" aria-hidden /> {lead.email}
+                  <a href={`mailto:${lead.email}`} className="flex items-center gap-2 text-ink-700 hover:text-brand-700">
+                    <Mail className="size-4 text-ink-400" aria-hidden /> {lead.email}
                   </a>
                 </li>
               )}
               {[lead.whatsapp, lead.phone].filter(Boolean).map((num) => (
                 <li key={num}>
-                  <a href={`tel:${num}`} className="flex items-center gap-2 text-slate-700 hover:text-brand-700">
-                    <Phone className="size-4 text-slate-400" aria-hidden /> {num}
+                  <a href={`tel:${num}`} className="flex items-center gap-2 text-ink-700 hover:text-brand-700">
+                    <Phone className="size-4 text-ink-400" aria-hidden /> {num}
                   </a>
                 </li>
               ))}
@@ -152,11 +152,11 @@ export default async function LeadPage({ params }: Props) {
             </div>
           </Card>
           <Card>
-            <dl className="divide-y divide-slate-100">
+            <dl className="divide-y divide-ink-100">
               {details.map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 px-5 py-2.5 text-sm">
-                  <dt className="text-slate-500">{label}</dt>
-                  <dd className="text-right font-medium text-slate-900">{value || "—"}</dd>
+                  <dt className="text-ink-500">{label}</dt>
+                  <dd className="text-right font-medium text-ink-900">{value || "—"}</dd>
                 </div>
               ))}
             </dl>

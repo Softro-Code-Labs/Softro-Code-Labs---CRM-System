@@ -17,12 +17,12 @@ export function StageBar({ dealId, stages, currentStageId, status, canEdit }: { 
 
   return (
     <div>
-      <ol className="flex overflow-hidden rounded-lg border border-slate-200 bg-white text-xs font-medium sm:text-sm">
+      <ol className="flex overflow-hidden rounded-lg border border-ink-200 bg-white text-xs font-medium sm:text-sm">
         {stages.map((stage, i) => {
           const done = closed ? status === "WON" : i < currentIndex;
           const current = !closed && i === currentIndex;
           return (
-            <li key={stage.id} className="flex-1 border-r border-slate-200 last:border-r-0">
+            <li key={stage.id} className="flex-1 border-r border-ink-200 last:border-r-0">
               <button
                 type="button"
                 disabled={!canEdit || closed || pending || current}
@@ -37,8 +37,8 @@ export function StageBar({ dealId, stages, currentStageId, status, canEdit }: { 
                   "flex w-full items-center justify-center gap-1.5 px-2 py-2.5 transition-colors",
                   current && "bg-brand-600 text-white",
                   done && "bg-brand-50 text-brand-700",
-                  !current && !done && "text-slate-500",
-                  canEdit && !closed && !current && "hover:bg-slate-50 hover:text-slate-900",
+                  !current && !done && "text-ink-500",
+                  canEdit && !closed && !current && "hover:bg-ink-50 hover:text-ink-900",
                 )}
               >
                 {done && <Check className="size-3.5" aria-hidden />}
@@ -93,7 +93,7 @@ export function CloseDealButtons({ dealId, status, canEdit }: { dealId: string; 
             required
             placeholder="Why did we lose it? e.g. went with a cheaper agency"
             aria-label="Reason the deal was lost"
-            className="h-8 min-w-64 flex-1 rounded-lg border border-slate-300 px-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+            className="h-8 min-w-64 flex-1 rounded-lg border border-ink-300 px-3 text-sm focus:border-ink-700 focus:ring-2 focus:ring-ink-900/10 focus:outline-none"
           />
           <Button size="sm" variant="danger" type="submit" disabled={pending}>
             Mark lost

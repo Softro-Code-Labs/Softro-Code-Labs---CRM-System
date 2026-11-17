@@ -33,7 +33,7 @@ export function ContactForm({ action, contact, companies, owners, defaultOwnerId
       <FormMessage message={state.message} />
 
       <Card className="p-6">
-        <h2 className="mb-5 text-sm font-semibold text-slate-900">Person</h2>
+        <h2 className="mb-5 text-sm font-semibold text-ink-900">Person</h2>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="First name" name="firstName" required defaultValue={v("firstName")} error={e.firstName} />
           <TextField label="Last name" name="lastName" defaultValue={v("lastName")} error={e.lastName} />
@@ -70,7 +70,7 @@ export function ContactForm({ action, contact, companies, owners, defaultOwnerId
       </Card>
 
       <Card className="p-6">
-        <h2 className="mb-5 text-sm font-semibold text-slate-900">How to reach them</h2>
+        <h2 className="mb-5 text-sm font-semibold text-ink-900">How to reach them</h2>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="Email" name="email" type="email" defaultValue={v("email")} error={e.email} className="sm:col-span-2" />
           <TextField label="Phone" name="phone" type="tel" defaultValue={v("phone")} error={e.phone} />

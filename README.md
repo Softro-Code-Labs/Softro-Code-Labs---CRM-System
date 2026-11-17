@@ -2,6 +2,8 @@
 
 Internal customer relationship management system for **Softro Code Labs**.
 
+**Using the CRM?** Read the [user guide](docs/USER-GUIDE.md).
+
 **Stack:** Next.js 16 (App Router, Server Actions) · TypeScript · PostgreSQL · Prisma 7 · Tailwind CSS 4 · Zod · jose (JWT sessions)
 
 ---

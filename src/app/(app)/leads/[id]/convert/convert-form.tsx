@@ -49,9 +49,9 @@ export function ConvertLeadForm({ action, lead, companies, owners, stages, sugge
       <FormMessage message={state.message} />
 
       <Card className="p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-900">1. Client company</h2>
+        <h2 className="mb-4 text-sm font-semibold text-ink-900">1. Client company</h2>
         <input type="hidden" name="companyMode" value={mode} />
-        <div className="mb-5 inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1" role="radiogroup" aria-label="Client company">
+        <div className="mb-5 inline-flex rounded-lg border border-ink-200 bg-ink-50 p-1" role="radiogroup" aria-label="Client company">
           {modes.map((m) => (
             <button
               key={m.value}
@@ -61,7 +61,7 @@ export function ConvertLeadForm({ action, lead, companies, owners, stages, sugge
               onClick={() => setMode(m.value)}
               className={cn(
                 "rounded-md px-3 py-1.5 text-sm font-medium",
-                mode === m.value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800",
+                mode === m.value ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-800",
               )}
             >
               {m.label}
@@ -81,10 +81,10 @@ export function ConvertLeadForm({ action, lead, companies, owners, stages, sugge
         {mode === "new" && (
           <TextField label="New company name" name="newCompanyName" defaultValue={v("newCompanyName", lead.companyName ?? "")} error={e.newCompanyName} />
         )}
-        {mode === "none" && <p className="text-sm text-slate-500">The deal will be linked to the contact only.</p>}
+        {mode === "none" && <p className="text-sm text-ink-500">The deal will be linked to the contact only.</p>}
 
         {lead.contactName && (
-          <div className="mt-5 border-t border-slate-100 pt-5">
+          <div className="mt-5 border-t border-ink-100 pt-5">
             <CheckboxField
               label={`Create a contact for ${lead.contactName}`}
               name="createContact"
@@ -96,7 +96,7 @@ export function ConvertLeadForm({ action, lead, companies, owners, stages, sugge
       </Card>
 
       <Card className="p-6">
-        <h2 className="mb-5 text-sm font-semibold text-slate-900">2. The deal</h2>
+        <h2 className="mb-5 text-sm font-semibold text-ink-900">2. The deal</h2>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="Deal name" name="title" required defaultValue={v("title", lead.title)} error={e.title} className="sm:col-span-2" />
           <TextField label="Value" name="value" inputMode="decimal" placeholder="0" defaultValue={v("value", lead.estimatedValue ?? "")} error={e.value} />

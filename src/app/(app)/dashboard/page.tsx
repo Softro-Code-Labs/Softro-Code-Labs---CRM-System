@@ -79,11 +79,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <Link key={stat.label} href={stat.href}>
               <Card className={cn("h-full p-5 transition-shadow hover:shadow-md", stat.alert && "border-red-200 bg-red-50/40")}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                  <Icon className={cn("size-5", stat.alert ? "text-red-500" : "text-brand-500")} aria-hidden />
+                  <p className="text-sm font-medium text-ink-500">{stat.label}</p>
+                  <Icon className={cn("size-5", stat.alert ? "text-red-500" : "text-ink-400")} aria-hidden />
                 </div>
-                <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
-                <p className={cn("mt-1 text-xs", stat.alert ? "font-medium text-red-600" : "text-slate-500")}>{stat.sub}</p>
+                <p className="mt-3 text-2xl font-semibold tracking-tight text-ink-900">{stat.value}</p>
+                <p className={cn("mt-1 text-xs", stat.alert ? "font-medium text-red-600" : "text-ink-500")}>{stat.sub}</p>
               </Card>
             </Link>
           );
@@ -98,13 +98,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             action={<Link href="/leads?tab=needs-reply" className="text-xs font-medium text-brand-600 hover:underline">View all</Link>}
           />
           {waitingLeads.length ? (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-ink-100">
               {waitingLeads.map((lead) => (
                 <li key={lead.id}>
-                  <Link href={`/leads/${lead.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-slate-50">
+                  <Link href={`/leads/${lead.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-ink-50">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">{lead.title}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="truncate text-sm font-medium text-ink-900">{lead.title}</p>
+                      <p className="text-xs text-ink-500">
                         {[lead.contactName, LEAD_SOURCE_LABELS[lead.source]].filter(Boolean).join(" · ")}
                       </p>
                     </div>
@@ -114,7 +114,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               ))}
             </ul>
           ) : (
-            <CardBody className="text-sm text-slate-500">All caught up. Every lead has had a reply.</CardBody>
+            <CardBody className="text-sm text-ink-500">All caught up. Every lead has had a reply.</CardBody>
           )}
         </Card>
 
@@ -124,12 +124,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             {stageRows.map((stage) => (
               <div key={stage.id}>
                 <div className="mb-1 flex items-baseline justify-between gap-4 text-sm">
-                  <span className="font-medium text-slate-700">{stage.name}</span>
-                  <span className="text-xs text-slate-500">
+                  <span className="font-medium text-ink-700">{stage.name}</span>
+                  <span className="text-xs text-ink-500">
                     {stage.count} {stage.count === 1 ? "deal" : "deals"} · {stage.total}
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-100">
+                <div className="h-2 rounded-full bg-ink-100">
                   <div className="h-2 rounded-full bg-brand-500" style={{ width: `${(stage.count / maxCount) * 100}%` }} />
                 </div>
               </div>
@@ -140,13 +140,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <Card className="lg:col-span-2">
           <CardHeader title="Recent wins" />
           {recentWins.length ? (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-ink-100">
               {recentWins.map((deal) => (
                 <li key={deal.id}>
-                  <Link href={`/deals/${deal.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-slate-50">
+                  <Link href={`/deals/${deal.id}`} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-ink-50">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">{deal.title}</p>
-                      <p className="text-xs text-slate-500">{[deal.company?.name, `Won ${formatDate(deal.closedAt)}`].filter(Boolean).join(" · ")}</p>
+                      <p className="truncate text-sm font-medium text-ink-900">{deal.title}</p>
+                      <p className="text-xs text-ink-500">{[deal.company?.name, `Won ${formatDate(deal.closedAt)}`].filter(Boolean).join(" · ")}</p>
                     </div>
                     <Badge tone="green">{formatMoney(deal.value, deal.currency)}</Badge>
                   </Link>
@@ -154,7 +154,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               ))}
             </ul>
           ) : (
-            <CardBody className="text-sm text-slate-500">No won deals yet. Your first one will show up here.</CardBody>
+            <CardBody className="text-sm text-ink-500">No won deals yet. Your first one will show up here.</CardBody>
           )}
         </Card>
       </div>

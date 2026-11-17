@@ -29,7 +29,7 @@ export function CompanyForm({ action, company, owners, defaultOwnerId, cancelHre
       <FormMessage message={state.message} />
 
       <Card className="p-6">
-        <h2 className="mb-5 text-sm font-semibold text-slate-900">Company details</h2>
+        <h2 className="mb-5 text-sm font-semibold text-ink-900">Company details</h2>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="Company name" name="name" required defaultValue={v("name")} error={e.name} className="sm:col-span-2" />
           <SelectField label="Type" name="type" options={COMPANY_TYPE_OPTIONS} defaultValue={v("type") || "PROSPECT"} error={e.type} />
@@ -52,7 +52,7 @@ export function CompanyForm({ action, company, owners, defaultOwnerId, cancelHre
       </Card>
 
       <Card className="p-6">
-        <h2 className="mb-5 text-sm font-semibold text-slate-900">Contact information</h2>
+        <h2 className="mb-5 text-sm font-semibold text-ink-900">Contact information</h2>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="Website" name="website" placeholder="example.com" defaultValue={v("website")} error={e.website} />
           <TextField label="General email" name="email" type="email" defaultValue={v("email")} error={e.email} />
