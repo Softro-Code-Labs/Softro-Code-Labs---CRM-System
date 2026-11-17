@@ -1,0 +1,91 @@
+# Runs on every push and pull request: lint, type-check, unit tests, then a full
+# build and the browser tests against a throwaway PostgreSQL. Vercel deploys separately.
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 22
+  # Test-only values: nothing here is a real secret.
+  DATABASE_URL: postgresql://softro:softro_ci_password@localhost:5432/softro_ci?schema=public
+  SESSION_SECRET: ci-only-session-secret-not-used-anywhere-else-0123456789
+  DEFAULT_CURRENCY: LKR
+  SEED_ADMIN_EMAIL: admin@softrocodelabs.com
+  SEED_ADMIN_PASSWORD: Ci-Admin-Pass#2026
+  CRON_SECRET: ci-only-cron-secret-0123456789
+  WEBSITE_LEAD_API_KEY: ci-only-website-key-0123456789abcdef
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  checks:
+    name: Lint, types and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: Check dependencies for known vulnerabilities
+        run: pnpm audit --prod --audit-level=high
+
+  e2e:
+    name: Build and browser tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: checks
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: softro
+          POSTGRES_PASSWORD: softro_ci_password
+          POSTGRES_DB: softro_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U softro -d softro_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply migrations to the test database
+        run: pnpm db:deploy
+      - name: Seed the test database
+        run: pnpm db:seed
+      - name: Build
+        run: pnpm build
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Browser tests
+        run: pnpm test:e2e
+      - name: Upload test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

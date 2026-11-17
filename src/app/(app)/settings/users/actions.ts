@@ -120,6 +120,22 @@ export async function setUserActive(id: string, active: boolean): Promise<{ mess
   return {};
 }
 
+/** For someone who lost their phone and their recovery codes. Signs them out; they set it up again. */
+export async function resetUserTwoFactor(id: string): Promise<{ message?: string }> {
+  const admin = await authorizeAction("user:manage");
+  if (!admin) return { message: FORBIDDEN_MESSAGE };
+  if (id === admin.id) return { message: "Use My profile to change your own two-step sign-in." };
+  const user = await db.user.findUnique({ where: { id }, select: { name: true } });
+  if (!user) return { message: "This person no longer exists." };
+  await db.user.update({
+    where: { id },
+    data: { totpSecret: null, totpEnabledAt: null, totpLastStep: null, recoveryCodeHashes: [], sessionVersion: { increment: 1 } },
+  });
+  await audit({ actorId: admin.id, action: "update", entity: "User", entityId: id, summary: `${user.name}: two-step sign-in reset by admin` });
+  refresh(id);
+  return {};
+}
+
 export async function unlockUser(id: string): Promise<{ message?: string }> {
   const admin = await authorizeAction("user:manage");
   if (!admin) return { message: FORBIDDEN_MESSAGE };

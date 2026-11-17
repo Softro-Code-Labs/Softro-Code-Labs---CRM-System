@@ -6,8 +6,8 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; expired?: string }> }) {
+  const { next, expired } = await searchParams;
   const user = await getCurrentUser();
   if (user) redirect(user.mustChangePassword ? "/change-password" : "/dashboard");
 
@@ -25,6 +25,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <p className="mt-3 text-sm text-ink-400">Sign in to continue</p>
         </div>
         <div className="rounded-2xl bg-white p-6 shadow-2xl shadow-black/40 sm:p-8">
+          {expired && <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">That took too long. Please sign in again.</p>}
           <LoginForm next={next} />
         </div>
         <p className="mt-6 text-center text-xs text-ink-500">

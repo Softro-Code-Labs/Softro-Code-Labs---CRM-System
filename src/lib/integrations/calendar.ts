@@ -27,7 +27,7 @@ function stamp(d: Date) {
   return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 }
 /** RFC 5545 line folding at 75 octets. */
-function fold(line: string) {
+export function foldIcsLine(line: string) {
   const bytes = Buffer.from(line, "utf8");
   if (bytes.length <= 75) return line;
   const out: string[] = [];
@@ -96,5 +96,5 @@ export async function calendarFeed(token: string) {
     );
   }
   lines.push("END:VCALENDAR");
-  return lines.map(fold).join("\r\n") + "\r\n";
+  return lines.map(foldIcsLine).join("\r\n") + "\r\n";
 }

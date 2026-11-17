@@ -40,7 +40,9 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 
 **Password rules:** at least 10 characters, with letters and numbers, and not containing your email name. A short sentence works well, e.g. *Galle sunset 2026*.
 
-**Too many wrong passwords:** after 5 wrong tries your account is locked for 15 minutes. Wait, or ask an admin to unlock it.
+**Two-step sign-in:** if you've turned it on (see [section 17](#17-your-profile-and-password)), after your password the CRM asks for the **6-digit code** from the authenticator app on your phone. Lost your phone? Click **Use a recovery code** and type one of the codes you saved.
+
+**Too many wrong passwords:** after 5 wrong tries your account is locked for 15 minutes. Wait, or ask an admin to unlock it. Lots of wrong attempts from one office network also pause sign-in from there for a few minutes.
 
 **Forgot your password?** Ask an admin to **reset** it. You'll get a new temporary password and must choose a new one when you sign in.
 
@@ -86,8 +88,10 @@ Each person has one role. Ask an admin if you need more access.
 | Delete leads, deals, companies or contacts | ✅ | ✅ | — | — | — |
 | Edit the sales pipeline stages, and the services & prices list | ✅ | ✅ | — | — | — |
 | Edit company details used on quotes | ✅ | — | — | — | — |
-| Add team members, change roles, reset passwords | ✅ | — | — | — | — |
+| Add team members, change roles, reset passwords and two-step sign-in | ✅ | — | — | — | — |
 | See the audit log | ✅ | — | — | — | — |
+| Integrations, security rules and system health | ✅ | — | — | — | — |
+| Turn on two-step sign-in for yourself | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 If a button is missing, your role doesn't allow that action. Every change is recorded with your name in the system's audit log.
 
@@ -527,6 +531,23 @@ Click **your name** at the top right to open **My profile**:
 - See your **role** and what it allows.
 - **Change your password:** enter your current password, then the new one twice. This signs you out on **every other device** (handy if you used a shared computer).
 
+### Two-step sign-in (recommended for everyone)
+
+With two-step sign-in, a stolen or guessed password isn't enough to get into the CRM: you also need your phone.
+
+1. Install **Google Authenticator** or **Microsoft Authenticator** on your phone (free).
+2. In the CRM, go to **My profile → Two-step sign-in → Set up two-step sign-in**.
+3. In the app, tap **+** and **scan the QR code**. (Or type the key shown next to it.)
+4. Type the **6-digit code** the app shows for *Softro CRM* and click **Turn on**.
+5. **Save your 10 recovery codes.** Click **Download** or **Copy** and keep them in the company password manager, or print them. Each one lets you sign in once if you lose your phone. They're only shown once.
+
+Turning it on signs you out of your other devices. From now on, sign in with your password and then the code from the app (it changes every 30 seconds).
+
+- **New phone?** Before you wipe the old one, use **Turn off** and then set it up again on the new phone. Or sign in with a recovery code and do it then.
+- **Running low on recovery codes?** Click **New recovery codes**. The old ones stop working.
+- **Lost your phone and your recovery codes?** Ask an admin to **reset two-step sign-in** for you, then set it up again.
+- If the company requires it for your role (admins and managers), you'll be asked to set it up before you can use the CRM, and you can't turn it off.
+
 ---
 
 ## 18. Settings (admins and managers)
@@ -539,6 +560,7 @@ Click **your name** at the top right to open **My profile**:
 - **Change role:** open the person, pick a new role and **Save changes**. They're signed out so the new permissions apply straight away.
 - **Reset password:** gives them a new temporary password and signs them out everywhere. Use it when someone forgets their password.
 - **Unlock sign-in:** shown when someone is locked out after too many wrong passwords.
+- **Reset two-step sign-in:** for someone who lost their phone *and* their recovery codes. It signs them out; they set it up again next time. Check it's really them first (call them).
 - **Deactivate:** for people who leave. They're signed out and can't sign in, but everything they created stays. Reassign their open deals and tasks first. **Reactivate** brings them back.
 - Status labels on the list: **Active**, **Temporary password** (hasn't signed in and changed it yet), **Locked** and **Deactivated**.
 - Safety rules: you can't deactivate yourself or remove your own admin rights, and there must always be at least one active admin.
@@ -573,6 +595,24 @@ Your **catalogue** of standard services, e.g. *Business website (5 pages)*, LKR 
 - **Website enquiry form:** shows who new enquiries go to and when the last one arrived. If it says "isn't a CRM user", fix `WEBSITE_LEAD_OWNER_EMAIL`.
 - **Morning summary:** needs `CRON_SECRET` in Vercel. Shows when it last ran. **Send today's summaries now** sends them by hand (only once a day).
 - **Accounting export:** accepted quotes, line by line with VAT, from **Reports → Export CSV → Accepted quotes**.
+
+### Security (admins)
+
+**Settings → Security** shows who has two-step sign-in on and how many recovery codes they have left.
+
+- **Require two-step sign-in for admins and managers:** switch this on once you've set it up for yourself. Admins and managers who haven't set it up are asked to do it the next time they open the CRM. Other roles can still choose to turn it on.
+- The page also lists the CRM's built-in protections (account lock, limits on sign-in attempts and website enquiries).
+
+### System health (admins)
+
+**Settings → System health** answers "is everything working?":
+
+- **Database** status and how fast it responds. **Version** shows which release is live.
+- **Errors to look at:** when something breaks for someone, it's recorded here. The same error on different records is grouped into one row with a count. Admins get **one alert per error per hour**, in team chat if connected, otherwise by email. When it's fixed, click **Mark fixed**. If it happens again, it comes back.
+- **Configuration:** which settings are filled in (values are never shown).
+- **Uptime and backups:** the address for an uptime monitor and how backups work.
+
+If someone reports "Something went wrong", ask for the **Ref** number on the error screen. It matches the *ref* shown here.
 
 ### Audit log (admins)
 
@@ -612,6 +652,9 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 | I can't delete a company | It has contracts. Delete or move them first, or set the company type to *Former customer*. |
 | A ticket says *Reply overdue* but I replied | Add your reply on the ticket with **"This is a reply sent to the client"** ticked. |
 | A report number looks wrong | Check the period and person filters first. Then check the deals behind it: won or lost status, close date, value and currency. |
+| I lost my phone (two-step sign-in) | Sign in with a **recovery code**, then set two-step sign-in up again on your new phone. No codes either? Ask an admin to reset it. |
+| "That code didn't work" | Make sure your phone's time is set **automatically** (Settings → Date & time). Codes change every 30 seconds, and each one works once. |
+| "Too many sign-in attempts from this network" | Wait the few minutes shown. It protects everyone in the office from password guessing. |
 | I'm not getting CRM emails | Check **My profile → Notifications** is on and look in Spam. Ask an admin to check **Settings → Integrations → Email**. |
 | My calendar doesn't show new tasks | Google refreshes subscribed calendars every few hours, Outlook about hourly. Only tasks with a due date that aren't done appear. |
 | "Every line needs a name" | A quote line is empty. Fill it in or remove it with the bin icon. |
