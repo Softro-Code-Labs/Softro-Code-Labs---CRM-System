@@ -17,6 +17,17 @@ export const PERMISSIONS = {
   "contact:update": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
   "contact:delete": ["ADMIN", "MANAGER"],
 
+  "lead:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
+  "lead:create": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
+  "lead:update": ["ADMIN", "MANAGER", "SALES"],
+  "lead:delete": ["ADMIN", "MANAGER"],
+  "lead:convert": ["ADMIN", "MANAGER", "SALES"],
+
+  "deal:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
+  "deal:create": ["ADMIN", "MANAGER", "SALES"],
+  "deal:update": ["ADMIN", "MANAGER", "SALES"],
+  "deal:delete": ["ADMIN", "MANAGER"],
+
   "user:manage": ["ADMIN"],
 } as const satisfies Record<string, readonly Role[]>;
 

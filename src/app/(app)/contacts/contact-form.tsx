@@ -8,6 +8,7 @@ import { LinkButton } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { Card } from "@/components/ui/card";
 import { initialFormState, type FormState } from "@/lib/form";
+import { LANGUAGE_OPTIONS } from "@/lib/crm-meta";
 
 type Option = { id: string; name: string };
 
@@ -38,6 +39,7 @@ export function ContactForm({ action, contact, companies, owners, defaultOwnerId
           <TextField label="Last name" name="lastName" defaultValue={v("lastName")} error={e.lastName} />
           <TextField label="Job title" name="jobTitle" placeholder="CTO, Procurement Manager…" defaultValue={v("jobTitle")} error={e.jobTitle} />
           <TextField label="Department" name="department" defaultValue={v("department")} error={e.department} />
+          <SelectField label="Preferred language" name="language" options={LANGUAGE_OPTIONS} defaultValue={v("language") || "ENGLISH"} error={e.language} />
           <SelectField
             label="Company"
             name="companyId"
