@@ -10,6 +10,7 @@ export type CurrentUser = {
   name: string;
   email: string;
   role: import("@/generated/prisma/enums").Role;
+  mustChangePassword: boolean;
 };
 
 /**
@@ -23,11 +24,12 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   const user = await db.user.findUnique({
     where: { id: session.userId },
-    select: { id: true, name: true, email: true, role: true, isActive: true },
+    select: { id: true, name: true, email: true, role: true, isActive: true, sessionVersion: true, mustChangePassword: true },
   });
-  if (!user || !user.isActive) return null;
+  // Deactivated users, and sessions from before a password change or reset, are signed out.
+  if (!user || !user.isActive || user.sessionVersion !== (session.version ?? 0)) return null;
 
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return { id: user.id, name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword };
 });
 
 export async function requireUser() {
@@ -36,9 +38,16 @@ export async function requireUser() {
   return user;
 }
 
+/** For pages inside the app: also sends people with a temporary password to change it first. */
+export async function requireActiveUser() {
+  const user = await requireUser();
+  if (user.mustChangePassword) redirect("/change-password");
+  return user;
+}
+
 /** Use in pages: redirects to the dashboard when the role is not allowed. */
 export async function requirePermission(permission: Permission) {
-  const user = await requireUser();
+  const user = await requireActiveUser();
   if (!can(user.role, permission)) redirect("/dashboard?denied=1");
   return user;
 }
@@ -53,5 +62,6 @@ export const FORBIDDEN_MESSAGE = "You do not have permission to do this.";
 export async function authorizeAction(permission: Permission) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (user.mustChangePassword) redirect("/change-password");
   return can(user.role, permission) ? user : null;
 }

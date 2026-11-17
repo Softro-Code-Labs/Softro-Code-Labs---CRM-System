@@ -25,7 +25,7 @@ async function main() {
     console.log(`✔ Admin user already exists: ${email}`);
   } else {
     await db.user.create({
-      data: { email, name, role: "ADMIN", passwordHash: await bcrypt.hash(password, 12) },
+      data: { email, name, role: "ADMIN", passwordHash: await bcrypt.hash(password, 12), mustChangePassword: true },
     });
     console.log(`✔ Created admin user: ${email}`);
   }

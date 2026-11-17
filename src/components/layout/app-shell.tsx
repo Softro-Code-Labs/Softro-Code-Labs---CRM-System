@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { LogOut, Menu } from "lucide-react";
 import { Sidebar } from "./sidebar";
@@ -23,11 +24,13 @@ export function AppShell({ user, children }: { user: CurrentUser; children: Reac
           <SoftroMark size={26} className="lg:hidden" />
           <div className="flex-1" />
           <div className="flex items-center gap-3">
-            <Avatar name={user.name} />
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium text-ink-900">{user.name}</p>
-              <p className="text-xs text-ink-500">{ROLE_LABELS[user.role]}</p>
-            </div>
+            <Link href="/settings/profile" className="flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-ink-100" title="My profile">
+              <Avatar name={user.name} />
+              <div className="hidden text-right sm:block">
+                <p className="text-sm font-medium text-ink-900">{user.name}</p>
+                <p className="text-xs text-ink-500">{ROLE_LABELS[user.role]}</p>
+              </div>
+            </Link>
             <form action={logout}>
               <button
                 type="submit"
