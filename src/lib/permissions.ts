@@ -50,6 +50,9 @@ export const PERMISSIONS = {
   "ticket:update": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
   "ticket:delete": ["ADMIN", "MANAGER"],
 
+  "report:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
+  "report:export": ["ADMIN", "MANAGER"],
+
   "settings:view": ["ADMIN", "MANAGER"],
   "user:manage": ["ADMIN"],
   "pipeline:manage": ["ADMIN", "MANAGER"],

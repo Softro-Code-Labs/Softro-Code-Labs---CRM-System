@@ -18,13 +18,14 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 10. [Quotes](#10-quotes)
 11. [Contracts: maintenance, hosting and support](#11-contracts-maintenance-hosting-and-support)
 12. [Support tickets](#12-support-tickets)
-13. [The dashboard](#13-the-dashboard)
-14. [Enquiries from our website](#14-enquiries-from-our-website)
-15. [Your profile and password](#15-your-profile-and-password)
-16. [Settings (admins and managers)](#16-settings-admins-and-managers)
-17. [Good habits and data rules](#17-good-habits-and-data-rules)
-18. [Questions and problems](#18-questions-and-problems)
-19. [Coming soon](#19-coming-soon)
+13. [Reports](#13-reports)
+14. [The dashboard](#14-the-dashboard)
+15. [Enquiries from our website](#15-enquiries-from-our-website)
+16. [Your profile and password](#16-your-profile-and-password)
+17. [Settings (admins and managers)](#17-settings-admins-and-managers)
+18. [Good habits and data rules](#18-good-habits-and-data-rules)
+19. [Questions and problems](#19-questions-and-problems)
+20. [Coming soon](#20-coming-soon)
 
 ---
 
@@ -50,7 +51,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 
 | Area | Where | What it's for |
 |---|---|---|
-| **Sidebar** (left) | Dashboard, Leads, Deals, Quotes, Companies, Contacts, Activities, Contracts, Support | Main sections. Items marked **Soon** are being built. |
+| **Sidebar** (left) | Dashboard, Leads, Deals, Quotes, Companies, Contacts, Activities, Contracts, Support, Reports | Main sections. You only see the ones your role can use. |
 | **Top bar** | Your name, role and sign-out button | On a phone, tap **☰** to open the sidebar. |
 | **Page header** | Title, breadcrumbs, main buttons | Breadcrumbs (e.g. *Deals › Website for Lanka Spices*) take you back a level. |
 
@@ -75,6 +76,8 @@ Each person has one role. Ask an admin if you need more access.
 | Delete contracts | ✅ | ✅ | — | — | — |
 | Create tickets, reply, change status and assignee | ✅ | ✅ | ✅ | ✅ | view only |
 | Delete tickets | ✅ | ✅ | — | — | — |
+| See reports | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Export reports to CSV | ✅ | ✅ | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
 | Add and edit contacts | ✅ | ✅ | ✅ | ✅ | — |
 | Add notes, log calls and chats, schedule tasks | ✅ | ✅ | ✅ | ✅ | — |
@@ -422,7 +425,40 @@ Tabs: **Open**, **Mine**, **Reply overdue**, **Waiting on client**, **Resolved**
 
 ---
 
-## 13. The dashboard
+## 13. Reports
+
+**Reports** shows how sales, leads, the team and support are doing. Use it in the weekly team meeting and at month end.
+
+### Choose what to look at
+
+- **Period:** last 12 months (the default), this or last month, quarter or year, or **Custom dates…** for any range.
+- **Whole team** or one person. Picking a person filters sales, leads and the tickets assigned to them.
+
+Money charts use **LKR**. Deals in other currencies (e.g. USD) are listed separately and never added to LKR.
+
+### What's on the page
+
+| Section | What it tells you |
+|---|---|
+| **Sales** | Won revenue, **win rate** (won ÷ won and lost), average deal size and average days to win. A chart of won revenue per month, plus revenue by **service**, the **top clients**, and **why we lost** (from the lost reasons people entered). |
+| **Pipeline forecast** | Open deals by **expected close month** for the next six months. The light column is the full value; the dark part is the **weighted forecast** (value × the stage's win probability). Also how many deals have a **close date that has passed** or **no close date**: fix those so the forecast is right. |
+| **Leads** | New leads, how many became deals, how many were **replied to within 2 working days**, the typical reply time, and a table of **where leads come from** and which sources turn into won work. |
+| **Team** | For each person: leads, replies on time, deals won and lost, win rate, won value, open pipeline, tasks done and tickets resolved. |
+| **Support and contracts** | Tickets opened and resolved, **first reply on time**, typical first-reply time, tickets by priority, **monthly recurring value** of active contracts and renewals due in the next 90 days. |
+
+Hover over (or tap) a column to see its exact value.
+
+### Export to Excel or Google Sheets (admins and managers)
+
+Click **Export CSV** and choose **Deals**, **Leads**, **Support tickets** or **Team performance**. The file uses the same period and person you have selected. Open it in Excel or import it into Google Sheets. Every export is recorded in the audit log.
+
+### Keep the numbers honest
+
+Reports are only as good as what's entered. Always mark deals **Won** or **Lost** (with a reason), keep **close dates** and **values** current, set the **service** on each deal, and log replies to leads and tickets.
+
+---
+
+## 14. The dashboard
 
 | Card | What it shows |
 |---|---|
@@ -441,7 +477,7 @@ Click any card to go to the full list behind it.
 
 ---
 
-## 14. Enquiries from our website
+## 15. Enquiries from our website
 
 The **Start your project** form on softrocodelabs.com sends each enquiry to **two** places:
 
@@ -452,7 +488,7 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 15. Your profile and password
+## 16. Your profile and password
 
 Click **your name** at the top right to open **My profile**:
 
@@ -462,7 +498,7 @@ Click **your name** at the top right to open **My profile**:
 
 ---
 
-## 16. Settings (admins and managers)
+## 17. Settings (admins and managers)
 
 **Settings** appears in the sidebar for admins and managers.
 
@@ -503,7 +539,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 17. Good habits and data rules
+## 18. Good habits and data rules
 
 - **One lead per enquiry, one company per business.** Search before adding so we don't get duplicates.
 - **Write titles people can scan:** *Mobile app for a tuition class in Kandy* beats *New enquiry*.
@@ -516,7 +552,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 18. Questions and problems
+## 19. Questions and problems
 
 | Problem | What to do |
 |---|---|
@@ -534,14 +570,13 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 | I can't edit a quote | Accepted and declined quotes are locked. Click **New version**. |
 | I can't delete a company | It has contracts. Delete or move them first, or set the company type to *Former customer*. |
 | A ticket says *Reply overdue* but I replied | Add your reply on the ticket with **"This is a reply sent to the client"** ticked. |
+| A report number looks wrong | Check the period and person filters first. Then check the deals behind it: won or lost status, close date, value and currency. |
 | "Every line needs a name" | A quote line is empty. Fill it in or remove it with the bin icon. |
 
 ---
 
-## 19. Coming soon
+## 20. Coming soon
 
-These are planned and shown as **Soon** in the sidebar:
-
-- **Reports:** win rate, revenue by service and client, team performance.
+Planned next: **integrations**, such as email, WhatsApp or Slack notifications, and accounting export.
 
 This guide will be updated as each one is released.

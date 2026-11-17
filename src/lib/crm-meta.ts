@@ -68,6 +68,7 @@ export const LEAD_STATUS_TONE: Record<LeadStatus, BadgeTone> = {
 };
 export const OPEN_LEAD_STATUSES: LeadStatus[] = ["NEW", "CONTACTED", "QUALIFIED"];
 
+export const DEAL_STATUS_LABELS: Record<DealStatus, string> = { OPEN: "Open", WON: "Won", LOST: "Lost" };
 export const DEAL_STATUS_TONE: Record<DealStatus, BadgeTone> = { OPEN: "blue", WON: "green", LOST: "red" };
 
 export const LANGUAGE_LABELS: Record<PreferredLanguage, string> = { ENGLISH: "English", SINHALA: "Sinhala" };
