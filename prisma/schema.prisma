@@ -1,0 +1,328 @@
+// Softro Code Labs CRM — database schema
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN // full access, user management, settings
+  MANAGER // sees and edits everything, reports
+  SALES // works on own leads/deals, sees all companies/contacts
+  SUPPORT // tickets, contracts (later phases), read-only sales data
+  VIEWER // read-only
+}
+
+enum CompanyType {
+  PROSPECT
+  CUSTOMER
+  PARTNER
+  VENDOR
+  FORMER_CUSTOMER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  UNQUALIFIED
+  CONVERTED
+}
+
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  LINKEDIN
+  EMAIL
+  PHONE
+  EVENT
+  COLD_OUTREACH
+  PARTNER
+  UPWORK_FIVERR
+  OTHER
+}
+
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  TASK
+}
+
+enum ActivityPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// ─────────────────────────────────────────────────────────────
+// Users & access
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         Role      @default(SALES)
+  isActive     Boolean   @default(true)
+  jobTitle     String?
+  phone        String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  ownedCompanies     Company[]  @relation("CompanyOwner")
+  ownedContacts      Contact[]  @relation("ContactOwner")
+  ownedLeads         Lead[]     @relation("LeadOwner")
+  ownedDeals         Deal[]     @relation("DealOwner")
+  assignedActivities Activity[] @relation("ActivityAssignee")
+  createdActivities  Activity[] @relation("ActivityCreator")
+  notes              Note[]
+  auditLogs          AuditLog[]
+}
+
+// ─────────────────────────────────────────────────────────────
+// Accounts & people
+// ─────────────────────────────────────────────────────────────
+
+model Company {
+  id           String      @id @default(cuid())
+  name         String
+  type         CompanyType @default(PROSPECT)
+  industry     String?
+  website      String?
+  email        String?
+  phone        String?
+  employeeSize String? // e.g. "1-10", "11-50"
+  addressLine  String?
+  city         String?
+  country      String?
+  taxId        String? // VAT / BR number
+  description  String?
+  ownerId      String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  owner      User?      @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  contacts   Contact[]
+  deals      Deal[]
+  leads      Lead[]
+  activities Activity[]
+  notes      Note[]
+
+  @@index([name])
+  @@index([type])
+  @@index([ownerId])
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String?
+  email       String?
+  phone       String?
+  mobile      String?
+  jobTitle    String?
+  department  String?
+  linkedinUrl String?
+  isPrimary   Boolean  @default(false) // primary contact for the company
+  companyId   String?
+  ownerId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  owner      User?      @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  deals      Deal[]
+  activities Activity[]
+  notes      Note[]
+
+  @@index([companyId])
+  @@index([email])
+  @@index([lastName, firstName])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Sales: leads, pipelines, deals
+// ─────────────────────────────────────────────────────────────
+
+model Lead {
+  id             String     @id @default(cuid())
+  title          String // e.g. "E-commerce mobile app for ABC Retail"
+  contactName    String?
+  email          String?
+  phone          String?
+  companyName    String?
+  source         LeadSource @default(OTHER)
+  status         LeadStatus @default(NEW)
+  estimatedValue Decimal?   @db.Decimal(14, 2)
+  currency       String     @default("LKR")
+  description    String?
+  ownerId        String?
+  companyId      String? // set when linked to an existing company
+  convertedAt    DateTime?
+  convertedDeal  Deal?      @relation("LeadConversion")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  owner      User?      @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  activities Activity[]
+  notes      Note[]
+
+  @@index([status])
+  @@index([ownerId])
+}
+
+model Pipeline {
+  id        String   @id @default(cuid())
+  name      String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stages PipelineStage[]
+  deals  Deal[]
+}
+
+model PipelineStage {
+  id          String   @id @default(cuid())
+  pipelineId  String
+  name        String
+  position    Int
+  probability Int      @default(0) // win probability % used for forecasting
+  isWon       Boolean  @default(false)
+  isLost      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  deals    Deal[]
+
+  @@unique([pipelineId, position])
+}
+
+model Deal {
+  id                String     @id @default(cuid())
+  title             String
+  value             Decimal    @default(0) @db.Decimal(14, 2)
+  currency          String     @default("LKR")
+  status            DealStatus @default(OPEN)
+  pipelineId        String
+  stageId           String
+  companyId         String?
+  contactId         String?
+  ownerId           String?
+  leadId            String?    @unique
+  expectedCloseDate DateTime?
+  closedAt          DateTime?
+  lostReason        String?
+  description       String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
+  stage      PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  company    Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact    Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  owner      User?         @relation("DealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  lead       Lead?         @relation("LeadConversion", fields: [leadId], references: [id], onDelete: SetNull)
+  activities Activity[]
+  notes      Note[]
+
+  @@index([stageId])
+  @@index([status])
+  @@index([ownerId])
+  @@index([companyId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Activities, notes, audit
+// ─────────────────────────────────────────────────────────────
+
+model Activity {
+  id           String           @id @default(cuid())
+  type         ActivityType
+  subject      String
+  description  String?
+  priority     ActivityPriority @default(MEDIUM)
+  dueAt        DateTime?
+  completedAt  DateTime?
+  assignedToId String?
+  createdById  String?
+  companyId    String?
+  contactId    String?
+  leadId       String?
+  dealId       String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  assignedTo User?    @relation("ActivityAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?    @relation("ActivityCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  lead       Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal       Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([assignedToId, completedAt, dueAt])
+  @@index([companyId])
+  @@index([contactId])
+  @@index([leadId])
+  @@index([dealId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  body      String
+  authorId  String?
+  companyId String?
+  contactId String?
+  leadId    String?
+  dealId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author  User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  lead    Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal    Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([contactId])
+  @@index([leadId])
+  @@index([dealId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String // e.g. "create", "update", "delete", "login"
+  entity    String // e.g. "Company", "Contact"
+  entityId  String?
+  summary   String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
