@@ -152,8 +152,8 @@ Responses: `201` created · `401` wrong key · `422` invalid data · `429` too m
 | **2. Sales pipeline** | Leads (WhatsApp, website form, referrals…) with a 2-working-day reply tracker · convert lead → deal · drag-and-drop deals board · won/lost tracking · website form API | ✅ Done |
 | **3. Activities & notes** | Notes · log calls, WhatsApp, emails and meetings · scheduled tasks with due dates and owners · timeline on every record · Activities page (overdue/today/upcoming/done) · dashboard "My tasks" | ✅ Done |
 | **4. Team & settings** | Team members (add with temporary password, roles, reset, deactivate) · forced password change · login lockout · sign-out-everywhere on reset/role change · My profile · pipeline stage editor · audit log viewer | ✅ Done |
-| **5. Quotes & proposals** | Service/product catalogue · quotations with line items, tax and discounts · PDF export · quote → deal link | ⏭ Next |
-| **6. Contracts & support** | AMC / SLA / retainer contracts with renewal alerts · support tickets linked to clients | |
+| **5. Quotes & proposals** | Services & prices catalogue · quotes with line items, discounts and tax · numbered Q-YYYY-NNNN · draft/sent/accepted/declined · branded PDF (Geist + Softro logo) · accepted quote updates deal value · company details & bank info | ✅ Done |
+| **6. Contracts & support** | AMC / SLA / retainer contracts with renewal alerts · support tickets linked to clients | ⏭ Next |
 | **7. Reports & dashboard** | Pipeline forecast · win rate · revenue by client/service · team performance · CSV export | |
 | **8. Integrations** | Email (Gmail/Outlook) · website lead capture form/API · Slack or WhatsApp notifications · accounting export | |
 | **9. Hardening** | Automated tests (Playwright) · rate limiting on login · 2FA · backups · error monitoring · CI/CD | |

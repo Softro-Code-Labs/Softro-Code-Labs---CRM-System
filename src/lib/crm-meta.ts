@@ -91,3 +91,19 @@ export const PRIORITY_LABELS: Record<import("@/generated/prisma/enums").Activity
   HIGH: "High",
 };
 export const PRIORITY_OPTIONS = options(PRIORITY_LABELS);
+
+export const QUOTE_STATUS_LABELS: Record<import("@/generated/prisma/enums").QuoteStatus, string> = {
+  DRAFT: "Draft",
+  SENT: "Sent",
+  ACCEPTED: "Accepted",
+  DECLINED: "Declined",
+};
+export const QUOTE_STATUS_TONE: Record<import("@/generated/prisma/enums").QuoteStatus, BadgeTone> = {
+  DRAFT: "gray",
+  SENT: "blue",
+  ACCEPTED: "green",
+  DECLINED: "red",
+};
+
+/** Common units for quote lines. People can also type their own. */
+export const QUOTE_UNITS = ["project", "hour", "day", "month", "year", "page", "screen", "licence", "user", "item"];

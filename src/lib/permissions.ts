@@ -35,6 +35,13 @@ export const PERMISSIONS = {
   // managers can manage everyone's.
   "activity:manage-all": ["ADMIN", "MANAGER"],
 
+  "quote:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
+  "quote:create": ["ADMIN", "MANAGER", "SALES"],
+  "quote:update": ["ADMIN", "MANAGER", "SALES"],
+  "quote:delete": ["ADMIN", "MANAGER"],
+  "product:manage": ["ADMIN", "MANAGER"],
+  "org:manage": ["ADMIN"],
+
   "settings:view": ["ADMIN", "MANAGER"],
   "user:manage": ["ADMIN"],
   "pipeline:manage": ["ADMIN", "MANAGER"],

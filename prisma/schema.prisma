@@ -86,6 +86,13 @@ enum ActivityType {
   TASK
 }
 
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
 enum ActivityPriority {
   LOW
   MEDIUM
@@ -97,23 +104,23 @@ enum ActivityPriority {
 // ─────────────────────────────────────────────────────────────
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String
-  passwordHash String
-  role         Role      @default(SALES)
-  isActive     Boolean   @default(true)
-  jobTitle     String?
-  phone        String?
-  lastLoginAt  DateTime?
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  name               String
+  passwordHash       String
+  role               Role      @default(SALES)
+  isActive           Boolean   @default(true)
+  jobTitle           String?
+  phone              String?
+  lastLoginAt        DateTime?
   // Security
   mustChangePassword Boolean   @default(false) // set for new users and after an admin reset
   sessionVersion     Int       @default(0) // bump to sign the user out everywhere
   failedLoginCount   Int       @default(0)
   lockedUntil        DateTime? // temporary lock after too many wrong passwords
   passwordChangedAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   ownedCompanies     Company[]  @relation("CompanyOwner")
   ownedContacts      Contact[]  @relation("ContactOwner")
@@ -123,6 +130,7 @@ model User {
   createdActivities  Activity[] @relation("ActivityCreator")
   notes              Note[]
   auditLogs          AuditLog[]
+  quotes             Quote[]
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -153,6 +161,7 @@ model Company {
   leads      Lead[]
   activities Activity[]
   notes      Note[]
+  quotes     Quote[]
 
   @@index([name])
   @@index([type])
@@ -181,6 +190,7 @@ model Contact {
   deals      Deal[]
   activities Activity[]
   notes      Note[]
+  quotes     Quote[]
 
   @@index([companyId])
   @@index([email])
@@ -283,6 +293,7 @@ model Deal {
   lead       Lead?         @relation("LeadConversion", fields: [leadId], references: [id], onDelete: SetNull)
   activities Activity[]
   notes      Note[]
+  quotes     Quote[]
 
   @@index([stageId])
   @@index([status])
@@ -364,4 +375,117 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([actorId])
   @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Quotes & catalogue
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * A service or product we quote often, with a standard price.
+ */
+model Product {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  unit        String       @default("project") // project, hour, day, month, page, licence…
+  unitPrice   Decimal      @db.Decimal(14, 2)
+  currency    String       @default("LKR")
+  serviceType ServiceType?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  quoteItems QuoteItem[]
+
+  @@index([isActive, name])
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  number          String      @unique // Q-2026-0001
+  title           String
+  status          QuoteStatus @default(DRAFT)
+  currency        String      @default("LKR")
+  issueDate       DateTime
+  validUntil      DateTime?
+  introduction    String? // shown at the top of the quote
+  terms           String? // payment terms, delivery, warranty…
+  notes           String? // internal only, never printed
+  discountPercent Decimal     @default(0) @db.Decimal(5, 2) // whole-quote discount
+  taxLabel        String      @default("VAT")
+  taxRate         Decimal     @default(0) @db.Decimal(5, 2)
+  // Totals are worked out on the server from the lines and stored for lists and reports.
+  subtotal        Decimal     @default(0) @db.Decimal(14, 2)
+  discountTotal   Decimal     @default(0) @db.Decimal(14, 2)
+  taxTotal        Decimal     @default(0) @db.Decimal(14, 2)
+  total           Decimal     @default(0) @db.Decimal(14, 2)
+  dealId          String?
+  companyId       String?
+  contactId       String?
+  createdById     String?
+  sentAt          DateTime?
+  acceptedAt      DateTime?
+  declinedAt      DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  deal      Deal?       @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  company   Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact   Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  createdBy User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  items     QuoteItem[]
+
+  @@index([status])
+  @@index([dealId])
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+model QuoteItem {
+  id              String  @id @default(cuid())
+  quoteId         String
+  position        Int
+  productId       String?
+  title           String
+  description     String?
+  quantity        Decimal @db.Decimal(12, 2)
+  unit            String  @default("project")
+  unitPrice       Decimal @db.Decimal(14, 2)
+  discountPercent Decimal @default(0) @db.Decimal(5, 2)
+  lineTotal       Decimal @db.Decimal(14, 2)
+
+  quote   Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([quoteId])
+}
+
+/**
+ * Named counters, e.g. "quote-2026" for quote numbers.
+ */
+model Counter {
+  key   String @id
+  value Int    @default(0)
+}
+
+/**
+ * Softro's own details, printed on quotes. A single row with id "default".
+ */
+model OrgSettings {
+  id                  String   @id @default("default")
+  companyName         String   @default("Softro Code Labs")
+  address             String?
+  phone               String?
+  email               String?
+  website             String?
+  registrationNo      String? // business registration (BR) number
+  vatNumber           String? // TIN / VAT number, if registered
+  defaultTaxLabel     String   @default("VAT")
+  defaultTaxRate      Decimal  @default(0) @db.Decimal(5, 2)
+  defaultValidityDays Int      @default(14)
+  defaultTerms        String?
+  bankDetails         String?
+  quoteFooter         String?
+  updatedAt           DateTime @updatedAt
 }
