@@ -3,6 +3,7 @@ import {
   Briefcase,
   Building2,
   CalendarCheck,
+  FileSignature,
   FileText,
   LayoutDashboard,
   LifeBuoy,
@@ -29,9 +30,9 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
   {
     title: "Sales",
     items: [
-      { label: "Leads", href: "/leads", icon: Target, soon: true },
-      { label: "Deals", href: "/deals", icon: Briefcase, soon: true },
-      { label: "Quotes", href: "/quotes", icon: FileText, soon: true },
+      { label: "Leads", href: "/leads", icon: Target, permission: "lead:view" },
+      { label: "Deals", href: "/deals", icon: Briefcase, permission: "deal:view" },
+      { label: "Quotes", href: "/quotes", icon: FileText, permission: "quote:view" },
     ],
   },
   {
@@ -39,16 +40,17 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
     items: [
       { label: "Companies", href: "/companies", icon: Building2, permission: "company:view" },
       { label: "Contacts", href: "/contacts", icon: Users, permission: "contact:view" },
-      { label: "Activities", href: "/activities", icon: CalendarCheck, soon: true },
-      { label: "Support", href: "/support", icon: LifeBuoy, soon: true },
+      { label: "Activities", href: "/activities", icon: CalendarCheck, permission: "activity:view" },
+      { label: "Contracts", href: "/contracts", icon: FileSignature, permission: "contract:view" },
+      { label: "Support", href: "/support", icon: LifeBuoy, permission: "ticket:view" },
     ],
   },
   {
     title: "Insights",
-    items: [{ label: "Reports", href: "/reports", icon: BarChart3, soon: true }],
+    items: [{ label: "Reports", href: "/reports", icon: BarChart3, permission: "report:view" }],
   },
   {
     title: "Admin",
-    items: [{ label: "Settings", href: "/settings", icon: Settings, permission: "user:manage", soon: true }],
+    items: [{ label: "Settings", href: "/settings", icon: Settings, permission: "settings:view" }],
   },
 ];

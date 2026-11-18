@@ -52,6 +52,9 @@ export async function deleteCompany(id: string) {
   if (!company) return { message: "This company no longer exists." };
 
   // Contacts and deals stay in the system; their company link is cleared.
+  const contracts = await db.contract.count({ where: { companyId: id } });
+  if (contracts > 0) return { message: `This company has ${contracts} contract(s). Delete or move them first, or set the company type to Former customer.` };
+
   await db.company.delete({ where: { id } });
   await audit({ actorId: user.id, action: "delete", entity: "Company", entityId: id, summary: company.name });
 

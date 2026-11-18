@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 const control =
-  "block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none disabled:bg-slate-100 aria-[invalid=true]:border-red-500";
+  "block w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm text-ink-900 shadow-sm placeholder:text-ink-400 focus:border-ink-700 focus:ring-2 focus:ring-ink-900/10 focus:outline-none disabled:bg-ink-100 aria-[invalid=true]:border-red-500";
 
 type FieldProps = {
   label: string;
@@ -15,7 +15,7 @@ type FieldProps = {
 function FieldShell({ label, name, error, hint, required, className, children }: FieldProps & { children: React.ReactNode }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label htmlFor={name} className="block text-sm font-medium text-slate-700">
+      <label htmlFor={name} className="block text-sm font-medium text-ink-700">
         {label}
         {required && <span className="ml-0.5 text-red-500">*</span>}
       </label>
@@ -25,7 +25,7 @@ function FieldShell({ label, name, error, hint, required, className, children }:
           {error[0]}
         </p>
       ) : hint ? (
-        <p className="text-xs text-slate-500">{hint}</p>
+        <p className="text-xs text-ink-500">{hint}</p>
       ) : null}
     </div>
   );
@@ -127,12 +127,12 @@ export function CheckboxField({
         id={name}
         name={name}
         type="checkbox"
-        className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+        className="mt-0.5 size-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500"
         {...props}
       />
       <span>
-        <span className="block text-sm font-medium text-slate-700">{label}</span>
-        {hint && <span className="block text-xs text-slate-500">{hint}</span>}
+        <span className="block text-sm font-medium text-ink-700">{label}</span>
+        {hint && <span className="block text-xs text-ink-500">{hint}</span>}
       </span>
     </label>
   );

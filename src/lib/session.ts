@@ -9,6 +9,8 @@ const SESSION_DAYS = 7;
 export type SessionPayload = {
   userId: string;
   role: Role;
+  /** Must match User.sessionVersion; bumping it signs the user out everywhere. */
+  version: number;
   expiresAt: number; // epoch ms
 };
 
@@ -40,9 +42,9 @@ export async function decrypt(token: string | undefined): Promise<SessionPayload
   }
 }
 
-export async function createSession(userId: string, role: Role) {
+export async function createSession(userId: string, role: Role, version: number) {
   const expiresAt = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
-  const token = await encrypt({ userId, role, expiresAt });
+  const token = await encrypt({ userId, role, version, expiresAt });
   const store = await cookies();
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,

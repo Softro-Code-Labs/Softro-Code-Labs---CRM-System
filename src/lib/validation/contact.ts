@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PreferredLanguage } from "@/generated/prisma/enums";
 import { optionalEmail, optionalId, optionalText, optionalUrl, requiredText } from "./common";
 
 export const contactSchema = z.object({
@@ -10,6 +11,7 @@ export const contactSchema = z.object({
   jobTitle: optionalText(120),
   department: optionalText(120),
   linkedinUrl: optionalUrl,
+  language: z.enum(PreferredLanguage).default("ENGLISH"),
   isPrimary: z
     .preprocess((v) => v === "on" || v === "true", z.boolean())
     .default(false),

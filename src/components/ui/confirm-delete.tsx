@@ -21,7 +21,7 @@ export function ConfirmDelete({ action, label = "Delete" }: { action: () => Prom
   return (
     <div className="flex items-center gap-2">
       {error && <span className="text-xs text-red-600">{error}</span>}
-      <span className="text-sm text-slate-600">Are you sure?</span>
+      <span className="text-sm text-ink-600">Are you sure?</span>
       <Button variant="ghost" size="sm" onClick={() => setConfirming(false)} disabled={pending}>
         Cancel
       </Button>

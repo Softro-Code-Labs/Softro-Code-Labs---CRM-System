@@ -39,6 +39,8 @@ enum LeadStatus {
 }
 
 enum LeadSource {
+  WEBSITE_FORM // "Start your project" form on softrocodelabs.com (via /api/leads)
+  WHATSAPP
   WEBSITE
   REFERRAL
   LINKEDIN
@@ -51,6 +53,25 @@ enum LeadSource {
   OTHER
 }
 
+// Matches the services on softrocodelabs.com and its "What would you like to build?" form
+enum ServiceType {
+  WEBSITE_WEB_APP
+  MOBILE_APP
+  ONLINE_STORE
+  BUSINESS_SYSTEM // ERP, CRM, inventory/POS, booking systems
+  AI_AUTOMATION
+  CUSTOM_SOFTWARE
+  SAAS_PLATFORM // SaaS, LMS, cloud platforms
+  LAB_PRODUCT // Softro's own products, e.g. Surelane
+  MAINTENANCE_SUPPORT
+  NOT_SURE
+}
+
+enum PreferredLanguage {
+  ENGLISH
+  SINHALA
+}
+
 enum DealStatus {
   OPEN
   WON
@@ -59,9 +80,64 @@ enum DealStatus {
 
 enum ActivityType {
   CALL
+  WHATSAPP
   EMAIL
   MEETING
   TASK
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
+enum ContractType {
+  MAINTENANCE // AMC / maintenance after a project
+  SUPPORT // support hours or SLA
+  HOSTING // hosting, domain, servers
+  RETAINER // monthly development retainer
+  SUBSCRIPTION // SaaS / Lab product subscription, e.g. Surelane
+  OTHER
+}
+
+enum ContractStatus {
+  ACTIVE
+  PAUSED
+  ENDED // finished or replaced by a renewal
+  CANCELLED
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ONE_TIME
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CLIENT
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketChannel {
+  WHATSAPP
+  EMAIL
+  PHONE
+  WEBSITE
+  IN_PERSON
+  OTHER
 }
 
 enum ActivityPriority {
@@ -75,26 +151,46 @@ enum ActivityPriority {
 // ─────────────────────────────────────────────────────────────
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String
-  passwordHash String
-  role         Role      @default(SALES)
-  isActive     Boolean   @default(true)
-  jobTitle     String?
-  phone        String?
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  name               String
+  passwordHash       String
+  role               Role      @default(SALES)
+  isActive           Boolean   @default(true)
+  jobTitle           String?
+  phone              String?
+  lastLoginAt        DateTime?
+  // Security
+  mustChangePassword Boolean   @default(false) // set for new users and after an admin reset
+  sessionVersion     Int       @default(0) // bump to sign the user out everywhere
+  failedLoginCount   Int       @default(0)
+  lockedUntil        DateTime? // temporary lock after too many wrong passwords
+  passwordChangedAt  DateTime?
+  // Notifications & integrations
+  emailNotifications Boolean   @default(true) // email me when something is assigned to me
+  dailyDigest        Boolean   @default(true) // 8 am summary on working days
+  calendarTokenHash  String?   @unique // SHA-256 of the private calendar feed token
+  // Two-step sign-in (authenticator app)
+  totpSecret         String? // AES-256-GCM encrypted base32 secret
+  totpEnabledAt      DateTime?
+  totpLastStep       Int? // last accepted 30-second step, so a code can't be used twice
+  recoveryCodeHashes String[]  @default([]) // SHA-256 of unused one-time recovery codes
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  ownedCompanies     Company[]  @relation("CompanyOwner")
-  ownedContacts      Contact[]  @relation("ContactOwner")
-  ownedLeads         Lead[]     @relation("LeadOwner")
-  ownedDeals         Deal[]     @relation("DealOwner")
-  assignedActivities Activity[] @relation("ActivityAssignee")
-  createdActivities  Activity[] @relation("ActivityCreator")
+  ownedCompanies     Company[]       @relation("CompanyOwner")
+  ownedContacts      Contact[]       @relation("ContactOwner")
+  ownedLeads         Lead[]          @relation("LeadOwner")
+  ownedDeals         Deal[]          @relation("DealOwner")
+  assignedActivities Activity[]      @relation("ActivityAssignee")
+  createdActivities  Activity[]      @relation("ActivityCreator")
   notes              Note[]
   auditLogs          AuditLog[]
+  quotes             Quote[]
+  ownedContracts     Contract[]      @relation("ContractOwner")
+  assignedTickets    Ticket[]        @relation("TicketAssignee")
+  createdTickets     Ticket[]        @relation("TicketCreator")
+  ticketComments     TicketComment[]
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -125,6 +221,9 @@ model Company {
   leads      Lead[]
   activities Activity[]
   notes      Note[]
+  quotes     Quote[]
+  contracts  Contract[]
+  tickets    Ticket[]
 
   @@index([name])
   @@index([type])
@@ -132,7 +231,7 @@ model Company {
 }
 
 model Contact {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   firstName   String
   lastName    String?
   email       String?
@@ -141,17 +240,21 @@ model Contact {
   jobTitle    String?
   department  String?
   linkedinUrl String?
-  isPrimary   Boolean  @default(false) // primary contact for the company
+  isPrimary   Boolean           @default(false) // primary contact for the company
+  language    PreferredLanguage @default(ENGLISH)
   companyId   String?
   ownerId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
   owner      User?      @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   deals      Deal[]
   activities Activity[]
   notes      Note[]
+  quotes     Quote[]
+  contracts  Contract[]
+  tickets    Ticket[]
 
   @@index([companyId])
   @@index([email])
@@ -163,23 +266,29 @@ model Contact {
 // ─────────────────────────────────────────────────────────────
 
 model Lead {
-  id             String     @id @default(cuid())
-  title          String // e.g. "E-commerce mobile app for ABC Retail"
-  contactName    String?
-  email          String?
-  phone          String?
-  companyName    String?
-  source         LeadSource @default(OTHER)
-  status         LeadStatus @default(NEW)
-  estimatedValue Decimal?   @db.Decimal(14, 2)
-  currency       String     @default("LKR")
-  description    String?
-  ownerId        String?
-  companyId      String? // set when linked to an existing company
-  convertedAt    DateTime?
-  convertedDeal  Deal?      @relation("LeadConversion")
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id               String            @id @default(cuid())
+  title            String // e.g. "E-commerce mobile app for ABC Retail"
+  contactName      String?
+  email            String?
+  phone            String?
+  whatsapp         String?
+  companyName      String?
+  language         PreferredLanguage @default(ENGLISH)
+  source           LeadSource        @default(OTHER)
+  serviceType      ServiceType?
+  status           LeadStatus        @default(NEW)
+  respondBy        DateTime? // reply promise: 2 working days after the enquiry
+  respondedAt      DateTime? // first reply sent to the lead
+  disqualifyReason String?
+  estimatedValue   Decimal?          @db.Decimal(14, 2)
+  currency         String            @default("LKR")
+  description      String?
+  ownerId          String?
+  companyId        String? // set when linked to an existing company
+  convertedAt      DateTime?
+  convertedDeal    Deal?             @relation("LeadConversion")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   owner      User?      @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
@@ -188,6 +297,7 @@ model Lead {
 
   @@index([status])
   @@index([ownerId])
+  @@index([respondBy])
 }
 
 model Pipeline {
@@ -219,23 +329,25 @@ model PipelineStage {
 }
 
 model Deal {
-  id                String     @id @default(cuid())
+  id                String       @id @default(cuid())
   title             String
-  value             Decimal    @default(0) @db.Decimal(14, 2)
-  currency          String     @default("LKR")
-  status            DealStatus @default(OPEN)
+  value             Decimal      @default(0) @db.Decimal(14, 2)
+  currency          String       @default("LKR")
+  status            DealStatus   @default(OPEN)
+  serviceType       ServiceType?
   pipelineId        String
   stageId           String
+  stageChangedAt    DateTime     @default(now())
   companyId         String?
   contactId         String?
   ownerId           String?
-  leadId            String?    @unique
+  leadId            String?      @unique
   expectedCloseDate DateTime?
   closedAt          DateTime?
   lostReason        String?
   description       String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
   stage      PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
@@ -245,6 +357,8 @@ model Deal {
   lead       Lead?         @relation("LeadConversion", fields: [leadId], references: [id], onDelete: SetNull)
   activities Activity[]
   notes      Note[]
+  quotes     Quote[]
+  contracts  Contract[]
 
   @@index([stageId])
   @@index([status])
@@ -275,11 +389,12 @@ model Activity {
 
   assignedTo User?    @relation("ActivityAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdBy  User?    @relation("ActivityCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  company    Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
   lead       Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
   deal       Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
 
+  // History survives if a company or contact is deleted; it's removed with its lead or deal.
   @@index([assignedToId, completedAt, dueAt])
   @@index([companyId])
   @@index([contactId])
@@ -299,8 +414,8 @@ model Note {
   updatedAt DateTime @updatedAt
 
   author  User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contact Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
   lead    Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
   deal    Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
 
@@ -325,4 +440,251 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([actorId])
   @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Quotes & catalogue
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * A service or product we quote often, with a standard price.
+ */
+model Product {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  unit        String       @default("project") // project, hour, day, month, page, licence…
+  unitPrice   Decimal      @db.Decimal(14, 2)
+  currency    String       @default("LKR")
+  serviceType ServiceType?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  quoteItems QuoteItem[]
+
+  @@index([isActive, name])
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  number          String      @unique // Q-2026-0001
+  title           String
+  status          QuoteStatus @default(DRAFT)
+  currency        String      @default("LKR")
+  issueDate       DateTime
+  validUntil      DateTime?
+  introduction    String? // shown at the top of the quote
+  terms           String? // payment terms, delivery, warranty…
+  notes           String? // internal only, never printed
+  discountPercent Decimal     @default(0) @db.Decimal(5, 2) // whole-quote discount
+  taxLabel        String      @default("VAT")
+  taxRate         Decimal     @default(0) @db.Decimal(5, 2)
+  // Totals are worked out on the server from the lines and stored for lists and reports.
+  subtotal        Decimal     @default(0) @db.Decimal(14, 2)
+  discountTotal   Decimal     @default(0) @db.Decimal(14, 2)
+  taxTotal        Decimal     @default(0) @db.Decimal(14, 2)
+  total           Decimal     @default(0) @db.Decimal(14, 2)
+  dealId          String?
+  companyId       String?
+  contactId       String?
+  createdById     String?
+  sentAt          DateTime?
+  acceptedAt      DateTime?
+  declinedAt      DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  deal      Deal?       @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  company   Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact   Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  createdBy User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  items     QuoteItem[]
+
+  @@index([status])
+  @@index([dealId])
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+model QuoteItem {
+  id              String  @id @default(cuid())
+  quoteId         String
+  position        Int
+  productId       String?
+  title           String
+  description     String?
+  quantity        Decimal @db.Decimal(12, 2)
+  unit            String  @default("project")
+  unitPrice       Decimal @db.Decimal(14, 2)
+  discountPercent Decimal @default(0) @db.Decimal(5, 2)
+  lineTotal       Decimal @db.Decimal(14, 2)
+
+  quote   Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([quoteId])
+}
+
+/**
+ * Named counters, e.g. "quote-2026" for quote numbers.
+ */
+model Counter {
+  key   String @id
+  value Int    @default(0)
+}
+
+/**
+ * Softro's own details, printed on quotes. A single row with id "default".
+ */
+model OrgSettings {
+  id                  String   @id @default("default")
+  companyName         String   @default("Softro Code Labs")
+  address             String?
+  phone               String?
+  email               String?
+  website             String?
+  registrationNo      String? // business registration (BR) number
+  vatNumber           String? // TIN / VAT number, if registered
+  defaultTaxLabel     String   @default("VAT")
+  defaultTaxRate      Decimal  @default(0) @db.Decimal(5, 2)
+  defaultValidityDays Int      @default(14)
+  defaultTerms        String?
+  bankDetails         String?
+  quoteFooter         String?
+  // Team chat (Slack, Google Chat, Discord or Teams incoming webhook)
+  chatWebhookUrl      String?
+  chatNotifyLeads     Boolean   @default(true) // new website leads
+  chatNotifyWins      Boolean   @default(true) // deals won
+  chatNotifyTickets   Boolean   @default(true) // urgent and high-priority tickets
+  digestLastRunAt     DateTime?
+  digestLastSent      Int?
+  requireTwoFactor    Boolean   @default(false) // admins and managers must use two-step sign-in
+  updatedAt           DateTime  @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// Contracts & support
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * An ongoing agreement with a client: maintenance, hosting, retainer, subscription…
+ */
+model Contract {
+  id                String         @id @default(cuid())
+  number            String         @unique // C-2026-0001
+  title             String
+  type              ContractType   @default(MAINTENANCE)
+  status            ContractStatus @default(ACTIVE)
+  companyId         String
+  contactId         String?
+  dealId            String?
+  ownerId           String?
+  startDate         DateTime
+  endDate           DateTime? // empty = open-ended
+  billingCycle      BillingCycle   @default(MONTHLY)
+  amount            Decimal        @default(0) @db.Decimal(14, 2) // per billing cycle
+  currency          String         @default("LKR")
+  autoRenew         Boolean        @default(false)
+  renewalNoticeDays Int            @default(30)
+  responseTimeHours Int? // SLA: first response to a support ticket
+  includedHours     Decimal?       @db.Decimal(8, 2) // support hours per month
+  scope             String? // what's covered, printed nowhere, for the team
+  renewedFromId     String?        @unique
+  renewalTaskId     String? // the "renew this contract" task we created
+  endedAt           DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contact     Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  deal        Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  owner       User?     @relation("ContractOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  renewedFrom Contract? @relation("ContractRenewal", fields: [renewedFromId], references: [id], onDelete: SetNull)
+  renewedTo   Contract? @relation("ContractRenewal")
+  tickets     Ticket[]
+
+  @@index([status, endDate])
+  @@index([companyId])
+}
+
+/**
+ * A client support request.
+ */
+model Ticket {
+  id              String         @id @default(cuid())
+  number          String         @unique // T-2026-0001
+  subject         String
+  description     String?
+  status          TicketStatus   @default(OPEN)
+  priority        TicketPriority @default(MEDIUM)
+  channel         TicketChannel  @default(WHATSAPP)
+  companyId       String?
+  contactId       String?
+  contractId      String?
+  assignedToId    String?
+  createdById     String?
+  responseDueAt   DateTime? // SLA: when we must first reply by
+  firstResponseAt DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  company    Company?        @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact    Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contract   Contract?       @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  assignedTo User?           @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?           @relation("TicketCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  comments   TicketComment[]
+
+  @@index([status, priority])
+  @@index([assignedToId, status])
+  @@index([companyId])
+  @@index([contractId])
+}
+
+model TicketComment {
+  id            String   @id @default(cuid())
+  ticketId      String
+  authorId      String?
+  body          String
+  /**
+   * true = a reply we sent the client (counts as our response); false = internal note
+   */
+  isClientReply Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId, createdAt])
+}
+
+/// Fixed-window counters for rate limiting (sign-in attempts, website form, 2FA codes).
+/// Stored in the database so limits hold across serverless instances.
+model RateLimit {
+  key     String   @id // e.g. "login:ip:1.2.3.4"
+  count   Int      @default(0)
+  resetAt DateTime
+
+  @@index([resetAt])
+}
+
+/// Server errors, grouped by fingerprint so a repeating error is one row with a count.
+model ErrorEvent {
+  id          String    @id @default(cuid())
+  fingerprint String    @unique
+  message     String
+  stack       String?
+  path        String?
+  method      String?
+  digest      String?
+  count       Int       @default(1)
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  alertedAt   DateTime?
+  resolvedAt  DateTime?
+
+  @@index([lastSeenAt])
 }
