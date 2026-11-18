@@ -26,6 +26,8 @@ export default async function globalSetup() {
         [randomUUID(), u.email, u.name, hash, roles[key]],
       );
     }
+    await client.query(`DELETE FROM "UserAvatar" WHERE "userId" IN (SELECT id FROM "User" WHERE email LIKE '%@softro.test')`);
+    await client.query(`UPDATE "User" SET "avatarUpdatedAt" = NULL WHERE email LIKE '%@softro.test'`);
     await client.query(`DELETE FROM "RateLimit"`);
     await client.query(`UPDATE "OrgSettings" SET "requireTwoFactor" = false`);
     const stages = await client.query(`SELECT count(*)::int AS n FROM "PipelineStage"`);

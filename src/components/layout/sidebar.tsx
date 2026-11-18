@@ -30,7 +30,7 @@ export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; on
           </button>
         </div>
 
-        <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4" aria-label="Main">
+        <nav className="scrollbar-on-dark flex-1 space-y-6 overflow-y-auto px-3 py-4" aria-label="Main">
           {NAV_SECTIONS.map((section, i) => {
             const items = section.items.filter((item) => !item.permission || can(role, item.permission));
             if (!items.length) return null;

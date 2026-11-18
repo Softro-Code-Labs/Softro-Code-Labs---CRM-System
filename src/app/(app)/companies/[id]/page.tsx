@@ -17,6 +17,7 @@ import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { companyTypeTone } from "../company-meta";
 import { deleteCompany } from "../actions";
 import { RecordTimeline } from "@/components/crm/record-timeline";
+import { InvoicesCard, invoiceCardSelect } from "@/components/crm/invoices-card";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -38,6 +39,7 @@ export default async function CompanyPage({ params }: Props) {
         orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
         select: { id: true, title: true, value: true, currency: true, status: true, stage: { select: { name: true } } },
       },
+      invoices: { where: { status: { not: "VOID" } }, orderBy: { createdAt: "desc" }, take: 10, select: invoiceCardSelect },
       contracts: {
         orderBy: [{ status: "asc" }, { endDate: "asc" }],
         select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true, amount: true, currency: true, billingCycle: true },
@@ -227,6 +229,8 @@ export default async function CompanyPage({ params }: Props) {
               <CardBody className="text-sm text-ink-500">No maintenance, hosting or support contracts yet.</CardBody>
             )}
           </Card>
+
+          {can(user.role, "invoice:view") && company.invoices.length > 0 && <InvoicesCard invoices={company.invoices} />}
 
           <Card>
             <CardHeader

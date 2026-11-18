@@ -16,6 +16,8 @@ import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { ContractStateBadge } from "@/components/crm/contract-state-badge";
 import { deleteContract } from "../actions";
 import { ContractActions } from "./contract-actions";
+import { InvoiceContractButton } from "./invoice-contract-button";
+import { InvoicesCard, invoiceCardSelect } from "@/components/crm/invoices-card";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -28,9 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ContractPage({ params }: Props) {
   const user = await requirePermission("contract:view");
   const { id } = await params;
-  const [c, tickets] = await Promise.all([
+  const [c, tickets, invoices] = await Promise.all([
     getContract(id),
     db.ticket.findMany({ where: { contractId: id }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, number: true, subject: true, status: true, createdAt: true } }),
+    can(user.role, "invoice:view") ? db.invoice.findMany({ where: { contractId: id }, orderBy: { createdAt: "desc" }, take: 24, select: invoiceCardSelect }) : [],
   ]);
   if (!c) notFound();
   const canManage = can(user.role, "contract:manage");
@@ -147,6 +150,13 @@ export default async function ContractPage({ params }: Props) {
               </CardBody>
             )}
           </Card>
+          {can(user.role, "invoice:view") && (
+            <InvoicesCard
+              invoices={invoices}
+              empty="No invoices yet for this contract."
+              action={can(user.role, "invoice:create") && Number(c.amount) > 0 && <InvoiceContractButton contractId={c.id} />}
+            />
+          )}
         </div>
         <Card>
           <dl className="divide-y divide-ink-100">

@@ -88,7 +88,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       </div>
 
       <Section title="Sales" description="Deals won or lost in the period.">
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile label="Won revenue" value={formatMoneyTotals(sales.wonTotals)} hint={`${sales.wonCount} ${sales.wonCount === 1 ? "deal" : "deals"} won`} />
           <StatTile label="Win rate" value={pctText(sales.winRate)} hint={`${sales.wonCount} won · ${sales.lostCount} lost`} />
           <StatTile label="Average deal" value={sales.avgDeal == null ? "—" : compactMoney(sales.avgDeal, C)} hint={sales.avgDeal == null ? "No wins yet" : fullMoney(sales.avgDeal, C)} />
@@ -128,7 +128,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       </Section>
 
       <Section title="Pipeline forecast" description={`Open deals in ${C}, by expected close date. Always from today, whatever period is selected.`}>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile label="Open pipeline" value={compactMoney(forecast.total, C)} hint={`${forecast.count} open ${forecast.count === 1 ? "deal" : "deals"}`} />
           <StatTile label="Weighted forecast" value={compactMoney(forecast.weighted, C)} hint="Value × stage win probability" />
           <StatTile label="Close date passed" value={forecast.late.count} tone={forecast.late.count ? "bad" : undefined} hint={forecast.late.count ? `${compactMoney(forecast.late.total, C)} · update these deals` : "All close dates are current"} />
@@ -145,7 +145,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       </Section>
 
       <Section title="Leads" description="Enquiries received in the period.">
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile label="New leads" value={leads.total} hint={`${leads.unqualified} unqualified`} />
           <StatTile label="Became deals" value={pctText(leads.conversionRate)} hint={`${leads.converted} converted`} />
           <StatTile label="Replied within 2 working days" value={pctText(leads.replyOnTimeRate)} tone={leads.replyOnTimeRate != null && leads.replyOnTimeRate < 80 ? "bad" : undefined} hint={leads.notReplied ? `${leads.notReplied} still waiting` : "None waiting"} />
@@ -236,7 +236,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       </Section>
 
       <Section title="Support and contracts" description="Tickets opened in the period; contracts as of today.">
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile label="Tickets opened" value={support.opened} hint={`${support.resolved} resolved · ${support.openNow} open now`} />
           <StatTile label="First reply on time" value={pctText(support.slaRate)} tone={support.slaRate != null && support.slaRate < 80 ? "bad" : undefined} hint={`Typical first reply: ${hoursText(support.medianReplyHours)}`} />
           <StatTile label="Monthly recurring value" value={support.mrr.length ? formatMoneyTotals(support.mrr) : "—"} hint={`${support.activeContracts} active ${support.activeContracts === 1 ? "contract" : "contracts"}`} />

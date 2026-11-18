@@ -28,7 +28,7 @@ export function AppShell({ user, theme, children }: { user: CurrentUser; theme: 
           <div className="flex items-center gap-3">
             <ThemeMenu initial={theme} />
             <Link href="/settings/profile" className="flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-ink-100" title="My profile">
-              <Avatar name={user.name} />
+              <Avatar name={user.name} src={user.avatarUrl} />
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-medium text-ink-900">{user.name}</p>
                 <p className="text-xs text-ink-500">{ROLE_LABELS[user.role]}</p>

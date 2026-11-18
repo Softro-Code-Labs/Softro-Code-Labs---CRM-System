@@ -10,7 +10,7 @@ import { saveOrgSettings } from "./actions";
 
 export type OrgValues = Record<
   | "companyName" | "address" | "phone" | "email" | "website" | "registrationNo" | "vatNumber"
-  | "defaultTaxLabel" | "defaultTaxRate" | "defaultValidityDays" | "defaultTerms" | "bankDetails" | "quoteFooter",
+  | "defaultTaxLabel" | "defaultTaxRate" | "defaultValidityDays" | "defaultTerms" | "bankDetails" | "quoteFooter" | "invoiceDueDays" | "invoiceTerms",
   string
 >;
 
@@ -48,6 +48,15 @@ export function OrgForm({ initial }: { initial: OrgValues }) {
           <TextAreaField label="Default terms" name="defaultTerms" rows={6} hint="Payment schedule, what's included, revisions, warranty…" defaultValue={v("defaultTerms")} error={e.defaultTerms} className="sm:col-span-3" />
           <TextAreaField label="Bank details" name="bankDetails" rows={4} hint="Printed on quotes so clients can pay the advance." defaultValue={v("bankDetails")} error={e.bankDetails} className="sm:col-span-3" />
           <TextField label="Footer line" name="quoteFooter" placeholder="Thank you for considering Softro Code Labs." defaultValue={v("quoteFooter")} error={e.quoteFooter} className="sm:col-span-3" />
+        </div>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="mb-1 text-sm font-semibold text-ink-900">Invoices</h2>
+        <p className="mb-5 text-xs text-ink-500">With a VAT number above, invoices print as “Tax Invoice” with both TINs. The bank details above are printed on every invoice.</p>
+        <div className="grid gap-5 sm:grid-cols-3">
+          <TextField label="Pay within (days)" name="invoiceDueDays" inputMode="numeric" hint="Sets each new invoice's due date." defaultValue={v("invoiceDueDays")} error={e.invoiceDueDays} />
+          <TextAreaField label="Payment instructions" name="invoiceTerms" rows={3} placeholder="Please quote the invoice number as the payment reference." defaultValue={v("invoiceTerms")} error={e.invoiceTerms} className="sm:col-span-3" />
         </div>
       </Card>
 

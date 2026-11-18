@@ -175,6 +175,13 @@ model User {
   totpEnabledAt      DateTime?
   totpLastStep       Int? // last accepted 30-second step, so a code can't be used twice
   recoveryCodeHashes String[]  @default([]) // SHA-256 of unused one-time recovery codes
+  // Profile photo: the image itself is in UserAvatar so ordinary user queries stay small.
+  avatarUpdatedAt    DateTime? // also the cache-busting version in the photo's URL
+  avatar             UserAvatar?
+  accessChecks       ProjectAccess[] @relation("AccessCheckedBy")
+  handoversIssued    Handover[]      @relation("HandoverIssuer")
+  invoicesCreated    Invoice[]       @relation("InvoiceCreator")
+  paymentsRecorded   Payment[]       @relation("PaymentRecorder")
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -224,6 +231,7 @@ model Company {
   quotes     Quote[]
   contracts  Contract[]
   tickets    Ticket[]
+  invoices   Invoice[]
 
   @@index([name])
   @@index([type])
@@ -255,6 +263,7 @@ model Contact {
   quotes     Quote[]
   contracts  Contract[]
   tickets    Ticket[]
+  invoices   Invoice[]
 
   @@index([companyId])
   @@index([email])
@@ -359,6 +368,8 @@ model Deal {
   notes      Note[]
   quotes     Quote[]
   contracts  Contract[]
+  access     ProjectAccess?
+  invoices   Invoice[]
 
   @@index([stageId])
   @@index([status])
@@ -500,6 +511,7 @@ model Quote {
   contact   Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
   createdBy User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
   items     QuoteItem[]
+  invoices  Invoice[]
 
   @@index([status])
   @@index([dealId])
@@ -550,6 +562,8 @@ model OrgSettings {
   defaultTaxRate      Decimal  @default(0) @db.Decimal(5, 2)
   defaultValidityDays Int      @default(14)
   defaultTerms        String?
+  invoiceDueDays      Int      @default(14) // invoices are due this many days after the invoice date
+  invoiceTerms        String? // printed on invoices, e.g. how to pay
   bankDetails         String?
   quoteFooter         String?
   // Team chat (Slack, Google Chat, Discord or Teams incoming webhook)
@@ -603,6 +617,7 @@ model Contract {
   renewedFrom Contract? @relation("ContractRenewal", fields: [renewedFromId], references: [id], onDelete: SetNull)
   renewedTo   Contract? @relation("ContractRenewal")
   tickets     Ticket[]
+  invoices  Invoice[]
 
   @@index([status, endDate])
   @@index([companyId])
@@ -687,4 +702,226 @@ model ErrorEvent {
   resolvedAt  DateTime?
 
   @@index([lastSeenAt])
+}
+
+/// A person's profile photo: 256×256 WebP, re-encoded on upload (no EXIF or location data). ~10–25 KB.
+model UserAvatar {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Bytes
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Project access register ─────────────────────────────────────────────────
+// Where each project's accounts live and how they're protected. No passwords, keys or codes:
+// those stay in the company password manager, and the CRM refuses text that looks like a secret.
+
+enum AccessStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum TwoStepMethod {
+  AUTHENTICATOR
+  SECURITY_KEY
+  SMS
+  NONE
+}
+
+enum ServiceCategory {
+  DOMAIN
+  HOSTING
+  CODE
+  DATABASE
+  EMAIL
+  PAYMENTS
+  STORAGE
+  ANALYTICS
+  OTHER
+}
+
+enum SignInMethod {
+  GOOGLE
+  PASSWORD_IN_GOOGLE
+  OTHER
+}
+
+enum AccountOwner {
+  SOFTRO
+  CLIENT
+  SHARED
+}
+
+model ProjectAccess {
+  id                 String        @id @default(cuid())
+  dealId             String        @unique
+  status             AccessStatus  @default(ACTIVE)
+  // The project's Google account: everything else is signed up with it
+  googleEmail        String?
+  recoveryEmail      String?
+  recoveryPhone      String?
+  twoStep            TwoStepMethod @default(AUTHENTICATOR)
+  secretsLocation    String? // where the Gmail password and backup codes are kept, e.g. "Bitwarden → Galle Hardware"
+  envLocation        String? // where the settings live, e.g. "Vercel project settings; Drive /env"
+  notes              String?
+  // Close-out checklist
+  passwordsSaved     Boolean       @default(false)
+  backupCodesSaved   Boolean       @default(false)
+  envSaved           Boolean       @default(false)
+  clientHandedOver   Boolean       @default(false)
+  browserProfileGone Boolean       @default(false)
+  localFilesDeleted  Boolean       @default(false)
+  // 6-monthly sign-in check (Google can delete personal accounts unused for 2 years)
+  lastCheckedAt      DateTime?
+  lastCheckedById    String?
+  reviewTaskId       String?
+  archivedAt         DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  deal          Deal             @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  lastCheckedBy User?            @relation("AccessCheckedBy", fields: [lastCheckedById], references: [id], onDelete: SetNull)
+  services      ProjectService[]
+  handovers     Handover[]
+
+  @@index([status])
+}
+
+model ProjectService {
+  id            String          @id @default(cuid())
+  accessId      String
+  name          String
+  category      ServiceCategory @default(OTHER)
+  url           String?
+  loginEmail    String?
+  signIn        SignInMethod    @default(GOOGLE)
+  owner         AccountOwner    @default(SOFTRO)
+  renewsAt      DateTime?
+  renewalTaskId String?
+  notes         String?
+  position      Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  access ProjectAccess @relation(fields: [accessId], references: [id], onDelete: Cascade)
+
+  @@index([accessId])
+  @@index([renewsAt])
+}
+
+/// A handover document given to the client. Its content is frozen when issued, so it re-downloads exactly the same.
+model Handover {
+  id         String   @id @default(cuid())
+  number     String   @unique // H-2026-0001
+  accessId   String
+  issuedById String?
+  issuedAt   DateTime @default(now())
+  snapshot   Json
+
+  access   ProjectAccess @relation(fields: [accessId], references: [id], onDelete: Cascade)
+  issuedBy User?         @relation("HandoverIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+
+  @@index([accessId])
+}
+
+// ─── Invoices and receipts ───────────────────────────────────────────────────
+
+enum InvoiceStatus {
+  ISSUED
+  PAID
+  VOID
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH
+  CHEQUE
+  CARD
+  ONLINE
+  OTHER
+}
+
+/// An invoice. "Tax Invoice" when Softro has a VAT number. Totals use the same maths as quotes.
+model Invoice {
+  id              String        @id @default(cuid())
+  number          String        @unique // INV-2026-0001
+  title           String
+  status          InvoiceStatus @default(ISSUED)
+  currency        String        @default("LKR")
+  issueDate       DateTime
+  dueDate         DateTime?
+  terms           String? // payment instructions, printed
+  notes           String? // internal only
+  discountPercent Decimal       @default(0) @db.Decimal(5, 2)
+  taxLabel        String        @default("VAT")
+  taxRate         Decimal       @default(0) @db.Decimal(5, 2)
+  subtotal        Decimal       @default(0) @db.Decimal(14, 2)
+  discountTotal   Decimal       @default(0) @db.Decimal(14, 2)
+  taxTotal        Decimal       @default(0) @db.Decimal(14, 2)
+  total           Decimal       @default(0) @db.Decimal(14, 2)
+  amountPaid      Decimal       @default(0) @db.Decimal(14, 2)
+  dealId          String?
+  companyId       String?
+  contactId       String?
+  quoteId         String? // made from this quote (advance, balance or full)
+  contractId      String? // or for this maintenance/hosting contract
+  createdById     String?
+  followUpTaskId  String? // "chase payment" task, closed when paid
+  paidAt          DateTime?
+  voidedAt        DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  deal      Deal?         @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  company   Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact   Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  quote     Quote?        @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  contract  Contract?     @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  createdBy User?         @relation("InvoiceCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  items     InvoiceItem[]
+  payments  Payment[]
+
+  @@index([status])
+  @@index([dueDate])
+  @@index([dealId])
+  @@index([companyId])
+  @@index([quoteId])
+  @@index([issueDate])
+}
+
+model InvoiceItem {
+  id              String  @id @default(cuid())
+  invoiceId       String
+  position        Int
+  title           String
+  description     String?
+  quantity        Decimal @db.Decimal(12, 2)
+  unit            String  @default("project")
+  unitPrice       Decimal @db.Decimal(14, 2)
+  discountPercent Decimal @default(0) @db.Decimal(5, 2)
+  lineTotal       Decimal @db.Decimal(14, 2)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+/// Money received against an invoice. Each payment gets its own receipt number.
+model Payment {
+  id            String        @id @default(cuid())
+  receiptNumber String        @unique // RCT-2026-0001
+  invoiceId     String
+  amount        Decimal       @db.Decimal(14, 2)
+  method        PaymentMethod @default(BANK_TRANSFER)
+  paidAt        DateTime
+  reference     String? // bank reference, cheque number…
+  notes         String?
+  recordedById  String?
+  createdAt     DateTime      @default(now())
+
+  invoice    Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  recordedBy User?   @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+  @@index([paidAt])
 }

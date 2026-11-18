@@ -78,6 +78,8 @@ export const orgSettingsSchema = z.object({
   defaultTaxRate: percent("Default tax rate"),
   defaultValidityDays: z.coerce.number({ error: "Enter a number of days" }).int().min(1).max(365),
   defaultTerms: optionalText(10_000),
+  invoiceDueDays: z.coerce.number({ error: "Enter a number of days" }).int().min(0).max(365),
+  invoiceTerms: optionalText(2000),
   bankDetails: optionalText(2000),
   quoteFooter: optionalText(500),
 });

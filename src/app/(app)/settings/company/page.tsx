@@ -31,6 +31,8 @@ export default async function CompanySettingsPage() {
           defaultTaxRate: org.defaultTaxRate.toString(),
           defaultValidityDays: String(org.defaultValidityDays),
           defaultTerms: s(org.defaultTerms),
+          invoiceDueDays: String(org.invoiceDueDays),
+          invoiceTerms: s(org.invoiceTerms),
           bankDetails: s(org.bankDetails),
           quoteFooter: s(org.quoteFooter),
         }}

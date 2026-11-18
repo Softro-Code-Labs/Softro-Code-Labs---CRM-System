@@ -6,12 +6,13 @@ A plain-words tour of the whole project: what it is, who uses it, and how a clie
 
 ## What it is
 
-**Softro CRM** is Softro Code Labs' own customer relationship system. It keeps every enquiry, deal, quote, contract and support request in one place, so nothing lives only in someone's WhatsApp or memory.
+**Softro CRM** is Softro Code Labs' own customer relationship system. It keeps every enquiry, deal, quote, invoice, contract and support request in one place, so nothing lives only in someone's WhatsApp or memory.
 
 It was built for how we actually work: clients reach us by **WhatsApp, the website, referrals and calls**, we promise a **reply within 2 working days**, we sell **websites, apps and business systems** by quote, and we keep clients on **maintenance and support contracts** afterwards.
 
 - 🎯 **Nothing slips:** every lead has a reply-by deadline, every ticket a first-reply time, every contract a renewal reminder.
-- 🧾 **Quotes in minutes:** a services price list, discounts, VAT, and a branded PDF with our bank details.
+- 🧾 **Quotes in minutes:** a services price list, discounts, VAT, and a branded PDF with our bank details and an *Accepted by* signature block.
+- 💰 **Invoices and receipts:** invoice an accepted quote in one click (advance %, full or balance), record payments, send numbered receipts, and see who owes us what. Prints as a **Tax Invoice** once we're VAT registered.
 - 📊 **Clear numbers:** won revenue, win rate, a weighted forecast and team performance, in LKR, with nothing added across currencies.
 - 🔔 **Tells you what to do:** an 8 am summary email, alerts when something is assigned to you, and your tasks in Google Calendar.
 - 🔒 **Safe by default:** roles, two-step sign-in, an audit log of every change, and nightly encrypted backups.
@@ -38,11 +39,13 @@ The rules for every role live in one file, `src/lib/permissions.ts`, and are che
 |---|---|---|
 | **Leads** | New enquiries from WhatsApp, the website, referrals, calls, Upwork/Fiverr… | Reply within **2 working days** (Mon–Fri, Sri Lanka time). Overdue ones turn red. |
 | **Deals** | Real opportunities on a drag-and-drop board: Discovery call → Proposal & quote → Design approval → Won / Lost | Every stage has a win %, which feeds the forecast. Lost deals need a reason. |
-| **Quotes** | Line items from the price list, discounts, VAT, a branded PDF | Numbered **Q-2026-0001**. Accepted quotes are locked; changes make a new version. |
+| **Quotes** | Line items from the price list, discounts, VAT, a branded PDF with an *Accepted by* block for the client | Numbered **Q-2026-0001**. Accepted quotes are locked; changes make a new version. |
+| **Invoices** | From an accepted quote (advance %, full or balance), a contract period, or by hand. Payments with numbered receipts | **INV-2026-0001** and **RCT-2026-0001**. Advance + balance always add up to the quote. Never deleted: void instead. A *Follow up payment* task is due the day after the due date. |
 | **Companies & contacts** | Every client and the people we talk to, with a WhatsApp button | Winning a deal turns a prospect into a customer. |
 | **Activities** | Calls, WhatsApp chats, emails, meetings, tasks and notes on every record | Tasks have owners and due dates, and show on the dashboard and in calendars. |
 | **Contracts** | Maintenance, hosting, support retainers and subscriptions | Numbered **C-…**. A renewal task appears before the end date; one click renews. |
 | **Support** | Client problems as tickets, with replies and internal notes | Numbered **T-…**. First reply due by priority (4 h urgent → 72 h low) or the contract's promise. |
+| **Project access** | Each project's Google account, the services made with it, who owns them, renewals, and a handover PDF for the client | **No secrets stored**: passwords stay in the password manager. A 6-monthly sign-in check keeps each project Gmail alive. |
 | **Reports** | Revenue, win rate, forecast, lead sources, team and support performance | Pick any period or person, and export to CSV. |
 | **Settings** | Team, pipeline, company details, price list, integrations, security, system health, audit log | Most are admin-only. |
 
@@ -53,8 +56,8 @@ The rules for every role live in one file, `src/lib/permissions.ts`, and are che
 1. **Enquiry.** Nimal fills in "Start your project" on softrocodelabs.com. Seconds later it's a **lead** in the CRM, assigned to Dilini, who gets an email and a ping in the team chat. A **reply-by** time is set for 2 working days later.
 2. **First reply.** Dilini taps the WhatsApp button, chats with Nimal and logs it. The lead turns from *New* to *Contacted*, and the reply clock stops.
 3. **Deal.** Nimal wants a proposal. **Convert to deal** creates the deal, his company and his contact in one step.
-4. **Quote.** Dilini builds a quote from the price list (design, development, hosting), adds 18% VAT and sends the PDF. When Nimal agrees, she marks it **accepted** and the deal's value updates.
-5. **Won.** She marks the deal **Won** 🎉. The team chat celebrates, and the revenue shows in Reports.
+4. **Quote.** Dilini builds a quote from the price list (design, development, hosting), adds 18% VAT and sends the PDF. Nimal signs the *Accepted by* block and sends it back; she marks the quote **accepted** and the deal's value updates.
+5. **Won and invoiced.** She marks the deal **Won** 🎉 and, from the quote, creates a **50% advance invoice**. When Nimal's bank transfer arrives she records it and sends the **receipt**. At launch she invoices the **balance**.
 6. **After launch.** She adds a yearly **maintenance contract** with a promised 8-hour first reply. A month before it ends, a **renewal task** appears on her dashboard.
 7. **Support.** Nimal reports a checkout error on WhatsApp. Ruwan logs a **ticket** under the contract. The 8-hour clock starts, and his reply is logged against it.
 8. **Every morning** at 8 am, each person gets one email of what's due today, overdue items first.
@@ -66,6 +69,7 @@ flowchart LR
   LEAD["Lead<br/>reply within<br/>2 working days"] -- "wants a proposal" --> DEAL["Deal<br/>Discovery → Proposal<br/>→ Design approval"]
   DEAL --> QUOTE["Quote<br/>Q-2026-0001<br/>PDF with VAT"]
   QUOTE -- "accepted" --> WON["Won 🎉"]
+  WON --> INV["Invoices<br/>advance · balance<br/>receipts"]
   WON --> CONTRACT["Contract<br/>maintenance · hosting<br/>renewal reminder"]
   CONTRACT --> TICKET["Support ticket<br/>first-reply clock"]
   CONTRACT -- "before the end date" --> RENEW["Renewal task"]
@@ -204,13 +208,14 @@ Next.js 16 · React 19 · TypeScript · PostgreSQL (Neon) · Prisma 7 · Tailwin
 
 | Part | Folder |
 |---|---|
-| The data model (20 tables) and migrations | `prisma/schema.prisma`, `prisma/migrations/` |
+| The data model (27 tables) and migrations | `prisma/schema.prisma`, `prisma/migrations/` |
 | Screens and the actions that save them | `src/app/(app)/<area>/` |
 | Sign-in and two-step sign-in pages | `src/app/login/`, `src/app/setup-two-factor/` |
 | The small API | `src/app/api/` (`leads`, `calendar`, `cron`, `health`) |
 | Who can do what | `src/lib/permissions.ts` |
 | Sign-in checks, sessions, 2FA, rate limits | `src/lib/auth.ts`, `src/lib/session.ts`, `src/lib/security/` |
-| Business rules (working days, quote maths, SLA, reports) | `src/lib/working-days.ts`, `quote-math.ts`, `tickets.ts`, `reports.ts` |
+| Business rules (working days, quote maths, invoices, SLA, reports) | `src/lib/working-days.ts`, `quote-math.ts`, `invoices.ts`, `amount-in-words.ts`, `tickets.ts`, `reports.ts` |
+| PDFs (quote, invoice, receipt, handover) | `src/lib/pdf/` |
 | Emails, chat, morning summary, calendar | `src/lib/integrations/` |
 | Error log and start-up checks | `src/lib/monitoring/`, `src/instrumentation.ts`, `src/lib/env.ts` |
 | Shared look (buttons, fields, cards) | `src/components/ui/`, colours in `src/app/globals.css` |
@@ -238,11 +243,14 @@ Nine steps, each one usable on its own before the next began.
 | **8. Integrations** | Emails through Resend, the morning summary, team chat alerts, calendar links, accounting export |
 | **9. Hardening** | Two-step sign-in, rate limits, error monitoring, health check, tests, CI, auto-migrations, nightly backups |
 
+Added since: dark mode, profile photos, the project access register with a handover PDF, and **invoices and receipts** (advance and balance invoices from accepted quotes, contract invoices, payments with receipts, a Tax Invoice layout, and an *Accepted by* block on quotes).
+
 ---
 
 ## Good to know
 
 - **The CRM is only as good as what goes in.** Log every reply, keep close dates and values current, and mark deals won or lost with a reason. Reports and the forecast depend on it.
+- **One Google account per project.** Everything for a project is signed up with its own Gmail, so finished projects need no browser profile. The CRM records where everything is; the secrets themselves live only in the password manager.
 - **Every check happens on the server.** Hiding a button is for convenience only; the rule in `permissions.ts` is what actually protects the data.
 - **Previews never touch live data.** Preview deploys use a separate database branch, send no emails and skip migrations unless told otherwise.
 - **Set `ENCRYPTION_KEY` once and never change it**, or everyone has to set up two-step sign-in again.

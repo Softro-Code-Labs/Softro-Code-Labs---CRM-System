@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Avatar } from "@/components/ui/avatar";
+import { avatarUrl } from "@/lib/avatar";
+import { RemovePhotoButton } from "./remove-photo-button";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
@@ -28,6 +31,16 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
         description={user.isActive ? undefined : "Deactivated: can't sign in."}
         breadcrumbs={[{ label: "Settings", href: "/settings" }, { label: "Team members", href: "/settings/users" }, { label: user.name }]}
       />
+
+      {user.avatarUpdatedAt && (
+        <Card className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+          <span className="flex items-center gap-3 text-sm text-ink-600">
+            <Avatar name={user.name} src={avatarUrl(user)} className="size-12" />
+            Profile photo
+          </span>
+          <RemovePhotoButton id={user.id} />
+        </Card>
+      )}
 
       <UserForm
         action={updateUser.bind(null, user.id)}

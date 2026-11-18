@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Building2, Mail, Pencil, Phone, Plus, Target, User } from "lucide-react";
+import { Building2, KeyRound, Mail, Pencil, Phone, Plus, Target, User } from "lucide-react";
+import { checkState } from "@/lib/project-access";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
@@ -17,6 +18,7 @@ import { deleteDeal } from "../actions";
 import { CloseDealButtons, StageBar } from "./deal-controls";
 import { ContractStateBadge } from "@/components/crm/contract-state-badge";
 import { RecordTimeline } from "@/components/crm/record-timeline";
+import { InvoicesCard, invoiceCardSelect } from "@/components/crm/invoices-card";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -38,8 +40,10 @@ export default async function DealPage({ params }: Props) {
       contact: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, mobile: true, jobTitle: true } },
       owner: { select: { name: true } },
       lead: { select: { id: true, title: true, createdAt: true } },
+      access: { select: { id: true, status: true, googleEmail: true, lastCheckedAt: true, createdAt: true, _count: { select: { services: true } } } },
       contracts: { orderBy: { createdAt: "desc" }, select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true } },
       quotes: { orderBy: { createdAt: "desc" }, select: { id: true, number: true, title: true, status: true, total: true, currency: true, issueDate: true } },
+      invoices: { orderBy: { createdAt: "desc" }, select: invoiceCardSelect },
     },
   });
   if (!deal) notFound();
@@ -130,6 +134,39 @@ export default async function DealPage({ params }: Props) {
               <CardBody className="text-sm text-ink-500">No quotes yet. Create one when the client is ready for prices.</CardBody>
             )}
           </Card>
+          {can(user.role, "invoice:view") && (deal.invoices.length > 0 || deal.status === "WON") && (
+            <InvoicesCard
+              invoices={deal.invoices}
+              empty="No invoices yet. Accept a quote and invoice it from the quote's page, or create one here."
+              action={
+                can(user.role, "invoice:create") && (
+                  <LinkButton href={`/invoices/new?dealId=${deal.id}`} size="sm" variant="secondary">
+                    <Plus className="size-4" aria-hidden /> New invoice
+                  </LinkButton>
+                )
+              }
+            />
+          )}
+          {can(user.role, "access:view") && (deal.status === "WON" || deal.access) && (
+            <Card>
+              <CardHeader
+                title="Project access"
+                description={
+                  deal.access
+                    ? `${deal.access.googleEmail ?? "No project Gmail yet"} · ${deal.access._count.services} ${deal.access._count.services === 1 ? "service" : "services"}${deal.access.status === "ARCHIVED" ? " · archived" : ""}`
+                    : "Record the project's Google account and the services made with it, so it's easy to pick up again later."
+                }
+                action={
+                  <LinkButton href={`/deals/${deal.id}/access`} size="sm" variant="secondary">
+                    <KeyRound className="size-4" aria-hidden /> {deal.access ? "Open" : "Set up"}
+                  </LinkButton>
+                }
+              />
+              {deal.access && ["never", "overdue"].includes(checkState(deal.access).state) && (
+                <CardBody className="text-sm font-medium text-red-600">The project Gmail needs its 6-monthly sign-in check.</CardBody>
+              )}
+            </Card>
+          )}
           {(deal.status === "WON" || deal.contracts.length > 0) && (
             <Card>
               <CardHeader

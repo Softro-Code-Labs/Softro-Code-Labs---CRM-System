@@ -139,6 +139,18 @@ export function QuoteDocument({ quote, org }: { quote: FullQuote; org: Org }) {
           )}
         </section>
       )}
+      <section className="mt-10 grid gap-8 text-xs text-ink-500 sm:grid-cols-2">
+        <div>
+          <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">For {org.companyName}</p>
+          <div className="h-10 border-b border-ink-300" />
+          <p className="mt-1">{quote.createdBy?.name ?? "Authorised signatory"}</p>
+        </div>
+        <div>
+          <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">Accepted by the client</p>
+          <div className="h-10 border-b border-ink-300" />
+          <p className="mt-1 flex justify-between"><span>Name, signature and company seal</span><span className="w-20">Date</span></p>
+        </div>
+      </section>
       {org.quoteFooter && <p className="mt-8 text-center text-xs text-ink-400">{org.quoteFooter}</p>}
     </article>
   );
