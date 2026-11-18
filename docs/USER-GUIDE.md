@@ -16,17 +16,19 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 8. [Contacts](#8-contacts)
 9. [Activities, tasks and notes](#9-activities-tasks-and-notes)
 10. [Quotes](#10-quotes)
-11. [Contracts: maintenance, hosting and support](#11-contracts-maintenance-hosting-and-support)
-12. [Support tickets](#12-support-tickets)
-13. [Reports](#13-reports)
-14. [Emails, team chat and your calendar](#14-emails-team-chat-and-your-calendar)
-15. [The dashboard](#15-the-dashboard)
-16. [Enquiries from our website](#16-enquiries-from-our-website)
-17. [Your profile and password](#17-your-profile-and-password)
-18. [Settings (admins and managers)](#18-settings-admins-and-managers)
-19. [Good habits and data rules](#19-good-habits-and-data-rules)
-20. [Questions and problems](#20-questions-and-problems)
-21. [Coming soon](#21-coming-soon)
+11. [Invoices and receipts](#11-invoices-and-receipts)
+12. [Contracts: maintenance, hosting and support](#12-contracts-maintenance-hosting-and-support)
+13. [Support tickets](#13-support-tickets)
+14. [Project access and handover](#14-project-access-and-handover)
+15. [Reports](#15-reports)
+16. [Emails, team chat and your calendar](#16-emails-team-chat-and-your-calendar)
+17. [The dashboard](#17-the-dashboard)
+18. [Enquiries from our website](#18-enquiries-from-our-website)
+19. [Your profile and password](#19-your-profile-and-password)
+20. [Settings (admins and managers)](#20-settings-admins-and-managers)
+21. [Good habits and data rules](#21-good-habits-and-data-rules)
+22. [Questions and problems](#22-questions-and-problems)
+23. [Coming soon](#23-coming-soon)
 
 ---
 
@@ -40,7 +42,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 
 **Password rules:** at least 10 characters, with letters and numbers, and not containing your email name. A short sentence works well, e.g. *Galle sunset 2026*.
 
-**Two-step sign-in:** if you've turned it on (see [section 17](#17-your-profile-and-password)), after your password the CRM asks for the **6-digit code** from the authenticator app on your phone. Lost your phone? Click **Use a recovery code** and type one of the codes you saved.
+**Two-step sign-in:** if you've turned it on (see [section 19](#19-your-profile-and-password)), after your password the CRM asks for the **6-digit code** from the authenticator app on your phone. Lost your phone? Click **Use a recovery code** and type one of the codes you saved.
 
 **Too many wrong passwords:** after 5 wrong tries your account is locked for 15 minutes. Wait, or ask an admin to unlock it. Lots of wrong attempts from one office network also pause sign-in from there for a few minutes.
 
@@ -75,6 +77,8 @@ Each person has one role. Ask an admin if you need more access.
 | Add and edit deals, move stages, mark won or lost | ✅ | ✅ | ✅ | — | — |
 | Create, edit and send quotes; download PDFs | ✅ | ✅ | ✅ | view and download only | view and download only |
 | Delete sent quotes (anyone can delete their own drafts) | ✅ | ✅ | — | — | — |
+| Create invoices and record payments; download invoice and receipt PDFs | ✅ | ✅ | ✅ | — | view and download only |
+| Void an invoice, or cancel a payment recorded by mistake | ✅ | ✅ | — | — | — |
 | Add, renew, pause and cancel contracts | ✅ | ✅ | ✅ | view only | view only |
 | Delete contracts | ✅ | ✅ | — | — | — |
 | Create tickets, reply, change status and assignee | ✅ | ✅ | ✅ | ✅ | view only |
@@ -87,9 +91,11 @@ Each person has one role. Ask an admin if you need more access.
 | Tick off or delete **anyone's** tasks and notes | ✅ | ✅ | — | — | — |
 | Delete leads, deals, companies or contacts | ✅ | ✅ | — | — | — |
 | Edit the sales pipeline stages, and the services & prices list | ✅ | ✅ | — | — | — |
-| Edit company details used on quotes | ✅ | — | — | — | — |
+| Edit company details used on quotes and invoices | ✅ | — | — | — | — |
 | Add team members, change roles, reset passwords and two-step sign-in | ✅ | — | — | — | — |
 | See the audit log | ✅ | — | — | — | — |
+| See and update project access (accounts, services, handover) | ✅ | ✅ | ✅ | ✅ | — |
+| Remove a whole project access register | ✅ | ✅ | — | — | — |
 | Integrations, security rules and system health | ✅ | — | — | — | — |
 | Turn on two-step sign-in for yourself | ✅ | ✅ | ✅ | ✅ | ✅ |
 
@@ -316,7 +322,7 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 1. Open the **deal** and click **New quote** in the *Quotes* box. The title, client and contact are filled in for you. (You can also use **Quotes → New quote**.)
 2. Check the **client company** and **Attention of** (contact). Every quote needs a company or a contact.
 3. Add **line items**:
-   - **Add from catalogue…** adds a standard service with its price (see *Services & prices* in section 14). You can still change the price for this client.
+   - **Add from catalogue…** adds a standard service with its price (see *Services & prices* in [section 20](#20-settings-admins-and-managers)). You can still change the price for this client.
    - **Add line** adds a blank line for anything custom.
    - For each line set the **name**, optional **details** (printed under the name), **qty**, **per** (project, hour, month…), **price** and optional **line discount %**. Use the arrows to reorder.
 4. Set a **discount %** for the whole quote, and **tax** if we charge it (e.g. *VAT 18%*). The totals update as you type.
@@ -341,6 +347,8 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 - **Accepted** also sets the deal's **value** to the quote total and adds a note to the deal. Then move the deal on (e.g. *Design approval*) or **Mark won**.
 - A sent quote past its *valid until* date shows **Past valid date**. Follow up or send a new version.
 - **Accepted and declined quotes are locked.** To change prices, click **New version**. It copies the quote as a new draft with a new number and today's date.
+- Every quote PDF ends with two signature blocks: one for us, and **Accepted by the client** (name, signature, company seal and date). Ask the client to sign and send it back before you start work. Keep the signed copy with the project files and attach it to the deal as a note.
+- Once a quote is accepted, invoice it from the quote's page (see [section 11](#11-invoices-and-receipts)).
 
 ### Tax and currency
 
@@ -349,7 +357,65 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 
 ---
 
-## 11. Contracts: maintenance, hosting and support
+## 11. Invoices and receipts
+
+An **invoice** asks the client to pay. A **receipt** confirms we received the money. Together with the quote and the handover document, these are the only papers most Sri Lankan clients need from us.
+
+### Invoice an accepted quote (the usual way)
+
+1. Open the **accepted quote**. An **Invoices** box shows how much of it is still to invoice.
+2. Choose what to invoice:
+   - **Advance (%)**: for example 50% before we start. The invoice has one line, *Advance payment (50%)*, plus VAT at the quote's rate.
+   - **Full amount**: copies every line of the quote.
+   - **Balance**: after an advance, invoices whatever is left. Use **Another part payment** for milestone payments (e.g. 30% / 40% / 30%).
+3. Click **Create invoice**. It gets the next number (e.g. **INV-2026-0012**), today's date, and a due date from **Settings → Company details** (14 days unless changed).
+
+The advance and balance invoices always add up to the quote total, VAT included. The CRM won't let you invoice more than the quote.
+
+### Other invoices
+
+- **Maintenance, hosting or support:** open the **contract** and click **Invoice this period**. It invoices one period's fee (monthly, yearly…).
+- **Anything else** (extra work, a domain renewal): **Invoices → New invoice**, or **New invoice** on a won deal. It works like the quote form.
+
+### Send it
+
+- **Download PDF** and send it by email or WhatsApp. The PDF has our bank details and the amount in words (e.g. *Rupees Two Hundred Thirty-Six Thousand Only*).
+- If we're **VAT registered** (our VAT number is filled in under Settings), the PDF is titled **Tax Invoice** and shows our TIN and the client's. Put the client's VAT/TIN number in their **company** record (*Tax / BR number*) before invoicing a VAT-registered client.
+- You can **edit** an invoice until any money is received. If the client already has it, send the new PDF.
+
+### When the client pays
+
+1. Open the invoice. Under **Record a payment**, enter the **amount**, **date received**, **how** (bank transfer, cash, cheque, card, online) and the **reference** (bank reference or cheque number).
+2. Click **Record payment**. The CRM makes a numbered **receipt** (e.g. **RCT-2026-0009**). Click **Receipt PDF** and send it to the client.
+3. If they paid part of it, the invoice shows **Part paid** and the balance. When the balance reaches zero it shows **Paid**.
+
+You can't record more than the balance. Receipts for cheques say *subject to realisation*.
+
+### Chasing payment
+
+- Each unpaid invoice has a **Follow up payment** task for the deal owner, due the day after the due date. It closes itself when the invoice is paid.
+- **Invoices** shows *Owed to us*, *Overdue* and *Received this month*. The **Unpaid** and **Overdue** tabs list the oldest first.
+- The dashboard's **Money owed to us** box lists overdue invoices.
+
+| Status | Meaning |
+|---|---|
+| **Unpaid** | Sent, nothing received, not due yet |
+| **Due soon** | Due within 3 days |
+| **Overdue** | Past the due date and not fully paid |
+| **Part paid** | Some money received |
+| **Paid** | Fully paid |
+| **Void** | Cancelled; kept on record |
+
+### Mistakes
+
+- **Wrong payment?** A manager or admin clicks **Cancel** next to it. The receipt number isn't reused, so tell the client to ignore that receipt.
+- **Wrong invoice?** If nothing has been paid, a manager or admin can **Void** it, then create the right one. Invoices are never deleted, so the numbers stay in order for the accountant.
+
+> **Ask the accountant** to check one Tax Invoice before you send your first, in case they want anything else on it.
+
+---
+
+## 12. Contracts: maintenance, hosting and support
 
 A **contract** is ongoing paid work for a client after a project: website maintenance, hosting, a support retainer, a software subscription. Contracts make sure renewals are never missed and show how much recurring income we have.
 
@@ -391,7 +457,7 @@ Tabs: **Active**, **Renewing soon**, **Ended** and **All**. The cards at the top
 
 ---
 
-## 12. Support tickets
+## 13. Support tickets
 
 A **ticket** is one client problem or request: *"Checkout page shows 500 error"*, *"Please add new product photos"*. Log every request that comes in by WhatsApp, email, phone or in person, so nothing is forgotten and response times are tracked.
 
@@ -430,7 +496,41 @@ Tabs: **Open**, **Mine**, **Reply overdue**, **Waiting on client**, **Resolved**
 
 ---
 
-## 13. Reports
+## 14. Project access and handover
+
+Every project gets its **own Google account** (a Gmail), and every service for that project is signed up with it: Vercel, GitHub, the database, hosting and so on. Use **Sign in with Google**, or save the password in that Google account. Signing in to Chrome with that Gmail then brings back all its passwords and bookmarks, so **you don't need to keep a separate browser profile** for each project.
+
+The CRM keeps the **map**: which Gmail, which services, who owns them and when they renew. **Passwords, keys and 2-step codes are never typed into the CRM.** They stay in the company password manager, and the CRM refuses text that looks like one.
+
+### Set it up
+
+Open a **won deal** and click **Project access → Set up** (or **Project access** in the sidebar for all projects).
+
+| Field | What to enter |
+|---|---|
+| **Project Gmail** | e.g. `galle.hardware.softro@gmail.com` |
+| **2-step verification** | Use an **authenticator app**. Save its setup key and backup codes in the password manager, so it doesn't depend on one person's phone. |
+| **Recovery email / phone** | **Company** ones (admin@softrocodelabs.com and the office number), never personal |
+| **Password and backup codes are kept in** | *Where* they are, e.g. "Bitwarden → Softro Projects → Galle Hardware" |
+| **Settings (.env) are kept in** | e.g. "Vercel project settings". For Vercel projects, `vercel env pull` rebuilds the file. Otherwise keep a copy in the project's Google Drive, which has version history. This text appears in the handover document. |
+
+Then **Add a service** for each account: domain, hosting, Vercel, GitHub, database, email, payments… Give its address, login email, how you sign in, **who owns it** (Softro, the client or shared) and, for anything paid, **when it renews**. A renewal date creates a reminder task 30 days before.
+
+### Keep it alive: the 6-monthly check
+
+Google can delete personal accounts that haven't been used for 2 years, and clients often come back after a year. So every 6 months the deal owner gets a task: **sign in to the project Gmail, check the 2-step codes work, then press "I signed in and checked it."** The **Project access → Needs a check** tab lists any that are overdue.
+
+### When the project is finished
+
+Work through the **close-out checklist**: logins saved, backup codes saved, settings saved, client handed over, **browser profile removed**, local `.env` files deleted. Then click **Archive project access**. Nothing is deleted. When the client asks for maintenance, press **Reopen for maintenance**, sign in to the project Gmail in Chrome, and everything is back.
+
+### Handover document for the client
+
+**Create handover PDF** makes a numbered document (e.g. **H-2026-0001**) with the services, who owns each one, renewal dates, support details and a sign-off section. It never includes passwords. Send those separately through a **secure link that expires** (e.g. Bitwarden Send), and ask the client to change them after they take over. Each document is saved, so you can download it again later exactly as it was sent.
+
+---
+
+## 15. Reports
 
 **Reports** shows how sales, leads, the team and support are doing. Use it in the weekly team meeting and at month end.
 
@@ -463,7 +563,7 @@ Reports are only as good as what's entered. Always mark deals **Won** or **Lost*
 
 ---
 
-## 14. Emails, team chat and your calendar
+## 16. Emails, team chat and your calendar
 
 ### Emails you'll get
 
@@ -493,7 +593,7 @@ The calendar is read-only: tick tasks off in the CRM. The link is shown once and
 
 ---
 
-## 15. The dashboard
+## 17. The dashboard
 
 | Card | What it shows |
 |---|---|
@@ -506,13 +606,14 @@ The calendar is read-only: tick tasks off in the CRM. The link is shown once and
 | **Pipeline by stage** | How many deals, and how much value, sit in each stage |
 | **Contracts ending soon** | Active contracts ending in the next 45 days |
 | **Support** | Open tickets, tickets assigned to you, replies overdue and urgent tickets |
+| **Money owed to us** | Unpaid invoices, money received this month, and the overdue invoices to chase |
 | **Recent wins** | The latest won deals |
 
 Click any card to go to the full list behind it.
 
 ---
 
-## 16. Enquiries from our website
+## 18. Enquiries from our website
 
 The **Start your project** form on softrocodelabs.com sends each enquiry to **two** places:
 
@@ -523,7 +624,7 @@ You don't need to type website enquiries in by hand. Just reply, then **log your
 
 ---
 
-## 17. Your profile and password
+## 19. Your profile and password
 
 Click **your name** at the top right to open **My profile**:
 
@@ -561,7 +662,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 
 ---
 
-## 18. Settings (admins and managers)
+## 20. Settings (admins and managers)
 
 **Settings** appears in the sidebar for admins and managers.
 
@@ -587,7 +688,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 
 ### Company details (admins)
 
-The details printed on every quote: company name, address, phone, email, website, **BR number** and **TIN/VAT number** (leave empty if not registered). It also holds the **quote defaults**: tax label and default rate, how many days quotes are valid for, **default terms**, **bank details** for advance payments, and a footer line.
+The details printed on every quote, invoice and receipt: company name, address, phone, email, website, **BR number** and **TIN/VAT number** (leave empty if not registered). It also holds the **quote defaults**: tax label and default rate, how many days quotes are valid for, **default terms**, **bank details** for advance payments, and a footer line. Under **Invoices**: how many days clients have to pay (sets each invoice's due date) and the **payment instructions** printed on invoices.
 
 > The default terms are only a starting point. Replace the [x] and [n] placeholders with Softro's real payment and revision terms before sending your first quote.
 
@@ -632,7 +733,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 19. Good habits and data rules
+## 21. Good habits and data rules
 
 - **One lead per enquiry, one company per business.** Search before adding so we don't get duplicates.
 - **Write titles people can scan:** *Mobile app for a tuition class in Kandy* beats *New enquiry*.
@@ -645,7 +746,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 20. Questions and problems
+## 22. Questions and problems
 
 | Problem | What to do |
 |---|---|
@@ -664,6 +765,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 | I can't delete a company | It has contracts. Delete or move them first, or set the company type to *Former customer*. |
 | A ticket says *Reply overdue* but I replied | Add your reply on the ticket with **"This is a reply sent to the client"** ticked. |
 | A report number looks wrong | Check the period and person filters first. Then check the deals behind it: won or lost status, close date, value and currency. |
+| "This looks like a password or key" | The CRM never stores secrets. Put it in the password manager and write *where* it is instead. |
 | I lost my phone (two-step sign-in) | Sign in with a **recovery code**, then set two-step sign-in up again on your new phone. No codes either? Ask an admin to reset it. |
 | "That code didn't work" | Make sure your phone's time is set **automatically** (Settings → Date & time). Codes change every 30 seconds, and each one works once. |
 | "Too many sign-in attempts from this network" | Wait the few minutes shown. It protects everyone in the office from password guessing. |
@@ -673,7 +775,7 @@ A read-only record of every sign-in and every create, update and delete: who, wh
 
 ---
 
-## 21. Coming soon
+## 23. Coming soon
 
 Ideas for later: two-way Gmail/Outlook email sync and WhatsApp Business messages from inside the CRM. Tell the admin what would help you most.
 

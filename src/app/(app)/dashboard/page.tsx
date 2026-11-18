@@ -3,6 +3,8 @@ import Link from "next/link";
 import { AlertTriangle, Briefcase, Handshake, Target, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { can } from "@/lib/permissions";
+import { balanceDue } from "@/lib/invoices";
 import { getDefaultPipeline } from "@/lib/queries/pipeline";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +31,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const waitingWhere = { status: { in: OPEN_LEAD_STATUSES }, respondedAt: null };
   const myTasksWhere = { assignedToId: user.id, completedAt: null, OR: [{ dueAt: { lt: endOfToday } }, { dueAt: null }] };
   const in45 = new Date(now.getTime() + 45 * 86_400_000);
+  const showMoney = can(user.role, "invoice:view");
+  const [unpaidInvoices, receivedThisMonth] = showMoney
+    ? await Promise.all([
+        db.invoice.findMany({
+          where: { status: "ISSUED" },
+          orderBy: [{ dueDate: "asc" }],
+          select: { id: true, number: true, title: true, currency: true, total: true, amountPaid: true, dueDate: true, company: { select: { name: true } } },
+        }),
+        db.payment.findMany({ where: { paidAt: { gte: monthStart } }, select: { amount: true, invoice: { select: { currency: true } } } }),
+      ])
+    : [[], []];
+  const startOfToday = colomboDayBounds(now).start;
+  const overdueInvoices = unpaidInvoices.filter((i) => i.dueDate && i.dueDate < startOfToday);
   const [renewals, ticketCounts] = await Promise.all([
     db.contract.findMany({
       where: { status: "ACTIVE", endDate: { not: null, lte: in45 } },
@@ -231,6 +246,39 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             ))}
           </div>
         </Card>
+
+        {showMoney && (
+          <Card>
+            <CardHeader title="Money owed to us" action={<Link href="/invoices" className="text-xs font-medium text-brand-700 hover:underline">All invoices</Link>} />
+            <div className="grid grid-cols-2 gap-px bg-ink-100">
+              <Link href="/invoices" className="bg-white px-5 py-4 hover:bg-ink-50">
+                <p className="text-xs text-ink-500">Unpaid ({unpaidInvoices.length})</p>
+                <p className="mt-1 text-lg font-semibold text-ink-900 tabular-nums">{unpaidInvoices.length ? formatMoneyTotals(unpaidInvoices.map((i) => ({ value: balanceDue(i), currency: i.currency }))) : "Nothing"}</p>
+              </Link>
+              <Link href="/invoices?tab=paid" className="bg-white px-5 py-4 hover:bg-ink-50">
+                <p className="text-xs text-ink-500">Received this month</p>
+                <p className="mt-1 text-lg font-semibold text-ink-900 tabular-nums">{receivedThisMonth.length ? formatMoneyTotals(receivedThisMonth.map((p) => ({ value: p.amount, currency: p.invoice.currency }))) : "Nothing yet"}</p>
+              </Link>
+            </div>
+            {overdueInvoices.length ? (
+              <ul className="divide-y divide-ink-100 border-t border-ink-100">
+                {overdueInvoices.slice(0, 4).map((i) => (
+                  <li key={i.id}>
+                    <Link href={`/invoices/${i.id}`} className="flex items-center justify-between gap-4 px-5 py-2.5 hover:bg-ink-50">
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-ink-900">{i.company?.name ?? i.title}</span>
+                        <span className="text-xs text-ink-500">{i.number} · due {formatDate(i.dueDate)}</span>
+                      </span>
+                      <Badge tone="red">{formatMoney(balanceDue(i), i.currency)}</Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CardBody className="border-t border-ink-100 text-sm text-ink-500">Nothing overdue.</CardBody>
+            )}
+          </Card>
+        )}
 
         <Card className="lg:col-span-2">
           <CardHeader title="Recent wins" />

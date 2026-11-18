@@ -62,6 +62,8 @@ export function QuoteEditor({
   deals,
   cancelHref,
   isEdit,
+  kind = "quote",
+  contractId,
 }: {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   initial: EditorValues;
@@ -72,7 +74,11 @@ export function QuoteEditor({
   deals: (Option & { companyId: string | null; contactId: string | null })[];
   cancelHref: string;
   isEdit?: boolean;
+  /** The same editor makes invoices: different labels, a due date instead of "valid until", no introduction. */
+  kind?: "quote" | "invoice";
+  contractId?: string | null;
 }) {
+  const inv = kind === "invoice";
   const [state, formAction] = useActionState(action, initialFormState);
   const v = (k: keyof EditorValues) => state.values?.[k] ?? initial[k];
   const e = state.errors ?? {};
@@ -123,7 +129,7 @@ export function QuoteEditor({
 
       <Card className="p-6">
         <div className="grid gap-5 sm:grid-cols-6">
-          <TextField label="Quote title" name="title" required placeholder="Inventory & POS system" defaultValue={v("title")} error={e.title} className="sm:col-span-4" />
+          <TextField label={inv ? "Invoice title" : "Quote title"} name="title" required placeholder={inv ? "Website maintenance, November 2026" : "Inventory & POS system"} defaultValue={v("title")} error={e.title} className="sm:col-span-4" />
           <SelectField label="Currency" name="currency" options={CURRENCY_OPTIONS} value={currency} onChange={(ev) => setCurrency(ev.target.value)} error={e.currency} className="sm:col-span-2" />
           <SelectField
             label="Deal"
@@ -155,9 +161,10 @@ export function QuoteEditor({
             className="sm:col-span-2"
           />
           <SelectField label="Attention of" name="contactId" options={contactOptions} placeholder="No contact" value={contactId} onChange={(ev) => setContactId(ev.target.value)} error={e.contactId} className="sm:col-span-2" />
-          <TextField label="Quote date" name="issueDate" type="date" required defaultValue={v("issueDate")} error={e.issueDate} className="sm:col-span-3" />
-          <TextField label="Valid until" name="validUntil" type="date" defaultValue={v("validUntil")} error={e.validUntil} className="sm:col-span-3" />
-          <TextAreaField label="Introduction (optional)" name="introduction" rows={2} placeholder="Thank you for the opportunity. Here's our proposal for…" defaultValue={v("introduction")} error={e.introduction} className="sm:col-span-6" />
+          <TextField label={inv ? "Invoice date" : "Quote date"} name="issueDate" type="date" required defaultValue={v("issueDate")} error={e.issueDate} className="sm:col-span-3" />
+          <TextField label={inv ? "Payment due" : "Valid until"} name={inv ? "dueDate" : "validUntil"} type="date" defaultValue={v("validUntil")} error={inv ? e.dueDate : e.validUntil} className="sm:col-span-3" />
+          {inv && contractId && <input type="hidden" name="contractId" value={contractId} />}
+          {!inv && <TextAreaField label="Introduction (optional)" name="introduction" rows={2} placeholder="Thank you for the opportunity. Here's our proposal for…" defaultValue={v("introduction")} error={e.introduction} className="sm:col-span-6" />}
         </div>
       </Card>
 
@@ -303,7 +310,7 @@ export function QuoteEditor({
 
       <Card className="p-6">
         <div className="grid gap-5">
-          <TextAreaField label="Terms" name="terms" rows={6} hint="Payment schedule, timeline, what's included, revisions, warranty. Printed on the quote." defaultValue={v("terms")} error={e.terms} />
+          <TextAreaField label={inv ? "Payment instructions" : "Terms"} name="terms" rows={inv ? 3 : 6} hint={inv ? "Printed on the invoice, above your bank details." : "Payment schedule, timeline, what's included, revisions, warranty. Printed on the quote."} defaultValue={v("terms")} error={e.terms} />
           <TextAreaField label="Internal notes" name="notes" rows={2} hint="Only visible in the CRM. Never printed." defaultValue={v("notes")} error={e.notes} />
         </div>
       </Card>
@@ -312,7 +319,7 @@ export function QuoteEditor({
         <LinkButton href={cancelHref} variant="secondary">
           Cancel
         </LinkButton>
-        <SubmitButton>{isEdit ? "Save quote" : "Create quote"}</SubmitButton>
+        <SubmitButton>{isEdit ? (inv ? "Save invoice" : "Save quote") : inv ? "Create invoice" : "Create quote"}</SubmitButton>
       </div>
     </form>
   );

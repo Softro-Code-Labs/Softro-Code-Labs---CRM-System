@@ -1,30 +1,11 @@
-import path from "node:path";
-import { Document, Font, Page, Path, Defs, LinearGradient, Stop, StyleSheet, Svg, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED } from "./shared";
 import type { FullQuote } from "@/lib/quotes";
 import type { getOrgSettings } from "@/lib/queries/org";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
 import { formatQuantity } from "@/lib/quote-math";
 
 type Org = Awaited<ReturnType<typeof getOrgSettings>>;
-
-// Geist, the same typeface as the CRM and softrocodelabs.com (SIL Open Font License).
-const fontDir = path.join(process.cwd(), "src", "assets", "fonts");
-Font.register({
-  family: "Geist",
-  fonts: [
-    { src: path.join(fontDir, "Geist-Regular.ttf"), fontWeight: 400 },
-    { src: path.join(fontDir, "Geist-Medium.ttf"), fontWeight: 500 },
-    { src: path.join(fontDir, "Geist-SemiBold.ttf"), fontWeight: 600 },
-    { src: path.join(fontDir, "Geist-Bold.ttf"), fontWeight: 700 },
-  ],
-});
-Font.registerHyphenationCallback((word) => [word]); // don't break words with hyphens
-
-const INK = "#161517";
-const MUTED = "#6e6962";
-const LIGHT = "#8f8a82";
-const LINE = "#e2ddd4";
-const CRIMSON = "#a70b21";
 
 const s = StyleSheet.create({
   page: { fontFamily: "Geist", fontSize: 9.5, color: INK, paddingTop: 40, paddingBottom: 56, paddingHorizontal: 44, lineHeight: 1.4 },
@@ -47,28 +28,11 @@ const s = StyleSheet.create({
   totals: { marginLeft: "auto", width: 230, marginTop: 10 },
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 2.5 },
   grand: { flexDirection: "row", justifyContent: "space-between", backgroundColor: INK, color: "#ffffff", paddingVertical: 7, paddingHorizontal: 9, borderRadius: 4, marginTop: 5, fontSize: 11.5, fontWeight: 600 },
+  signLine: { borderBottomWidth: 0.75, borderBottomColor: MUTED, height: 34, marginBottom: 4 },
   footerLine: { position: "absolute", bottom: 38, left: 44, right: 44, borderTopWidth: 0.5, borderTopColor: LINE },
   footerLeft: { position: "absolute", bottom: 24, left: 44, fontSize: 7.5, color: LIGHT },
   footerRight: { position: "absolute", bottom: 24, left: 320, right: 44, fontSize: 7.5, color: LIGHT, textAlign: "right" },
 });
-
-function Mark({ size = 40 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="10 15.5 170 170">
-      <Defs>
-        <LinearGradient id="g" x1="0" y1="40" x2="0" y2="170" gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor="#A70B21" />
-          <Stop offset="1" stopColor="#EF4C5B" />
-        </LinearGradient>
-      </Defs>
-      <Path
-        fill="url(#g)"
-        fillRule="evenodd"
-        d="M111.5 24 L47 54.5 L47 102 L98.5 121.5 L98.5 154 L83 146 L83 121.4 L69 116.3 L69 154.6 L112.6 177 L112.6 78 L98.3 83.2 L98.3 105.9 L83 100.4 L83 83.4 L129 66.4 L129 117 L117 113 L117 127.5 L143.3 137 L143.3 46.8 L112.6 57 L112.6 24 Z M98.3 45.4 L98.3 62.4 L69 73.2 L69 95.2 L61.2 92.8 L61.2 63.5 Z"
-      />
-    </Svg>
-  );
-}
 
 function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
   const money = (v: { toString(): string }) => formatMoney(v, quote.currency);
@@ -194,6 +158,23 @@ function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
           </View>
         ) : null}
 
+        <View style={[s.row, { gap: 28, marginTop: 30 }]} wrap={false}>
+          <View style={{ flex: 1 }}>
+            <Text style={s.label}>For {org.companyName}</Text>
+            <Text style={[s.small, { marginBottom: 2 }]}> </Text>
+            <View style={s.signLine} />
+            <Text style={s.small}>{quote.createdBy?.name ?? "Authorised signatory"}</Text>
+          </View>
+          <View style={{ flex: 1.3 }}>
+            <Text style={s.label}>Accepted by the client</Text>
+            <Text style={[s.small, { marginBottom: 2 }]}>We accept this quotation and its terms.</Text>
+            <View style={s.signLine} />
+            <View style={[s.row, { justifyContent: "space-between" }]}>
+              <Text style={s.small}>Name, signature and company seal</Text>
+              <Text style={[s.small, { width: 80 }]}>Date</Text>
+            </View>
+          </View>
+        </View>
       </Page>
     </Document>
   );

@@ -42,6 +42,13 @@ export const PERMISSIONS = {
   "product:manage": ["ADMIN", "MANAGER"],
   "org:manage": ["ADMIN"],
 
+  "invoice:view": ["ADMIN", "MANAGER", "SALES", "VIEWER"],
+  "invoice:create": ["ADMIN", "MANAGER", "SALES"],
+  "invoice:update": ["ADMIN", "MANAGER", "SALES"],
+  "invoice:void": ["ADMIN", "MANAGER"],
+  "payment:record": ["ADMIN", "MANAGER", "SALES"],
+  "payment:delete": ["ADMIN", "MANAGER"],
+
   "contract:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
   "contract:manage": ["ADMIN", "MANAGER", "SALES"],
   "contract:delete": ["ADMIN", "MANAGER"],
@@ -49,6 +56,10 @@ export const PERMISSIONS = {
   "ticket:create": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
   "ticket:update": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
   "ticket:delete": ["ADMIN", "MANAGER"],
+
+  "access:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
+  "access:manage": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
+  "access:delete": ["ADMIN", "MANAGER"],
 
   "report:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
   "report:export": ["ADMIN", "MANAGER"],

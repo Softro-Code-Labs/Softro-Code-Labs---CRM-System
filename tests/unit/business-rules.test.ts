@@ -92,3 +92,18 @@ describe("permissions", () => {
     expect(can(null, "deal:view")).toBe(false);
   });
 });
+
+describe("project access sign-in check", async () => {
+  const { checkState } = await import("@/lib/project-access");
+  const created = new Date("2026-01-01T00:00:00Z");
+  it("asks for a first check, then every 6 months", () => {
+    expect(checkState({ googleEmail: null, lastCheckedAt: null, createdAt: created }).state).toBe("no-account");
+    expect(checkState({ googleEmail: "p@gmail.com", lastCheckedAt: null, createdAt: created }).state).toBe("never");
+    const checked = new Date("2026-03-01T00:00:00Z");
+    expect(checkState({ googleEmail: "p@gmail.com", lastCheckedAt: checked, createdAt: created }, new Date("2026-04-01T00:00:00Z")).state).toBe("ok");
+    expect(checkState({ googleEmail: "p@gmail.com", lastCheckedAt: checked, createdAt: created }, new Date("2026-08-10T00:00:00Z")).state).toBe("due-soon");
+    const late = checkState({ googleEmail: "p@gmail.com", lastCheckedAt: checked, createdAt: created }, new Date("2026-09-15T00:00:00Z"));
+    expect(late.state).toBe("overdue");
+    expect(late.dueAt?.toISOString().slice(0, 10)).toBe("2026-08-30");
+  });
+});

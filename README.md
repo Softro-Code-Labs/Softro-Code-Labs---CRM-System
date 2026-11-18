@@ -1,6 +1,6 @@
 # Softro CRM 🧭
 
-Softro Code Labs' own CRM: **leads, deals, quotes, contracts, support and reports in one place**, built for how we sell and support software in Sri Lanka.
+Softro Code Labs' own CRM: **leads, deals, quotes, invoices, contracts, support and reports in one place**, built for how we sell and support software in Sri Lanka.
 
 Live at **[softro-code-labs-crm-system.vercel.app](https://softro-code-labs-crm-system.vercel.app)**, moving to **crm.softrocodelabs.com** (team members only)
 
@@ -50,9 +50,12 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change the sidebar | `src/components/layout/nav-items.ts` |
 | Change buttons, fields, cards, badges | `src/components/ui/` |
 | Change the quote PDF | `src/lib/pdf/quote-pdf.tsx`, fonts in `src/assets/fonts/` |
+| Change the invoice or receipt PDF | `src/lib/pdf/invoice-pdf.tsx`, `src/lib/pdf/receipt-pdf.tsx`; amount in words in `src/lib/amount-in-words.ts` |
+| Change invoicing rules (advance/balance, payments, follow-up task) | `src/lib/invoices.ts`, `src/app/(app)/invoices/actions.ts` |
 | Change quote maths (discounts, VAT) | `src/lib/quote-math.ts` |
 | Change reply deadlines and working days | `src/lib/working-days.ts`, ticket times in `src/lib/tickets.ts` |
 | Change report figures | `src/lib/reports.ts`, CSV exports in `src/app/(app)/reports/export/route.ts` |
+| Change project access (accounts register, checklist, handover PDF) | `src/app/(app)/deals/[id]/access/`, `src/lib/project-access.ts`, `src/lib/pdf/handover-pdf.tsx`, secret detection in `src/lib/security/secret-guard.ts` |
 | Change emails, team chat messages, the morning summary or the calendar feed | `src/lib/integrations/` |
 | Change profile photos (size, formats) | `src/lib/avatar.ts`, upload in `src/app/(app)/settings/profile/avatar-*.tsx`, served by `src/app/avatars/` |
 | Change sign-in, sessions or two-step sign-in | `src/app/login/`, `src/lib/auth.ts`, `src/lib/session.ts`, `src/lib/security/` |
@@ -124,8 +127,8 @@ Responses: `201` created · `401` wrong key · `422` invalid data · `429` too m
 
 | Layer | Command | Covers |
 |---|---|---|
-| **Unit** (33) | `pnpm test` | Two-step codes (RFC 6238 vectors), encryption, recovery codes, working days in Sri Lanka time, quote maths and VAT, ticket SLA, permissions, report periods, CSV safety, email escaping, webhook allow-list |
-| **Browser** (13) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets |
+| **Unit** (48) | `pnpm test` | Two-step codes (RFC 6238 vectors), encryption, recovery codes, working days in Sri Lanka time, quote maths and VAT, amounts in words, invoice states and balances, ticket SLA, permissions, report periods, CSV safety, email escaping, webhook allow-list, secret guard, avatars |
+| **Browser** (17) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets, theme, profile photos, project access and handover, quote → advance invoice → payment and receipt → balance → paid |
 
 Browser tests create and change records, so run them against a **separate test database**, never Neon:
 

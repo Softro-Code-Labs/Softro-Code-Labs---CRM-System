@@ -1,3 +1,4 @@
+import type { AccountOwner, PaymentMethod, ServiceCategory, SignInMethod, TwoStepMethod } from "@/generated/prisma/enums";
 import type { DealStatus, LeadSource, LeadStatus, PreferredLanguage, ServiceType } from "@/generated/prisma/enums";
 import type { BadgeTone } from "@/components/ui/badge";
 
@@ -166,3 +167,78 @@ export const TICKET_CHANNEL_LABELS: Record<TicketChannel, string> = {
   OTHER: "Other",
 };
 export const TICKET_CHANNEL_OPTIONS = options(TICKET_CHANNEL_LABELS);
+
+/* ── Project access register ───────────────────────────────────────────── */
+
+export const TWO_STEP_LABELS: Record<TwoStepMethod, string> = {
+  AUTHENTICATOR: "Authenticator app",
+  SECURITY_KEY: "Security key",
+  SMS: "Text message (SMS)",
+  NONE: "Not turned on",
+};
+export const TWO_STEP_OPTIONS = options(TWO_STEP_LABELS);
+
+export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
+  DOMAIN: "Domain & DNS",
+  HOSTING: "Hosting",
+  CODE: "Code",
+  DATABASE: "Database",
+  EMAIL: "Email",
+  PAYMENTS: "Payments",
+  STORAGE: "Files & storage",
+  ANALYTICS: "Analytics & SEO",
+  OTHER: "Other",
+};
+export const SERVICE_CATEGORY_OPTIONS = options(SERVICE_CATEGORY_LABELS);
+
+export const SIGN_IN_LABELS: Record<SignInMethod, string> = {
+  GOOGLE: "Sign in with Google",
+  PASSWORD_IN_GOOGLE: "Email + password (saved in Google)",
+  OTHER: "Other (see notes)",
+};
+export const SIGN_IN_OPTIONS = options(SIGN_IN_LABELS);
+
+export const ACCOUNT_OWNER_LABELS: Record<AccountOwner, string> = { SOFTRO: "Softro", CLIENT: "Client", SHARED: "Shared" };
+export const ACCOUNT_OWNER_OPTIONS = options(ACCOUNT_OWNER_LABELS);
+
+/** Close-out checklist, in the order it's done. */
+export const ACCESS_CHECKLIST = [
+  { key: "passwordsSaved", label: "Every login is saved in the project's Google account (or the password manager)" },
+  { key: "backupCodesSaved", label: "The Gmail password and 2-step backup codes are in the password manager" },
+  { key: "envSaved", label: "Settings (.env) are saved: in Vercel, or a copy in the project's Google Drive" },
+  { key: "clientHandedOver", label: "Client has what they need: handover document sent, ownership moved where agreed" },
+  { key: "browserProfileGone", label: "The project's browser profile is removed" },
+  { key: "localFilesDeleted", label: "Local .env files and downloads are deleted from team computers" },
+] as const;
+export type AccessChecklistKey = (typeof ACCESS_CHECKLIST)[number]["key"];
+
+/** Sign in to each project Gmail at least this often. Google can delete personal accounts unused for 2 years. */
+export const ACCESS_CHECK_EVERY_DAYS = 182;
+
+/* ── Invoices and payments ─────────────────────────────────────────── */
+export type InvoiceState = "unpaid" | "due-soon" | "part-paid" | "overdue" | "paid" | "void";
+export const INVOICE_STATE_LABELS: Record<InvoiceState, string> = {
+  unpaid: "Unpaid",
+  "due-soon": "Due soon",
+  "part-paid": "Part paid",
+  overdue: "Overdue",
+  paid: "Paid",
+  void: "Void",
+};
+export const INVOICE_STATE_TONE: Record<InvoiceState, BadgeTone> = {
+  unpaid: "blue",
+  "due-soon": "amber",
+  "part-paid": "purple",
+  overdue: "red",
+  paid: "green",
+  void: "gray",
+};
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  BANK_TRANSFER: "Bank transfer",
+  CASH: "Cash",
+  CHEQUE: "Cheque",
+  CARD: "Card",
+  ONLINE: "Online (PayHere, Stripe…)",
+  OTHER: "Other",
+};
+export const PAYMENT_METHOD_OPTIONS = options(PAYMENT_METHOD_LABELS);

@@ -16,8 +16,9 @@ export async function saveOrgSettings(_prev: FormState, formData: FormData): Pro
   if (!parsed.success) return { errors: zodErrors(parsed.error), values };
 
   await db.orgSettings.upsert({ where: { id: "default" }, update: parsed.data, create: { id: "default", ...parsed.data } });
-  await audit({ actorId: user.id, action: "update", entity: "OrgSettings", summary: "Company details for quotes" });
+  await audit({ actorId: user.id, action: "update", entity: "OrgSettings", summary: "Company details for quotes and invoices" });
   revalidatePath("/settings/company");
   revalidatePath("/quotes", "layout");
+  revalidatePath("/invoices", "layout");
   return { ok: true };
 }
