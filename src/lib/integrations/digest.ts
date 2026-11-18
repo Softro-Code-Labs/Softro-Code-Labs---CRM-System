@@ -6,10 +6,12 @@ import { appUrl } from "./app-url";
 import { sendEmail, type SendResult } from "./email";
 import { renderEmail, type EmailSection } from "./email-template";
 import { colomboWhen } from "./notify";
+import { usageWarnings } from "@/lib/usage";
 
 /**
  * The 8 am "your day" email: overdue and today's tasks, leads waiting for a reply,
  * tickets whose first reply is due, and deals whose close date has passed.
+ * Admins also get a warning when a plan limit (database storage, compute) passes 80%.
  * Nothing to report means no email.
  */
 const LIMIT = 8;
@@ -17,7 +19,7 @@ const OPEN_TICKET = ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"] as const;
 
 export async function buildDigest(userId: string, now = new Date()) {
   const { start, end } = colomboDayBounds(now);
-  const [tasks, leads, tickets, deals] = await Promise.all([
+  const [tasks, leads, tickets, deals, user] = await Promise.all([
     db.activity.findMany({
       where: { assignedToId: userId, completedAt: null, dueAt: { lt: end } },
       orderBy: { dueAt: "asc" },
@@ -42,7 +44,9 @@ export async function buildDigest(userId: string, now = new Date()) {
       take: 30,
       select: { id: true, title: true, expectedCloseDate: true },
     }),
+    db.user.findUnique({ where: { id: userId }, select: { role: true } }),
   ]);
+  const limits = user?.role === "ADMIN" ? await usageWarnings() : [];
 
   const late = (d: Date | null) => Boolean(d && d < now);
   const more = (n: number, label: string) => (n > LIMIT ? [{ text: `…and ${n - LIMIT} more ${label}`, url: undefined }] : []);
@@ -85,8 +89,26 @@ export async function buildDigest(userId: string, now = new Date()) {
       ],
     });
 
+  if (limits.length)
+    sections.push({
+      heading: "Plan limits (admins)",
+      items: limits.map((m) => ({
+        text: `${m.label}: ${m.display}${m.percent != null ? ` (${m.percent}%)` : ""}`,
+        meta:
+          m.key === "storage"
+            ? m.level === "full"
+              ? "Nearly full: saving will start failing. Upgrade Neon or free space now."
+              : "Over 80%. Plan an upgrade or free some space."
+            : m.level === "full"
+              ? "Nearly used up: the database pauses until next month when it runs out. Upgrade Neon now."
+              : "Over 80% for this month. Watch it, or upgrade Neon.",
+        urgent: m.level === "full",
+        url: appUrl("/settings/system"),
+      })),
+    });
+
   const overdue = tasks.filter((t) => t.dueAt && t.dueAt < start).length + leads.filter((l) => late(l.respondBy)).length + tickets.filter((t) => late(t.responseDueAt)).length;
-  return { sections, overdue, total: tasks.length + leads.length + tickets.length + deals.length };
+  return { sections, overdue, total: tasks.length + leads.length + tickets.length + deals.length + limits.length };
 }
 
 const dayName = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Colombo" });

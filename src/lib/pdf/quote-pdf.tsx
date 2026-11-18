@@ -92,29 +92,31 @@ function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
 
         {quote.introduction ? <Text style={{ marginBottom: 12 }}>{quote.introduction}</Text> : null}
 
-        <View style={s.tableHead} fixed>
-          <Text style={[s.th, s.colNo]}>#</Text>
-          <Text style={[s.th, s.colDesc]}>Description</Text>
-          <Text style={[s.th, s.colQty]}>Qty</Text>
-          <Text style={[s.th, s.colPrice]}>Price</Text>
-          {anyDisc ? <Text style={[s.th, s.colDisc]}>Disc.</Text> : null}
-          <Text style={[s.th, s.colAmt]}>Amount</Text>
-        </View>
-        {quote.items.map((item, i) => (
-          <View key={item.id} style={s.tr} wrap={false}>
-            <Text style={s.colNo}>{i + 1}</Text>
-            <View style={s.colDesc}>
-              <Text style={{ fontWeight: 500 }}>{item.title}</Text>
-              {item.description ? <Text style={[s.small, { marginTop: 1 }]}>{item.description}</Text> : null}
-            </View>
-            <Text style={s.colQty}>
-              {formatQuantity(item.quantity, item.unit)}
-            </Text>
-            <Text style={s.colPrice}>{money(item.unitPrice)}</Text>
-            {anyDisc ? <Text style={s.colDisc}>{Number(item.discountPercent) ? `${Number(item.discountPercent)}%` : "—"}</Text> : null}
-            <Text style={[s.colAmt, { fontWeight: 500 }]}>{money(item.lineTotal)}</Text>
+        <View>
+          <View style={s.tableHead} fixed>
+            <Text style={[s.th, s.colNo]}>#</Text>
+            <Text style={[s.th, s.colDesc]}>Description</Text>
+            <Text style={[s.th, s.colQty]}>Qty</Text>
+            <Text style={[s.th, s.colPrice]}>Price</Text>
+            {anyDisc ? <Text style={[s.th, s.colDisc]}>Disc.</Text> : null}
+            <Text style={[s.th, s.colAmt]}>Amount</Text>
           </View>
-        ))}
+          {quote.items.map((item, i) => (
+            <View key={item.id} style={s.tr} wrap={false}>
+              <Text style={s.colNo}>{i + 1}</Text>
+              <View style={s.colDesc}>
+                <Text style={{ fontWeight: 500 }}>{item.title}</Text>
+                {item.description ? <Text style={[s.small, { marginTop: 1 }]}>{item.description}</Text> : null}
+              </View>
+              <Text style={s.colQty}>
+                {formatQuantity(item.quantity, item.unit)}
+              </Text>
+              <Text style={s.colPrice}>{money(item.unitPrice)}</Text>
+              {anyDisc ? <Text style={s.colDisc}>{Number(item.discountPercent) ? `${Number(item.discountPercent)}%` : "—"}</Text> : null}
+              <Text style={[s.colAmt, { fontWeight: 500 }]}>{money(item.lineTotal)}</Text>
+            </View>
+          ))}
+        </View>
 
         <View style={s.totals} wrap={false}>
           <View style={s.totalRow}>
@@ -141,20 +143,16 @@ function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
           </View>
         </View>
 
-        {quote.terms || org.bankDetails ? (
-          <View style={[s.row, { gap: 20, marginTop: 24, borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 12 }]} wrap={false}>
-            {quote.terms ? (
-              <View style={{ flex: 1 }}>
-                <Text style={s.label}>Terms</Text>
-                <Text style={{ fontSize: 8.5, color: MUTED }}>{quote.terms}</Text>
-              </View>
-            ) : null}
-            {org.bankDetails ? (
-              <View style={{ flex: 1 }}>
-                <Text style={s.label}>Payment details</Text>
-                <Text style={{ fontSize: 8.5, color: MUTED }}>{org.bankDetails}</Text>
-              </View>
-            ) : null}
+        {org.bankDetails ? (
+          <View style={{ marginTop: 22, borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 12 }} wrap={false}>
+            <Text style={s.label}>Payment details</Text>
+            <Text style={{ fontSize: 8.5, color: MUTED }}>{org.bankDetails}</Text>
+          </View>
+        ) : null}
+        {quote.terms ? (
+          <View style={{ marginTop: 14 }}>
+            <Text style={s.label} minPresenceAhead={40}>Terms</Text>
+            <Text style={{ fontSize: 8.5, color: MUTED }}>{quote.terms}</Text>
           </View>
         ) : null}
 

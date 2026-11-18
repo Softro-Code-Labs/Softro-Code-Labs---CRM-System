@@ -9,6 +9,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ResolveButton } from "./resolve-button";
+import { UsageCard } from "./usage-card";
+import { getUsage } from "@/lib/usage";
+import { formatBytes } from "@/lib/usage-math";
 
 export const metadata: Metadata = { title: "System health" };
 
@@ -18,9 +21,9 @@ async function databaseCheck() {
     const [rows, migration, size] = await Promise.all([
       db.$queryRaw<{ ok: number }[]>`SELECT 1 AS ok`,
       db.$queryRaw<{ migration_name: string; finished_at: Date | null }[]>`SELECT migration_name, finished_at FROM "_prisma_migrations" WHERE finished_at IS NOT NULL ORDER BY finished_at DESC LIMIT 1`.catch(() => []),
-      db.$queryRaw<{ size: string }[]>`SELECT pg_size_pretty(pg_database_size(current_database())) AS size`.catch(() => []),
+      db.$queryRaw<{ bytes: bigint }[]>`SELECT pg_database_size(current_database()) AS bytes`.catch(() => []),
     ]);
-    return { ok: rows.length === 1, ms: Math.round(performance.now() - started), migration: migration[0] ?? null, size: size[0]?.size ?? null };
+    return { ok: rows.length === 1, ms: Math.round(performance.now() - started), migration: migration[0] ?? null, size: size[0] ? formatBytes(Number(size[0].bytes)) : null };
   } catch {
     return { ok: false, ms: null, migration: null, size: null };
   }
@@ -30,17 +33,18 @@ export default async function SystemPage({ searchParams }: { searchParams: Promi
   await requirePermission("system:view");
   const { show } = await searchParams;
   const showFixed = show === "all";
-  const [database, errors, openCount] = await Promise.all([
+  const [database, errors, openCount, usage] = await Promise.all([
     databaseCheck(),
     db.errorEvent.findMany({ where: showFixed ? {} : { resolvedAt: null }, orderBy: { lastSeenAt: "desc" }, take: 50 }),
     db.errorEvent.count({ where: { resolvedAt: null } }),
+    getUsage().catch(() => null),
   ]);
   const checks = envChecks();
   const version = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <PageHeader title="System health" description="Is everything working, and what went wrong recently." breadcrumbs={[{ label: "Settings", href: "/settings" }, { label: "System health" }]} />
+      <PageHeader title="System health" description="Is everything working, how close we are to our plan limits, and what went wrong recently." breadcrumbs={[{ label: "Settings", href: "/settings" }, { label: "System health" }]} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="px-5 py-4">
@@ -61,6 +65,8 @@ export default async function SystemPage({ searchParams }: { searchParams: Promi
           </p>
         </Card>
       </div>
+
+      {usage && <UsageCard usage={usage} />}
 
       <Card>
         <CardHeader

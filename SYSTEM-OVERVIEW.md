@@ -146,7 +146,7 @@ flowchart TB
 | **A website enquiry arrives** | New lead with a reply-by time. The owner gets an email (reply goes straight to the client), and the team chat gets a message. |
 | **A deal is won · an urgent ticket opens** | Team chat message |
 | **A contract is saved** | Its renewal task is created or moved to match the dates |
-| **8:00 am, weekdays** | Morning summary emails. Old rate-limit counters and fixed errors are cleaned up. |
+| **8:00 am, weekdays** | Morning summary emails (admins also get a warning if a plan limit is over 80%). Old rate-limit counters and fixed errors are cleaned up. |
 | **About every hour** | Calendar apps fetch each person's tasks |
 | **02:00 every night** | GitHub makes an encrypted copy of the database |
 | **Every push to GitHub** | CI runs all checks. Production deploys apply database changes, then go live. |
@@ -243,7 +243,7 @@ Nine steps, each one usable on its own before the next began.
 | **8. Integrations** | Emails through Resend, the morning summary, team chat alerts, calendar links, accounting export |
 | **9. Hardening** | Two-step sign-in, rate limits, error monitoring, health check, tests, CI, auto-migrations, nightly backups |
 
-Added since: dark mode, profile photos, the project access register with a handover PDF, and **invoices and receipts** (advance and balance invoices from accepted quotes, contract invoices, payments with receipts, a Tax Invoice layout, and an *Accepted by* block on quotes).
+Added since: dark mode, a plan-usage panel for admins (Neon storage and compute, with an 80% warning in the morning email), profile photos, the project access register with a handover PDF, and **invoices and receipts** (advance and balance invoices from accepted quotes, contract invoices, payments with receipts, a Tax Invoice layout, and an *Accepted by* block on quotes).
 
 ---
 
