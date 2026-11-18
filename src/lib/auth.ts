@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { can, type Permission } from "@/lib/permissions";
 import { mustSetUpTwoFactor } from "@/lib/security/two-factor";
+import { avatarUrl } from "@/lib/avatar";
 
 export type CurrentUser = {
   id: string;
@@ -13,6 +14,7 @@ export type CurrentUser = {
   role: import("@/generated/prisma/enums").Role;
   mustChangePassword: boolean;
   totpEnabled: boolean;
+  avatarUrl: string | null;
 };
 
 /**
@@ -26,12 +28,12 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   const user = await db.user.findUnique({
     where: { id: session.userId },
-    select: { id: true, name: true, email: true, role: true, isActive: true, sessionVersion: true, mustChangePassword: true, totpEnabledAt: true },
+    select: { id: true, name: true, email: true, role: true, isActive: true, sessionVersion: true, mustChangePassword: true, totpEnabledAt: true, avatarUpdatedAt: true },
   });
   // Deactivated users, and sessions from before a password change or reset, are signed out.
   if (!user || !user.isActive || user.sessionVersion !== (session.version ?? 0)) return null;
 
-  return { id: user.id, name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword, totpEnabled: Boolean(user.totpEnabledAt) };
+  return { id: user.id, name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword, totpEnabled: Boolean(user.totpEnabledAt), avatarUrl: avatarUrl(user) };
 });
 
 export async function requireUser() {

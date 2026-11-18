@@ -174,7 +174,6 @@
   --color-brand-700: #a70b21;
   --color-brand-800: #8a0b1d;
   --color-brand-900: #6f0d1a;
-  color-scheme: light;
 }
 
 :root[data-theme="light"] {
@@ -184,4 +183,48 @@
 /* On-colour text that must stay white on a solid colour (danger button, ticked checkbox, current stage). */
 @utility text-on-accent {
   color: #fff;
+}
+
+/*
+ * Scrollbars: slim, and in the theme's colours instead of the system's grey or white bars.
+ * `scrollbar-color` covers Chrome, Edge and Firefox; the -webkit rules cover Safari.
+ */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink-300) transparent;
+  }
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-ink-300);
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--color-ink-400);
+    }
+  }
+}
+
+/* The sidebar is dark in both themes: a faint light thumb that only stands out on hover. */
+@utility scrollbar-on-dark {
+  color-scheme: dark;
+  scrollbar-color: rgb(255 255 255 / 0.12) transparent;
+  &:hover {
+    scrollbar-color: rgb(255 255 255 / 0.24) transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.12);
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.24);
+  }
 }

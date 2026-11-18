@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { avatarUrl } from "@/lib/avatar";
 import { LinkButton } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Team members" };
@@ -17,7 +18,7 @@ export default async function UsersPage() {
   const me = await requirePermission("user:manage");
   const users = await db.user.findMany({
     orderBy: [{ isActive: "desc" }, { name: "asc" }],
-    select: { id: true, name: true, email: true, role: true, jobTitle: true, isActive: true, lastLoginAt: true, mustChangePassword: true, lockedUntil: true },
+    select: { id: true, name: true, email: true, role: true, jobTitle: true, isActive: true, lastLoginAt: true, mustChangePassword: true, lockedUntil: true, avatarUpdatedAt: true },
   });
   const now = new Date();
 
@@ -49,7 +50,7 @@ export default async function UsersPage() {
                 <tr key={u.id} className={u.isActive ? "hover:bg-ink-50" : "bg-ink-50/50 text-ink-400"}>
                   <td className="px-5 py-3">
                     <Link href={`/settings/users/${u.id}`} className="flex items-center gap-3">
-                      <Avatar name={u.name} />
+                      <Avatar name={u.name} src={avatarUrl(u)} />
                       <span>
                         <span className="block font-medium text-ink-900 hover:text-brand-700">
                           {u.name} {u.id === me.id && <span className="font-normal text-ink-500">(you)</span>}

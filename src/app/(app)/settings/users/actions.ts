@@ -120,6 +120,18 @@ export async function setUserActive(id: string, active: boolean): Promise<{ mess
   return {};
 }
 
+/** Takes down someone's profile photo (e.g. an unsuitable picture). They can add a new one. */
+export async function removeUserPhoto(id: string): Promise<{ message?: string }> {
+  const admin = await authorizeAction("user:manage");
+  if (!admin) return { message: FORBIDDEN_MESSAGE };
+  const user = await db.user.findUnique({ where: { id }, select: { name: true } });
+  if (!user) return { message: "This person no longer exists." };
+  await db.$transaction([db.userAvatar.deleteMany({ where: { userId: id } }), db.user.update({ where: { id }, data: { avatarUpdatedAt: null } })]);
+  await audit({ actorId: admin.id, action: "update", entity: "User", entityId: id, summary: `${user.name}: profile photo removed by admin` });
+  revalidatePath("/", "layout");
+  return {};
+}
+
 /** For someone who lost their phone and their recovery codes. Signs them out; they set it up again. */
 export async function resetUserTwoFactor(id: string): Promise<{ message?: string }> {
   const admin = await authorizeAction("user:manage");

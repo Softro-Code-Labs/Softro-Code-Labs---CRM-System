@@ -25,6 +25,8 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // Profile photos are resized in the browser first; this leaves room for the rare one that can't be.
+  experimental: { serverActions: { bodySizeLimit: "3mb" } },
   // The CRM is fully authenticated and per-user, so every page renders at
   // request time. Cache Components is left off to keep data flow simple.
   output: "standalone",

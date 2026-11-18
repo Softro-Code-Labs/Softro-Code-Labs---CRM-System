@@ -529,6 +529,7 @@ Click **your name** at the top right to open **My profile**:
 
 - Update your **name, job title and phone / WhatsApp**.
 - See your **role** and what it allows.
+- **Profile photo:** click **Add a photo** (or drag one onto the circle). It's cropped to a square and shown next to your name across the CRM. Use **Change photo** or **Remove** any time. Hidden details in the file, like where the photo was taken, are removed automatically.
 - **Change your password:** enter your current password, then the new one twice. This signs you out on **every other device** (handy if you used a shared computer).
 
 ### Appearance: dark or light
@@ -570,6 +571,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 - **Change role:** open the person, pick a new role and **Save changes**. They're signed out so the new permissions apply straight away.
 - **Reset password:** gives them a new temporary password and signs them out everywhere. Use it when someone forgets their password.
 - **Unlock sign-in:** shown when someone is locked out after too many wrong passwords.
+- **Remove photo:** takes down someone's profile photo if it isn't suitable. They can add a new one.
 - **Reset two-step sign-in:** for someone who lost their phone *and* their recovery codes. It signs them out; they set it up again next time. Check it's really them first (call them).
 - **Deactivate:** for people who leave. They're signed out and can't sign in, but everything they created stays. Reassign their open deals and tasks first. **Reactivate** brings them back.
 - Status labels on the list: **Active**, **Temporary password** (hasn't signed in and changed it yet), **Locked** and **Deactivated**.

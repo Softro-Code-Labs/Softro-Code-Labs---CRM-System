@@ -54,6 +54,7 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change reply deadlines and working days | `src/lib/working-days.ts`, ticket times in `src/lib/tickets.ts` |
 | Change report figures | `src/lib/reports.ts`, CSV exports in `src/app/(app)/reports/export/route.ts` |
 | Change emails, team chat messages, the morning summary or the calendar feed | `src/lib/integrations/` |
+| Change profile photos (size, formats) | `src/lib/avatar.ts`, upload in `src/app/(app)/settings/profile/avatar-*.tsx`, served by `src/app/avatars/` |
 | Change sign-in, sessions or two-step sign-in | `src/app/login/`, `src/lib/auth.ts`, `src/lib/session.ts`, `src/lib/security/` |
 | Change rate limits | `src/lib/security/rate-limit.ts` (`LIMITS`) |
 | Change error alerts or the health check | `src/lib/monitoring/errors.ts`, `src/instrumentation.ts`, `src/app/api/health/` |

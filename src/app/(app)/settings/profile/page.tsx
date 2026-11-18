@@ -8,6 +8,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PasswordForm } from "@/components/crm/password-form";
 import { ProfileForm } from "./profile-form";
+import { AvatarCard } from "./avatar-card";
+import { avatarUrl } from "@/lib/avatar";
 import { CalendarCard, NotificationsCard } from "./notifications-card";
 import { emailConfigured } from "@/lib/integrations/email";
 import { TwoFactorCard } from "./two-factor-card";
@@ -29,7 +31,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       <PageHeader title="My profile" description={user.email} />
       <Card>
         <CardHeader title="Your details" />
-        <CardBody>
+        <CardBody className="space-y-6">
+          <AvatarCard name={user.name} initialUrl={avatarUrl(user)} />
           <ProfileForm initial={{ name: user.name, jobTitle: user.jobTitle ?? "", phone: user.phone ?? "" }} />
         </CardBody>
       </Card>
