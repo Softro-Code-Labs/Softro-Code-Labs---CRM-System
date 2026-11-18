@@ -721,6 +721,13 @@ Your **catalogue** of standard services, e.g. *Business website (5 pages)*, LKR 
 **Settings → System health** answers "is everything working?":
 
 - **Database** status and how fast it responds. **Version** shows which release is live.
+- **Plan usage:** how close we are to our hosting limits, as bars that turn amber at 80% and red at 95%:
+  - **Database storage**, e.g. *9.7 MB of 1.0 GB*. It doesn't reset. If it fills up, saving new records fails until we free space or upgrade.
+  - **Database compute** and **data transfer** this month, with a forecast for the month (needs the Neon API key, see the README). They reset each month. If compute runs out on the free plan, the database pauses until next month.
+  - **What takes the space:** the largest parts of the database (profile photos, the audit log, activities…).
+  - A link to Vercel's own usage page, because Vercel doesn't share usage with the app.
+
+  At 80% or more, every admin's morning email includes a **Plan limits** warning.
 - **Errors to look at:** when something breaks for someone, it's recorded here. The same error on different records is grouped into one row with a count. Admins get **one alert per error per hour**, in team chat if connected, otherwise by email. When it's fixed, click **Mark fixed**. If it happens again, it comes back.
 - **Configuration:** which settings are filled in (values are never shown).
 - **Uptime and backups:** the address for an uptime monitor and how backups work.

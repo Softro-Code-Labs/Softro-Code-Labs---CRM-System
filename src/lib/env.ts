@@ -13,6 +13,7 @@ export function envChecks(env: NodeJS.ProcessEnv = process.env): Check[] {
     { name: "WEBSITE_LEAD_API_KEY", ok: len("WEBSITE_LEAD_API_KEY") >= 24, required: false, hint: "24+ characters, same as the website" },
     { name: "RESEND_API_KEY", ok: len("RESEND_API_KEY") > 0 && Boolean(env.EMAIL_FROM), required: false, hint: "with EMAIL_FROM, for emails" },
     { name: "CRON_SECRET", ok: len("CRON_SECRET") >= 16, required: false, hint: "16+ characters, for the morning summary" },
+    { name: "NEON_API_KEY", ok: len("NEON_API_KEY") > 0 && Boolean(env.NEON_PROJECT_ID), required: false, hint: "with NEON_PROJECT_ID, for plan usage in System health" },
   ];
 }
 

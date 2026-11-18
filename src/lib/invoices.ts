@@ -115,7 +115,7 @@ export async function linesFromQuote(
   const amount = mode === "percent" ? round2((quoteNet * percent) / 100) : round2(quoteNet - already);
   if (amount <= 0) throw new Error("This quote is already fully invoiced.");
   if (mode === "percent" && round2(already + amount) > quoteNet + 0.01) throw new Error(`That's more than what's left to invoice on this quote.`);
-  const title = mode === "percent" ? `Advance payment (${percent}%)` : already > 0 ? "Balance payment" : "Payment";
+  const title = mode === "percent" ? `${already > 0 ? "Part" : "Advance"} payment (${percent}%)` : already > 0 ? "Balance payment" : "Payment";
   return totalsFor(
     [{ title, description: `${quote.number}: ${quote.title}`, quantity: 1, unit: "item", unitPrice: amount, discountPercent: 0 }],
     0,

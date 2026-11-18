@@ -85,6 +85,9 @@ Set these in `.env` locally, and in **Vercel → Settings → Environment Variab
 | 🔒 `RESEND_API_KEY` | ✅ | — | Sends emails. Its **own** Resend key (Sending access, softrocodelabs.com only) |
 | `EMAIL_FROM` | `Softro CRM <crm@softrocodelabs.com>` | — | Sender address, on a domain verified in Resend |
 | 🔒 `CRON_SECRET` | ✅ | — | Protects the 8 am summary job. 16+ characters |
+| 🔒 `NEON_API_KEY` | ✅ | — | Optional. Shows Neon compute hours and data transfer in System health. A **project-scoped** key for the CRM project (Neon → Organization settings → API keys) |
+| `NEON_PROJECT_ID` | ✅ | — | Optional, with `NEON_API_KEY`. Neon → your project → Settings (e.g. `summer-bush-30064139`) |
+| `PLAN_DB_STORAGE_MB`, `PLAN_COMPUTE_HOURS`, `PLAN_TRANSFER_GB` | — | — | Optional. Plan limits for the usage panel. Default to Neon's free plan: 1024, 100, 5. Change them if you upgrade. |
 | `MIGRATE_ON_BUILD` | — | `true` only with its own branch | Lets preview deploys update their own database |
 | `SEED_ADMIN_*` | — | — | Local `.env` only, used by `pnpm db:seed` |
 
@@ -127,8 +130,8 @@ Responses: `201` created · `401` wrong key · `422` invalid data · `429` too m
 
 | Layer | Command | Covers |
 |---|---|---|
-| **Unit** (48) | `pnpm test` | Two-step codes (RFC 6238 vectors), encryption, recovery codes, working days in Sri Lanka time, quote maths and VAT, amounts in words, invoice states and balances, ticket SLA, permissions, report periods, CSV safety, email escaping, webhook allow-list, secret guard, avatars |
-| **Browser** (17) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets, theme, profile photos, project access and handover, quote → advance invoice → payment and receipt → balance → paid |
+| **Unit** (53) | `pnpm test` | Two-step codes (RFC 6238 vectors), encryption, recovery codes, working days in Sri Lanka time, quote maths and VAT, amounts in words, invoice states and balances, ticket SLA, permissions, report periods, CSV safety, email escaping, webhook allow-list, secret guard, avatars, plan usage |
+| **Browser** (18) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets, theme, profile photos, project access and handover, quote → advance invoice → payment and receipt → balance → paid, plan usage panel |
 
 Browser tests create and change records, so run them against a **separate test database**, never Neon:
 
@@ -159,7 +162,8 @@ In GitHub → Settings → Branches, protect `main` so the **CI** checks must pa
 3. Point `crm.softrocodelabs.com` at Vercel (a Cloudflare CNAME, DNS only).
 
 **Checklist**
-- [ ] Settings → **System health**: database OK, every required setting shows **Set**
+- [ ] Settings → **System health**: database OK, every required setting shows **Set**, **Plan usage** shows storage (and compute, once `NEON_API_KEY` is set)
+- [ ] Vercel on the **Pro** plan: the free Hobby plan is for non-commercial use only
 - [ ] Settings → **Integrations**: test email arrives, test chat message arrives
 - [ ] A test enquiry from the website appears in **Leads** and its owner gets an email
 - [ ] **Two-step sign-in** on for every admin, then **Require for admins and managers** switched on (Settings → Security)
