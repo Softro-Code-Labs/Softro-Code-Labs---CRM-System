@@ -11,6 +11,9 @@ import { ProfileForm } from "./profile-form";
 import { CalendarCard, NotificationsCard } from "./notifications-card";
 import { emailConfigured } from "@/lib/integrations/email";
 import { TwoFactorCard } from "./two-factor-card";
+import { ThemeChooser } from "@/components/theme/theme-switcher";
+import { parseTheme, THEME_COOKIE } from "@/lib/theme";
+import { cookies } from "next/headers";
 import { TWO_FACTOR_ROLES, twoFactorPolicy } from "@/lib/security/two-factor";
 
 export const metadata: Metadata = { title: "My profile" };
@@ -47,6 +50,12 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <CardBody className="flex flex-wrap items-center gap-3 text-sm text-ink-600">
           <Badge tone="brand">{ROLE_LABELS[user.role]}</Badge>
           {ROLE_DESCRIPTIONS[user.role]}. Ask an admin to change it.
+        </CardBody>
+      </Card>
+      <Card>
+        <CardHeader title="Appearance" description="Saved on this browser. Dark is the default." />
+        <CardBody>
+          <ThemeChooser initial={parseTheme((await cookies()).get(THEME_COOKIE)?.value)} />
         </CardBody>
       </Card>
       <Card id="two-step">

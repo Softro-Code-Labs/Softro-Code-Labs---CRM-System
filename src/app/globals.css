@@ -49,3 +49,139 @@
     @apply bg-brand-100 text-brand-900;
   }
 }
+
+/*
+ * Dark theme (the default). Instead of restyling every screen, dark mode redefines the colour
+ * tokens: the ink greys flip, `white` becomes the card surface, and the soft tints (50–300) of each
+ * status colour become dark washes while their text shades (700–900) become light.
+ * Generated from the light values above and Tailwind's palette; keep them in step if you change one.
+ *
+ * `.theme-fixed` keeps the original palette inside it whatever the theme: the sidebar and sign-in
+ * screens (always dark), and paper-like things that must stay white (the quote preview, QR codes).
+ */
+:root[data-theme="dark"] {
+  --color-ink-50: #18171a;
+  --color-ink-100: #211f23;
+  --color-ink-200: #2e2c30;
+  --color-ink-300: #45423f;
+  --color-ink-400: #7a756e;
+  --color-ink-500: #9a958d;
+  --color-ink-600: #b8b3aa;
+  --color-ink-700: #d3cec5;
+  --color-ink-800: #e6e1d9;
+  --color-ink-900: #f3efe8;
+  --color-ink-950: #faf8f4;
+  --color-white: #1c1b1f;
+  --color-canvas: #111013;
+  --color-red-50: color-mix(in oklab, oklch(63.7% 0.237 25.331) 13%, #1c1b1f);
+  --color-red-100: color-mix(in oklab, oklch(63.7% 0.237 25.331) 20%, #1c1b1f);
+  --color-red-200: color-mix(in oklab, oklch(63.7% 0.237 25.331) 36%, #1c1b1f);
+  --color-red-300: color-mix(in oklab, oklch(70.4% 0.191 22.216) 60%, #1c1b1f);
+  --color-red-700: oklch(80.8% 0.114 19.571);
+  --color-red-800: oklch(88.5% 0.062 18.334);
+  --color-red-900: oklch(93.6% 0.032 17.717);
+  --color-emerald-50: color-mix(in oklab, oklch(69.6% 0.17 162.48) 13%, #1c1b1f);
+  --color-emerald-100: color-mix(in oklab, oklch(69.6% 0.17 162.48) 20%, #1c1b1f);
+  --color-emerald-200: color-mix(in oklab, oklch(69.6% 0.17 162.48) 36%, #1c1b1f);
+  --color-emerald-300: color-mix(in oklab, oklch(76.5% 0.177 163.223) 60%, #1c1b1f);
+  --color-emerald-700: oklch(84.5% 0.143 164.978);
+  --color-emerald-800: oklch(90.5% 0.093 164.15);
+  --color-emerald-900: oklch(95% 0.052 163.051);
+  --color-amber-50: color-mix(in oklab, oklch(76.9% 0.188 70.08) 13%, #1c1b1f);
+  --color-amber-100: color-mix(in oklab, oklch(76.9% 0.188 70.08) 20%, #1c1b1f);
+  --color-amber-200: color-mix(in oklab, oklch(76.9% 0.188 70.08) 36%, #1c1b1f);
+  --color-amber-300: color-mix(in oklab, oklch(82.8% 0.189 84.429) 60%, #1c1b1f);
+  --color-amber-700: oklch(87.9% 0.169 91.605);
+  --color-amber-800: oklch(92.4% 0.12 95.746);
+  --color-amber-900: oklch(96.2% 0.059 95.617);
+  --color-sky-50: color-mix(in oklab, oklch(68.5% 0.169 237.323) 13%, #1c1b1f);
+  --color-sky-100: color-mix(in oklab, oklch(68.5% 0.169 237.323) 20%, #1c1b1f);
+  --color-sky-200: color-mix(in oklab, oklch(68.5% 0.169 237.323) 36%, #1c1b1f);
+  --color-sky-300: color-mix(in oklab, oklch(74.6% 0.16 232.661) 60%, #1c1b1f);
+  --color-sky-700: oklch(82.8% 0.111 230.318);
+  --color-sky-800: oklch(90.1% 0.058 230.902);
+  --color-sky-900: oklch(95.1% 0.026 236.824);
+  --color-violet-50: color-mix(in oklab, oklch(60.6% 0.25 292.717) 13%, #1c1b1f);
+  --color-violet-100: color-mix(in oklab, oklch(60.6% 0.25 292.717) 20%, #1c1b1f);
+  --color-violet-200: color-mix(in oklab, oklch(60.6% 0.25 292.717) 36%, #1c1b1f);
+  --color-violet-300: color-mix(in oklab, oklch(70.2% 0.183 293.541) 60%, #1c1b1f);
+  --color-violet-700: oklch(81.1% 0.111 293.571);
+  --color-violet-800: oklch(89.4% 0.057 293.283);
+  --color-violet-900: oklch(94.3% 0.029 294.588);
+  --color-brand-50: color-mix(in oklab, #e23a4c 13%, #1c1b1f);
+  --color-brand-100: color-mix(in oklab, #e23a4c 20%, #1c1b1f);
+  --color-brand-200: color-mix(in oklab, #e23a4c 36%, #1c1b1f);
+  --color-brand-300: color-mix(in oklab, #ef4c5b 60%, #1c1b1f);
+  --color-brand-700: #f0919c;
+  --color-brand-800: #f6bec5;
+  --color-brand-900: #fbe0e3;
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .theme-fixed {
+  --color-ink-50: #f5f2ec;
+  --color-ink-100: #ece8e0;
+  --color-ink-200: #ddd8ce;
+  --color-ink-300: #bdb7ac;
+  --color-ink-400: #8f8a82;
+  --color-ink-500: #6e6962;
+  --color-ink-600: #524e49;
+  --color-ink-700: #3a3734;
+  --color-ink-800: #24221f;
+  --color-ink-900: #161517;
+  --color-ink-950: #0b0b0d;
+  --color-white: #fff;
+  --color-canvas: #f8f6f2;
+  --color-red-50: oklch(97.1% 0.013 17.38);
+  --color-red-100: oklch(93.6% 0.032 17.717);
+  --color-red-200: oklch(88.5% 0.062 18.334);
+  --color-red-300: oklch(80.8% 0.114 19.571);
+  --color-red-700: oklch(50.5% 0.213 27.518);
+  --color-red-800: oklch(44.4% 0.177 26.899);
+  --color-red-900: oklch(39.6% 0.141 25.723);
+  --color-emerald-50: oklch(97.9% 0.021 166.113);
+  --color-emerald-100: oklch(95% 0.052 163.051);
+  --color-emerald-200: oklch(90.5% 0.093 164.15);
+  --color-emerald-300: oklch(84.5% 0.143 164.978);
+  --color-emerald-700: oklch(50.8% 0.118 165.612);
+  --color-emerald-800: oklch(43.2% 0.095 166.913);
+  --color-emerald-900: oklch(37.8% 0.077 168.94);
+  --color-amber-50: oklch(98.7% 0.022 95.277);
+  --color-amber-100: oklch(96.2% 0.059 95.617);
+  --color-amber-200: oklch(92.4% 0.12 95.746);
+  --color-amber-300: oklch(87.9% 0.169 91.605);
+  --color-amber-700: oklch(55.5% 0.163 48.998);
+  --color-amber-800: oklch(47.3% 0.137 46.201);
+  --color-amber-900: oklch(41.4% 0.112 45.904);
+  --color-sky-50: oklch(97.7% 0.013 236.62);
+  --color-sky-100: oklch(95.1% 0.026 236.824);
+  --color-sky-200: oklch(90.1% 0.058 230.902);
+  --color-sky-300: oklch(82.8% 0.111 230.318);
+  --color-sky-700: oklch(50% 0.134 242.749);
+  --color-sky-800: oklch(44.3% 0.11 240.79);
+  --color-sky-900: oklch(39.1% 0.09 240.876);
+  --color-violet-50: oklch(96.9% 0.016 293.756);
+  --color-violet-100: oklch(94.3% 0.029 294.588);
+  --color-violet-200: oklch(89.4% 0.057 293.283);
+  --color-violet-300: oklch(81.1% 0.111 293.571);
+  --color-violet-700: oklch(49.1% 0.27 292.581);
+  --color-violet-800: oklch(43.2% 0.232 292.759);
+  --color-violet-900: oklch(38% 0.189 293.745);
+  --color-brand-50: #fdf1f2;
+  --color-brand-100: #fbe0e3;
+  --color-brand-200: #f6bec5;
+  --color-brand-300: #f0919c;
+  --color-brand-700: #a70b21;
+  --color-brand-800: #8a0b1d;
+  --color-brand-900: #6f0d1a;
+  color-scheme: light;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* On-colour text that must stay white on a solid colour (danger button, ticked checkbox, current stage). */
+@utility text-on-accent {
+  color: #fff;
+}

@@ -531,6 +531,16 @@ Click **your name** at the top right to open **My profile**:
 - See your **role** and what it allows.
 - **Change your password:** enter your current password, then the new one twice. This signs you out on **every other device** (handy if you used a shared computer).
 
+### Appearance: dark or light
+
+The CRM opens in **dark mode**. To change it, click the **moon icon** at the top right (or go to **My profile → Appearance**) and choose:
+
+- **Dark**, the default, easy on the eyes;
+- **Light**, best in bright rooms;
+- **Match my device**, which follows your computer or phone and switches with it.
+
+Your choice is saved on that browser, so you can use dark on your laptop and light on your phone. Quote previews always stay white, like the printed PDF.
+
 ### Two-step sign-in (recommended for everyone)
 
 With two-step sign-in, a stolen or guessed password isn't enough to get into the CRM: you also need your phone.

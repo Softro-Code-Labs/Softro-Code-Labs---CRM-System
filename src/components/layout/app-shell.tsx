@@ -9,8 +9,10 @@ import { Avatar } from "@/components/ui/avatar";
 import { ROLE_LABELS } from "@/lib/permissions";
 import { logout } from "@/app/login/actions";
 import type { CurrentUser } from "@/lib/auth";
+import { ThemeMenu } from "@/components/theme/theme-switcher";
+import type { ThemePreference } from "@/lib/theme";
 
-export function AppShell({ user, children }: { user: CurrentUser; children: React.ReactNode }) {
+export function AppShell({ user, theme, children }: { user: CurrentUser; theme: ThemePreference; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,6 +26,7 @@ export function AppShell({ user, children }: { user: CurrentUser; children: Reac
           <SoftroMark size={26} className="lg:hidden" />
           <div className="flex-1" />
           <div className="flex items-center gap-3">
+            <ThemeMenu initial={theme} />
             <Link href="/settings/profile" className="flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-ink-100" title="My profile">
               <Avatar name={user.name} />
               <div className="hidden text-right sm:block">

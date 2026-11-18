@@ -64,7 +64,7 @@ export function TwoFactorCard({ enabled, recoveryLeft, required, onFinished }: {
           <li>Type the 6-digit code the app shows for <strong>Softro CRM</strong>.</li>
         </ol>
         <div className="flex flex-wrap items-start gap-5">
-          <div className="size-44 rounded-lg border border-ink-200 bg-white p-2 [&_svg]:size-full" role="img" aria-label="QR code for your authenticator app" dangerouslySetInnerHTML={{ __html: setup.qrSvg }} />
+          <div className="theme-fixed size-44 rounded-lg border border-ink-200 bg-white p-2 [&_svg]:size-full" role="img" aria-label="QR code for your authenticator app" dangerouslySetInnerHTML={{ __html: setup.qrSvg }} />
           <div className="space-y-2">
             <p className="text-xs text-ink-500">Can&apos;t scan? Enter this key in the app instead:</p>
             <p className="font-mono text-sm font-medium break-all text-ink-900" data-testid="totp-secret">{setup.secret}</p>

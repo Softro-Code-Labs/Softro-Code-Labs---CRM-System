@@ -31,7 +31,7 @@ export function DoneCheckbox({ id, done, canToggle, label }: { id: string; done:
         }
         className={cn(
           "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-          checked ? "border-emerald-600 bg-emerald-600 text-white" : "border-ink-300 hover:border-ink-600",
+          checked ? "border-emerald-600 bg-emerald-600 text-on-accent" : "border-ink-300 hover:border-ink-600",
           !canToggle && "cursor-not-allowed opacity-50",
         )}
       >
