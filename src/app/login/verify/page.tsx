@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Enter your code" };
 export default async function VerifyPage() {
   if (!(await getPendingTwoFactor())) redirect("/login?expired=1");
   return (
-    <main className="relative flex min-h-full items-center justify-center overflow-hidden bg-ink-950 px-4 py-12">
+    <main className="theme-fixed relative flex min-h-full items-center justify-center overflow-hidden bg-ink-950 px-4 py-12">
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
           <SoftroCrmLogo tone="dark" size="lg" />

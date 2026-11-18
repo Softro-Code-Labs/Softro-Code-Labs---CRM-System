@@ -175,12 +175,18 @@ flowchart TB
 
 One idea runs through the design: **calm, dark-and-crimson, like softrocodelabs.com.** Every list, detail page and form has the same layout, so once you've learnt one area you know them all.
 
-| Colour | Used for |
-|---|---|
-| Ink `#0b0b0d` → `#161517` | Sidebar, sign-in screen and headings |
-| Warm paper `#f5f2ec` | Page background |
-| Softro crimson `#a70b21` / `#c2283a` | Brand colour, active menu item, main highlights, charts |
-| Green · amber · red | Status only: on track · due soon · overdue (always with a word, never colour alone) |
+**Dark mode is the default.** Anyone can switch to light, or follow their device, from the moon icon at the top right; the choice is remembered per browser. The sidebar and sign-in screens are dark in both themes, and quote previews stay white like the printed PDF.
+
+| Colour | Dark theme (default) | Light theme |
+|---|---|---|
+| Page background | Near-black `#111013` | Warm paper `#f8f6f2` |
+| Cards | Charcoal `#1c1b1f` | White |
+| Text | Warm off-white `#f3efe8` | Ink `#161517` |
+| Sidebar and sign-in | Ink `#0b0b0d` | Ink `#0b0b0d` |
+| Brand: active menu item, highlights, charts | Softro crimson `#c2283a` / `#a70b21` | Softro crimson |
+| Status: on track · due soon · overdue | Green · amber · red, as soft dark washes | Green · amber · red, as soft tints |
+
+Status colours always come with a word or icon, never colour alone.
 
 **Font:** Geist Sans for everything, Geist Mono for numbers like Q-2026-0001. Both are self-hosted.
 

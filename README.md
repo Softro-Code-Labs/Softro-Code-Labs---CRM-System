@@ -57,7 +57,8 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change sign-in, sessions or two-step sign-in | `src/app/login/`, `src/lib/auth.ts`, `src/lib/session.ts`, `src/lib/security/` |
 | Change rate limits | `src/lib/security/rate-limit.ts` (`LIMITS`) |
 | Change error alerts or the health check | `src/lib/monitoring/errors.ts`, `src/instrumentation.ts`, `src/app/api/health/` |
-| Change colours and fonts | `src/app/globals.css` (`ink-*` greys and `brand-*` crimson at the top) |
+| Change colours and fonts | `src/app/globals.css`: `ink-*` greys and `brand-*` crimson at the top, the dark theme below them |
+| Change dark/light mode or the switcher | `src/lib/theme/`, `src/components/theme/theme-switcher.tsx` |
 | Change the logo | `src/components/brand/` |
 | Change the staff guide | `docs/USER-GUIDE.md` |
 
@@ -186,5 +187,6 @@ Check the data, then make that branch the main one in Neon, or copy back only wh
 - **Numbers like Q-2026-0001, C-…, T-…** come from the `Counter` table inside a transaction, so two people can never get the same number.
 - **Notifications never slow anyone down.** Emails and chat messages are sent after the response (`after()`), and a failed send never breaks the action.
 - **Read a migration's SQL before committing it.** Prisma writes it, but a renamed field can come out as "drop and add", which loses data. Rename it by hand in the SQL instead.
+- **Dark is the default theme.** It works by redefining the colour tokens on `<html data-theme="dark">`, so screens are written once with the normal classes (`bg-white`, `text-ink-900`, `bg-red-50`…) and both themes just work. Use `text-on-accent` (not `text-white`) for text on a solid colour, and wrap anything that must look the same in both themes in `theme-fixed` (the sidebar, sign-in screens, quote preview, QR codes).
 - **Running `next dev`** may create `AGENTS.md` in the root. Commit it or ignore it.
 - Release history and the reasoning behind each part are in **[SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md#how-it-was-built)**.

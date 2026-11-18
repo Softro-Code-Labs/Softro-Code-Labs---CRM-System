@@ -25,7 +25,7 @@ export function QuoteStatusActions({ id, status, canEdit, canCreate, hasOpenDeal
         )}
         {canEdit && status === "SENT" && (
           <>
-            <Button size="sm" disabled={pending} onClick={() => run(() => setQuoteStatus(id, "ACCEPTED"))} className="bg-emerald-600 hover:bg-emerald-700">
+            <Button size="sm" disabled={pending} onClick={() => run(() => setQuoteStatus(id, "ACCEPTED"))} className="bg-emerald-600 text-on-accent hover:bg-emerald-500">
               <CheckCircle2 className="size-4" aria-hidden /> Accepted
             </Button>
             <Button size="sm" variant="secondary" disabled={pending} onClick={() => run(() => setQuoteStatus(id, "DECLINED"))}>

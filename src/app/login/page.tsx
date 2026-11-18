@@ -12,7 +12,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   if (user) redirect(user.mustChangePassword ? "/change-password" : "/dashboard");
 
   return (
-    <main className="relative flex min-h-full items-center justify-center overflow-hidden bg-ink-950 px-4 py-12">
+    <main className="theme-fixed relative flex min-h-full items-center justify-center overflow-hidden bg-ink-950 px-4 py-12">
       {/* Soft crimson glow, echoing the website hero */}
       <div
         aria-hidden

@@ -15,7 +15,7 @@ export default async function SetupTwoFactorPage() {
   if (!(await mustSetUpTwoFactor(user))) redirect("/dashboard");
 
   return (
-    <main className="flex min-h-full items-center justify-center bg-ink-950 px-4 py-12">
+    <main className="theme-fixed flex min-h-full items-center justify-center bg-ink-950 px-4 py-12">
       <div className="w-full max-w-lg">
         <div className="mb-8 flex flex-col items-center text-center">
           <SoftroCrmLogo tone="dark" size="lg" />

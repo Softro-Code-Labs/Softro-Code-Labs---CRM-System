@@ -35,7 +35,7 @@ export function StageBar({ dealId, stages, currentStageId, status, canEdit }: { 
                 aria-current={current ? "step" : undefined}
                 className={cn(
                   "flex w-full items-center justify-center gap-1.5 px-2 py-2.5 transition-colors",
-                  current && "bg-brand-600 text-white",
+                  current && "bg-brand-600 text-on-accent",
                   done && "bg-brand-50 text-brand-700",
                   !current && !done && "text-ink-500",
                   canEdit && !closed && !current && "hover:bg-ink-50 hover:text-ink-900",
@@ -78,7 +78,7 @@ export function CloseDealButtons({ dealId, status, canEdit }: { dealId: string; 
     <div className="space-y-2">
       {!askReason ? (
         <div className="flex gap-2">
-          <Button size="sm" disabled={pending} onClick={() => run(() => markDealWon(dealId))} className="bg-emerald-600 hover:bg-emerald-700">
+          <Button size="sm" disabled={pending} onClick={() => run(() => markDealWon(dealId))} className="bg-emerald-600 text-on-accent hover:bg-emerald-500">
             <Trophy className="size-4" aria-hidden /> Mark won
           </Button>
           <Button size="sm" variant="secondary" disabled={pending} onClick={() => setAskReason(true)}>

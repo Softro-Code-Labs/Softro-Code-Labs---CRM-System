@@ -14,7 +14,8 @@ export function QuoteDocument({ quote, org }: { quote: FullQuote; org: Org }) {
   const contact = quote.contact;
 
   return (
-    <article className="rounded-xl border border-ink-200 bg-white px-8 py-10 shadow-sm sm:px-12">
+    // Paper-like preview of the PDF: stays white in dark mode, like the real document.
+    <article className="theme-fixed rounded-xl border border-ink-200 bg-white px-8 py-10 text-ink-900 shadow-sm sm:px-12">
       <header className="flex flex-wrap items-start justify-between gap-6 border-b border-ink-100 pb-6">
         <div className="flex items-start gap-3">
           <SoftroMark size={44} />
