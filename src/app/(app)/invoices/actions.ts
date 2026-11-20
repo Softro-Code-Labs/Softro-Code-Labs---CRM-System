@@ -214,22 +214,30 @@ export async function recordPayment(invoiceId: string, _prev: FormState, formDat
   return { ok: true, message: `Payment recorded. Receipt ${payment.receiptNumber}.`, receiptId: payment.id };
 }
 
-/** For a payment recorded by mistake. The receipt number isn't reused. */
+/**
+ * For a payment recorded by mistake. If its receipt was the latest one issued, the number is freed,
+ * so the next payment gets it again (RCT-2026-0001 → cancelled → next is RCT-2026-0001).
+ * An older receipt's number can't be reused without making a duplicate, so it's left as a gap.
+ */
 export async function deletePayment(paymentId: string): Promise<{ message?: string }> {
   const user = await authorizeAction("payment:delete");
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const p = await db.payment.findUnique({ where: { id: paymentId }, include: { invoice: true } });
   if (!p) return {};
   const owner = await dealOwner(p.invoice.dealId);
+  let reused = false;
   await db.$transaction(async (tx) => {
     await tx.payment.delete({ where: { id: paymentId } });
+    const [, year, seq] = p.receiptNumber.split("-");
+    // Only steps back when this was the newest receipt; safe if someone records a payment at the same moment.
+    reused = (await tx.counter.updateMany({ where: { key: `receipt-${year}`, value: Number(seq) }, data: { value: { decrement: 1 } } })).count > 0;
     const updated = await tx.invoice.update({
       where: { id: p.invoiceId },
       data: { amountPaid: { decrement: p.amount }, ...(p.invoice.status === "PAID" && { status: "ISSUED", paidAt: null }) },
     });
     await syncFollowUpTask(tx, updated, owner);
   });
-  await audit({ actorId: user.id, action: "delete", entity: "Invoice", entityId: p.invoiceId, summary: `Cancelled ${p.receiptNumber} (${formatMoney(p.amount, p.invoice.currency)}) on ${p.invoice.number}` });
+  await audit({ actorId: user.id, action: "delete", entity: "Invoice", entityId: p.invoiceId, summary: `Cancelled ${p.receiptNumber} (${formatMoney(p.amount, p.invoice.currency)}) on ${p.invoice.number}${reused ? "; number freed for the next payment" : ""}` });
   refresh(p.invoice);
   return {};
 }

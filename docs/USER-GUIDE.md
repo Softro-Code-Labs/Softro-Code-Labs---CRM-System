@@ -408,9 +408,10 @@ You can't record more than the balance. Receipts for cheques say *subject to rea
 
 ### Mistakes
 
-- **Wrong payment?** A manager or admin clicks **Cancel** next to it. The receipt number isn't reused, so tell the client to ignore that receipt.
+- **Wrong payment?** A manager or admin clicks **Cancel** next to it. If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
 - **Wrong invoice?** If nothing has been paid, a manager or admin can **Void** it, then create the right one. Invoices are never deleted, so the numbers stay in order for the accountant.
 - **Voided by mistake?** A manager or admin opens it and clicks **Restore invoice**. It's unpaid again with the same number. The CRM won't restore it if the quote has been invoiced again since, because that would bill the client twice: void the replacement first.
+- **Something the screens can't undo** (a wrong number, test invoices on the live CRM): admins use the ready-made scripts in [DATABASE-FIXES.md](DATABASE-FIXES.md).
 
 > **Ask the accountant** to check one Tax Invoice before you send your first, in case they want anything else on it.
 

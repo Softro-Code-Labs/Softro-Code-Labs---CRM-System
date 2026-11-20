@@ -5,7 +5,7 @@ Softro Code Labs' own CRM: **leads, deals, quotes, invoices, contracts, support 
 Live at **[softro-code-labs-crm-system.vercel.app](https://softro-code-labs-crm-system.vercel.app)**, moving to **crm.softrocodelabs.com** (team members only)
 
 > New here? Start with **[SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md)**. It explains the whole project in plain words.
-> Using the CRM day to day? Read the **[user guide](docs/USER-GUIDE.md)**.
+> Using the CRM day to day? Read the **[user guide](docs/USER-GUIDE.md)**. Admins fixing a numbering or test-data mistake: **[database fixes](docs/DATABASE-FIXES.md)**.
 
 **Built with:** Next.js 16 · React 19 · TypeScript · PostgreSQL (Neon) · Prisma 7 · Tailwind CSS v4 · Zod · jose · React-PDF · Resend · Vitest · Playwright · Vercel
 
@@ -65,6 +65,7 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change dark/light mode or the switcher | `src/lib/theme/`, `src/components/theme/theme-switcher.tsx` |
 | Change the logo | `src/components/brand/` |
 | Change the staff guide | `docs/USER-GUIDE.md` |
+| Fix a numbering mistake or remove test invoices, receipts or quotes | `docs/DATABASE-FIXES.md` (ready-made SQL for the Neon SQL Editor) |
 
 **Adding a field to something (e.g. a "budget" on deals):** add it in `prisma/schema.prisma` → `pnpm db:migrate --name deal_budget` → add it to the Zod schema in `src/lib/validation/` → add the input to the form and show it on the detail page. Every page and action already re-checks the user's role, so no extra security work is needed.
 

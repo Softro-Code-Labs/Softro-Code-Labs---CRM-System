@@ -20,6 +20,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { initialFormState } from "@/lib/form";
+import { ConfirmAction } from "@/components/ui/confirm-action";
 import {
   ACCESS_CHECKLIST,
   ACCOUNT_OWNER_LABELS,
@@ -284,7 +285,6 @@ export function ServicesManager({
   canEdit: boolean;
 }) {
   const [editing, setEditing] = useState<string | "new" | null>(null);
-  const [pending, start] = useTransition();
   return (
     <div>
       {services.length > 0 ? (
@@ -373,24 +373,18 @@ export function ServicesManager({
                         >
                           <Pencil className="size-4" />
                         </button>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `Remove ${s.name} from this project?`,
-                              )
-                            )
-                              start(
-                                async () => void (await deleteService(s.id)),
-                              );
-                          }}
+                        <ConfirmAction
+                          iconOnly
                           className="rounded p-1.5 text-ink-500 hover:bg-red-50 hover:text-red-600"
-                          aria-label={`Remove ${s.name}`}
+                          ariaLabel={`Remove ${s.name}`}
+                          question={`Remove ${s.name}?`}
+                          yes="Yes, remove"
+                          onConfirm={async () =>
+                            void (await deleteService(s.id))
+                          }
                         >
                           <Trash2 className="size-4" />
-                        </button>
+                        </ConfirmAction>
                       </td>
                     )}
                   </tr>
@@ -563,7 +557,13 @@ export function Checklist({
 
 /* ── Project Delivery Pack ─────────────────────────────────────────────── */
 
-export function HandoverButton({ accessId, exists }: { accessId: string; exists: boolean }) {
+export function HandoverButton({
+  accessId,
+  exists,
+}: {
+  accessId: string;
+  exists: boolean;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -585,7 +585,13 @@ export function HandoverButton({ accessId, exists }: { accessId: string; exists:
         }
       >
         <FileDown className="size-4" aria-hidden />{" "}
-        {pending ? (exists ? "Updating…" : "Creating…") : exists ? "Update Project Delivery Pack" : "Create Project Delivery Pack"}
+        {pending
+          ? exists
+            ? "Updating…"
+            : "Creating…"
+          : exists
+            ? "Update Project Delivery Pack"
+            : "Create Project Delivery Pack"}
       </Button>
       {error && <span className="text-xs text-red-600">{error}</span>}
     </span>

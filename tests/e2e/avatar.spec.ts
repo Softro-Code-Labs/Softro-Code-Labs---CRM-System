@@ -37,6 +37,7 @@ test("a person adds a profile photo, the team sees it, and it can be removed", a
   await signIn(page, USERS.viewer);
   await page.goto("/settings/profile");
   await page.getByRole("button", { name: "Remove" }).click();
+  await page.getByRole("button", { name: "Yes, remove" }).click();
   await expect(page.getByText("Photo removed.")).toBeVisible();
   await expect(page.locator("header img")).toHaveCount(0);
 });

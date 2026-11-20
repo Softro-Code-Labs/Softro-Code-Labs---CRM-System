@@ -30,7 +30,7 @@ import {
   LoginSheetForm,
   ServicesManager,
 } from "./access-controls";
-import { deleteAccess, deleteHandover } from "./actions";
+import { deleteAccess } from "./actions";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -62,7 +62,7 @@ export default async function ProjectAccessPage({ params }: Props) {
   const canEdit = can(user.role, "access:manage");
   const check = access ? checkState(access) : null;
   const archived = access?.status === "ARCHIVED";
-  const [current, ...older] = access?.handovers ?? [];
+  const current = access?.handovers[0];
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -210,21 +210,6 @@ export default async function ProjectAccessPage({ params }: Props) {
                     </span>
                   </span>
                 </a>
-              )}
-              {older.length > 0 && (
-                <div className="border-b border-ink-100 px-5 py-3">
-                  <p className="mb-1.5 text-xs font-medium text-ink-600">Extra packs (made before packs were updated in place)</p>
-                  <ul className="space-y-1.5">
-                    {older.map((h) => (
-                      <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                        <a href={`/handovers/${h.id}/pdf`} target="_blank" rel="noopener" className="font-mono whitespace-nowrap text-ink-600 hover:text-brand-700">
-                          {h.number} · {formatDate(h.issuedAt)}
-                        </a>
-                        {can(user.role, "access:delete") && <ConfirmDelete action={deleteHandover.bind(null, h.id)} label="Delete" />}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               )}
               {canEdit && (
                 <CardBody className="space-y-2">

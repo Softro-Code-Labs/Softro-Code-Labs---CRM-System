@@ -160,18 +160,6 @@ export async function createHandover(accessId: string): Promise<{ id?: string; m
   return { id: handover.id };
 }
 
-/** Removes an extra Project Delivery Pack (e.g. a duplicate made before packs were updated in place). */
-export async function deleteHandover(id: string): Promise<{ message?: string }> {
-  const user = await authorizeAction("access:delete");
-  if (!user) return { message: FORBIDDEN_MESSAGE };
-  const h = await db.handover.findUnique({ where: { id }, include: { access: { select: { dealId: true, deal: { select: { title: true } } } } } });
-  if (!h) return {};
-  await db.handover.delete({ where: { id } });
-  await audit({ actorId: user.id, action: "delete", entity: "ProjectAccess", entityId: h.access.dealId, summary: `Project Delivery Pack ${h.number} deleted: ${h.access.deal.title}` });
-  refresh(h.access.dealId);
-  return {};
-}
-
 export async function deleteAccess(accessId: string): Promise<Result> {
   const user = await authorizeAction("access:delete");
   if (!user) return { message: FORBIDDEN_MESSAGE };
