@@ -120,6 +120,8 @@ export async function deleteOpenTasks(tx: Prisma.TransactionClient, ids: (string
 /** What the client sees. Frozen when issued, so the same PDF can be downloaded again later. No internal notes, no secret locations. */
 export type HandoverSnapshot = {
   number: string;
+  /** 1 when first made; goes up each time the pack is updated. Older snapshots don't have it. */
+  version?: number;
   issuedAt: string;
   issuedBy: string | null;
   project: { title: string; client: string | null; contact: string | null };

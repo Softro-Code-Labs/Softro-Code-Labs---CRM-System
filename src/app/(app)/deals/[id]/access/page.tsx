@@ -12,7 +12,7 @@ import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { formatDate, toDateInput } from "@/lib/utils";
-import { checkState, getAccessForDeal } from "@/lib/project-access";
+import { checkState, getAccessForDeal, type HandoverSnapshot } from "@/lib/project-access";
 import {
   ACCESS_CHECKLIST,
   TWO_STEP_LABELS,
@@ -30,7 +30,7 @@ import {
   LoginSheetForm,
   ServicesManager,
 } from "./access-controls";
-import { deleteAccess } from "./actions";
+import { deleteAccess, deleteHandover } from "./actions";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -62,6 +62,7 @@ export default async function ProjectAccessPage({ params }: Props) {
   const canEdit = can(user.role, "access:manage");
   const check = access ? checkState(access) : null;
   const archived = access?.status === "ARCHIVED";
+  const [current, ...older] = access?.handovers ?? [];
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -193,35 +194,42 @@ export default async function ProjectAccessPage({ params }: Props) {
                 title="Project Delivery Pack"
                 description="For the client: services, owners, renewals and support. No passwords: those go in the login sheet."
               />
-              {access.handovers.length > 0 && (
-                <ul className="divide-y divide-ink-100 border-b border-ink-100">
-                  {access.handovers.map((h) => (
-                    <li key={h.id}>
-                      <a
-                        href={`/handovers/${h.id}/pdf`}
-                        target="_blank"
-                        rel="noopener"
-                        className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ink-50"
-                      >
-                        <span className="flex items-center gap-2 text-ink-800">
-                          <FileText
-                            className="size-4 text-ink-400"
-                            aria-hidden
-                          />
-                          <span className="font-mono">{h.number}</span>
-                        </span>
-                        <span className="text-xs text-ink-500">
-                          {formatDate(h.issuedAt)}
-                          {h.issuedBy && ` · ${h.issuedBy.name}`}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+              {current && (
+                <a
+                  href={`/handovers/${current.id}/pdf`}
+                  target="_blank"
+                  rel="noopener"
+                  className="flex items-start gap-3 border-b border-ink-100 px-5 py-3 text-sm hover:bg-ink-50"
+                >
+                  <FileText className="mt-0.5 size-4 shrink-0 text-ink-400" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block font-mono font-medium whitespace-nowrap text-ink-900">{current.number}</span>
+                    <span className="block text-xs text-ink-500">
+                      Version {(current.snapshot as unknown as HandoverSnapshot).version ?? 1} · updated {formatDate(current.issuedAt)}
+                      {current.issuedBy && ` by ${current.issuedBy.name}`}
+                    </span>
+                  </span>
+                </a>
+              )}
+              {older.length > 0 && (
+                <div className="border-b border-ink-100 px-5 py-3">
+                  <p className="mb-1.5 text-xs font-medium text-ink-600">Extra packs (made before packs were updated in place)</p>
+                  <ul className="space-y-1.5">
+                    {older.map((h) => (
+                      <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <a href={`/handovers/${h.id}/pdf`} target="_blank" rel="noopener" className="font-mono whitespace-nowrap text-ink-600 hover:text-brand-700">
+                          {h.number} · {formatDate(h.issuedAt)}
+                        </a>
+                        {can(user.role, "access:delete") && <ConfirmDelete action={deleteHandover.bind(null, h.id)} label="Delete" />}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               {canEdit && (
-                <CardBody>
-                  <HandoverButton accessId={access.id} />
+                <CardBody className="space-y-2">
+                  <HandoverButton accessId={access.id} exists={Boolean(current)} />
+                  {current && <p className="text-xs text-ink-500">Updates the same pack with today&apos;s services. The number stays the same; the version goes up.</p>}
                 </CardBody>
               )}
             </Card>

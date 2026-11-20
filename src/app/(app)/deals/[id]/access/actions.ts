@@ -8,7 +8,7 @@ import { formToObject, zodErrors, type FormState } from "@/lib/form";
 import { accessSchema, serviceSchema } from "@/lib/validation/access";
 import { ACCESS_CHECKLIST, type AccessChecklistKey } from "@/lib/crm-meta";
 import { nextNumber } from "@/lib/numbering";
-import { accessInclude, buildHandoverSnapshot, deleteOpenTasks, syncReviewTask, syncServiceRenewalTask } from "@/lib/project-access";
+import { accessInclude, buildHandoverSnapshot, deleteOpenTasks, syncReviewTask, syncServiceRenewalTask, type HandoverSnapshot } from "@/lib/project-access";
 
 type Result = { ok?: boolean; message?: string };
 
@@ -126,7 +126,10 @@ export async function setArchived(accessId: string, archived: boolean): Promise<
   return { ok: true };
 }
 
-/** Issues a numbered Project Delivery Pack. Its content is frozen now; the PDF can be downloaded again later. */
+/**
+ * One Project Delivery Pack per project. The first time it gets a number; after that, "Update" refreshes
+ * the same pack with today's services and bumps its version, keeping the number the client already has.
+ */
 export async function createHandover(accessId: string): Promise<{ id?: string; message?: string }> {
   const user = await authorizeAction("access:manage");
   if (!user) return { message: FORBIDDEN_MESSAGE };
@@ -134,14 +137,39 @@ export async function createHandover(accessId: string): Promise<{ id?: string; m
   if (!access) return { message: "This project no longer exists." };
   if (!access.services.length && !access.googleEmail) return { message: "Add the project's account or services first." };
 
+  const latest = access.handovers[0];
   const handover = await db.$transaction(async (tx) => {
+    if (latest) {
+      const version = ((latest.snapshot as unknown as HandoverSnapshot).version ?? 1) + 1;
+      const snapshot = { ...(await buildHandoverSnapshot(access, latest.number, user.name)), version };
+      return tx.handover.update({ where: { id: latest.id }, data: { issuedAt: new Date(), issuedById: user.id, snapshot } });
+    }
     const number = await nextNumber(tx, "DP");
-    const snapshot = await buildHandoverSnapshot(access, number, user.name);
+    const snapshot = { ...(await buildHandoverSnapshot(access, number, user.name)), version: 1 };
     return tx.handover.create({ data: { number, accessId, issuedById: user.id, snapshot } });
   });
-  await audit({ actorId: user.id, action: "create", entity: "ProjectAccess", entityId: access.dealId, summary: `Project Delivery Pack ${handover.number}: ${access.deal.title}` });
+  const v = (handover.snapshot as unknown as HandoverSnapshot).version ?? 1;
+  await audit({
+    actorId: user.id,
+    action: latest ? "update" : "create",
+    entity: "ProjectAccess",
+    entityId: access.dealId,
+    summary: `Project Delivery Pack ${handover.number}${v > 1 ? ` updated to version ${v}` : ""}: ${access.deal.title}`,
+  });
   refresh(access.dealId);
   return { id: handover.id };
+}
+
+/** Removes an extra Project Delivery Pack (e.g. a duplicate made before packs were updated in place). */
+export async function deleteHandover(id: string): Promise<{ message?: string }> {
+  const user = await authorizeAction("access:delete");
+  if (!user) return { message: FORBIDDEN_MESSAGE };
+  const h = await db.handover.findUnique({ where: { id }, include: { access: { select: { dealId: true, deal: { select: { title: true } } } } } });
+  if (!h) return {};
+  await db.handover.delete({ where: { id } });
+  await audit({ actorId: user.id, action: "delete", entity: "ProjectAccess", entityId: h.access.dealId, summary: `Project Delivery Pack ${h.number} deleted: ${h.access.deal.title}` });
+  refresh(h.access.dealId);
+  return {};
 }
 
 export async function deleteAccess(accessId: string): Promise<Result> {

@@ -64,6 +64,14 @@ test("project access: record the Gmail and services, refuse secrets, check, clos
   expect(res.headers()["content-type"]).toBe("application/pdf");
   expect((await res.body()).subarray(0, 5).toString()).toBe("%PDF-");
 
+  // Updating keeps one pack with the same number; the version goes up.
+  const number = (await link.textContent())!.match(/DP-\d{4}-\d{4}/)![0];
+  const [popup2] = await Promise.all([page.waitForEvent("popup"), page.getByRole("button", { name: "Update Project Delivery Pack" }).click()]);
+  await popup2.close();
+  await expect(page.getByText(/Version 2 · updated/)).toBeVisible();
+  await expect(page.getByRole("link", { name: /DP-\d{4}-\d{4}/ })).toHaveCount(1);
+  await expect(page.getByRole("link", { name: new RegExp(number) })).toBeVisible();
+
   // Login sheet: passwords typed now, put in a locked PDF, never saved.
   await sql(`UPDATE "ProjectService" SET "signIn" = 'PASSWORD_IN_GOOGLE' WHERE name = 'Domain (hotel.lk)' AND "accessId" IN (SELECT id FROM "ProjectAccess" WHERE "dealId" = $1)`, [dealId]);
   await page.reload();

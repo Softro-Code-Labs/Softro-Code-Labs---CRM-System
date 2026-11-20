@@ -56,9 +56,9 @@ function InvoicePdf({ invoice: quote, org }: { invoice: FullInvoice; org: Org })
           {quote.number}
         </Text>
         <View style={s.header}>
-          <View style={[s.row, { gap: 10, maxWidth: 300 }]}>
+          <View style={[s.row, { gap: 10, flex: 1, paddingRight: 20 }]}>
             <Mark />
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={s.orgName}>{org.companyName}</Text>
               {org.address ? <Text style={s.small}>{org.address}</Text> : null}
               {orgLine ? <Text style={s.small}>{orgLine}</Text> : null}
@@ -79,7 +79,7 @@ function InvoicePdf({ invoice: quote, org }: { invoice: FullInvoice; org: Org })
             {client ? <Text style={{ fontWeight: 600 }}>{client.name}</Text> : null}
             {contact ? (
               <Text>
-                Attn: {fullName(contact)}
+                Contact: {fullName(contact)}
                 {contact.jobTitle ? `, ${contact.jobTitle}` : ""}
               </Text>
             ) : null}

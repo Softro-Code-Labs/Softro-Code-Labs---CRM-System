@@ -47,9 +47,9 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
         </Text>
 
         <View style={s.header}>
-          <View style={[s.row, { gap: 10, maxWidth: 300 }]}>
+          <View style={[s.row, { gap: 10, flex: 1, paddingRight: 20 }]}>
             <Mark />
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={s.orgName}>{org.companyName}</Text>
               {org.address ? <Text style={s.small}>{org.address}</Text> : null}
               {orgLine ? <Text style={s.small}>{orgLine}</Text> : null}
@@ -58,7 +58,9 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
           <View>
             <Text style={s.title}>Project Delivery Pack</Text>
             <Text style={s.number}>{h.number}</Text>
-            <Text style={[s.small, { textAlign: "right", marginTop: 4 }]}>Date: {formatDate(h.issuedAt)}</Text>
+            <Text style={[s.small, { textAlign: "right", marginTop: 4 }]}>
+              {(h.version ?? 1) > 1 ? `Version ${h.version} · updated ${formatDate(h.issuedAt)}` : `Date: ${formatDate(h.issuedAt)}`}
+            </Text>
           </View>
         </View>
 
@@ -66,7 +68,7 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
           <View style={{ maxWidth: 260 }}>
             <Text style={s.label}>Prepared for</Text>
             <Text style={{ fontWeight: 600 }}>{h.project.client ?? h.project.contact ?? "—"}</Text>
-            {h.project.client && h.project.contact ? <Text style={s.small}>Attn: {h.project.contact}</Text> : null}
+            {h.project.client && h.project.contact ? <Text style={s.small}>Contact: {h.project.contact}</Text> : null}
           </View>
           <View style={{ maxWidth: 240, alignItems: "flex-end" }}>
             <Text style={s.label}>Project</Text>

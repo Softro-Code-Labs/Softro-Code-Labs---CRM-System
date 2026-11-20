@@ -563,7 +563,7 @@ export function Checklist({
 
 /* ── Project Delivery Pack ─────────────────────────────────────────────── */
 
-export function HandoverButton({ accessId }: { accessId: string }) {
+export function HandoverButton({ accessId, exists }: { accessId: string; exists: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -580,12 +580,12 @@ export function HandoverButton({ accessId }: { accessId: string }) {
             if (r.id) {
               window.open(`/handovers/${r.id}/pdf`, "_blank", "noopener");
               router.refresh();
-            } else setError(r.message ?? "Couldn't create it.");
+            } else setError(r.message ?? "Couldn't make it.");
           })
         }
       >
         <FileDown className="size-4" aria-hidden />{" "}
-        {pending ? "Creating…" : "Create Project Delivery Pack"}
+        {pending ? (exists ? "Updating…" : "Creating…") : exists ? "Update Project Delivery Pack" : "Create Project Delivery Pack"}
       </Button>
       {error && <span className="text-xs text-red-600">{error}</span>}
     </span>

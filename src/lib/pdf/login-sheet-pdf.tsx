@@ -172,9 +172,9 @@ function LoginSheetPdf({
         </Text>
 
         <View style={s.header}>
-          <View style={[s.row, { gap: 10, maxWidth: 300 }]}>
+          <View style={[s.row, { gap: 10, flex: 1, paddingRight: 20 }]}>
             <Mark />
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={s.orgName}>{org.companyName}</Text>
               {org.phone || org.email ? (
                 <Text style={s.small}>
