@@ -8,7 +8,7 @@ import { Button, LinkButton } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { Card } from "@/components/ui/card";
 import { initialFormState, type FormState } from "@/lib/form";
-import { CURRENCY_OPTIONS, QUOTE_UNITS } from "@/lib/crm-meta";
+import { CURRENCY_OPTIONS, unitOptions } from "@/lib/crm-meta";
 import { quoteTotals } from "@/lib/quote-math";
 import { cn, formatMoney } from "@/lib/utils";
 
@@ -243,7 +243,13 @@ export function QuoteEditor({
                     <input aria-label="Quantity" inputMode="decimal" value={item.quantity} onChange={(ev) => update(item.key, { quantity: ev.target.value })} className={cn(cellInput, "text-right")} />
                   </td>
                   <td className="px-2 py-2">
-                    <input aria-label="Unit" list="quote-unit-list" value={item.unit} onChange={(ev) => update(item.key, { unit: ev.target.value })} className={cellInput} />
+                    <select aria-label="Unit" value={item.unit || "project"} onChange={(ev) => update(item.key, { unit: ev.target.value })} className={cellInput}>
+                      {unitOptions(item.unit).map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-2 py-2">
                     <input aria-label="Unit price" inputMode="decimal" value={item.unitPrice} onChange={(ev) => update(item.key, { unitPrice: ev.target.value })} placeholder="0" className={cn(cellInput, "text-right")} />
@@ -268,11 +274,6 @@ export function QuoteEditor({
               )}
             </tbody>
           </table>
-          <datalist id="quote-unit-list">
-            {QUOTE_UNITS.map((u) => (
-              <option key={u} value={u} />
-            ))}
-          </datalist>
         </div>
 
         <div className="flex flex-col gap-6 border-t border-ink-100 px-5 py-5 sm:flex-row sm:justify-between">
