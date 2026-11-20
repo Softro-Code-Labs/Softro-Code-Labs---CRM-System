@@ -58,7 +58,7 @@ export default async function ContractPage({ params }: Props) {
         breadcrumbs={[{ label: "Contracts", href: "/contracts" }, { label: c.number }]}
         actions={
           <>
-            {can(user.role, "contract:delete") && <ConfirmDelete action={deleteContract.bind(null, c.id)} />}
+            {can(user.role, "contract:delete") && <ConfirmDelete action={deleteContract.bind(null, c.id)} title={`Delete contract ${c.number}?`} body="To end it but keep the record, use Cancel contract instead. This can't be undone." />}
             {canManage && c.status !== "ENDED" && (
               <LinkButton href={`/contracts/${c.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

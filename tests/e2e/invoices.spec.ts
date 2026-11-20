@@ -131,7 +131,7 @@ test("cancelling the latest payment frees its receipt number; an older one leave
   };
   const cancel = async (receipt: string) => {
     await page.getByRole("button", { name: `Cancel ${receipt}` }).click();
-    await expect(page.getByText(`Cancel ${receipt}? Only if it was recorded by mistake.`)).toBeVisible();
+    await expect(page.getByRole("dialog", { name: `Cancel payment ${receipt}?` })).toBeVisible();
     await page.getByRole("button", { name: "Yes, cancel payment" }).click();
     await expect(page.getByRole("link", { name: receipt })).toHaveCount(0);
   };
@@ -140,7 +140,9 @@ test("cancelling the latest payment frees its receipt number; an older one leave
   const first = await pay("1000");
   // Asks first; "No" keeps the payment.
   await page.getByRole("button", { name: `Cancel ${first}` }).click();
-  await page.getByRole("button", { name: "No", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: `Cancel payment ${first}?` })).toBeVisible();
+  await page.getByRole("button", { name: "No, keep it" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("link", { name: first })).toBeVisible();
   await cancel(first);
   expect(await pay("1000")).toBe(first);

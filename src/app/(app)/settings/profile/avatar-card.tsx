@@ -126,7 +126,8 @@ export function AvatarCard({
           {url && (
             <ConfirmAction
               variant="ghost"
-              question="Remove your photo?"
+              title="Remove your photo?"
+              body="Your initials will show instead. You can add a photo again any time."
               yes="Yes, remove"
               onConfirm={async () => {
                 const r = await removeAvatar();

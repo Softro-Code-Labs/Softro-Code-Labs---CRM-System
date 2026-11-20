@@ -88,60 +88,68 @@ export function PaymentForm({
   );
 }
 
-export function CancelPaymentButton({
+/** One payment, with its receipt. "Cancel" asks below the payment, full width, before anything happens. */
+/** One payment, with its receipt and a Cancel that asks in a pop-up first. */
+export function PaymentItem({
   id,
   receipt,
+  amount,
+  detail,
+  canCancel,
 }: {
   id: string;
   receipt: string;
+  amount: string;
+  detail: string;
+  canCancel: boolean;
 }) {
   return (
+    <li className="flex items-start justify-between gap-3 px-5 py-3 text-sm">
+      <span className="min-w-0">
+        <span className="font-medium text-ink-900 tabular-nums">{amount}</span>
+        <span className="block text-xs break-words text-ink-500">{detail}</span>
+      </span>
+      <span className="flex shrink-0 flex-col items-end gap-1">
+        <a
+          href={`/receipts/${id}/pdf`}
+          target="_blank"
+          rel="noopener"
+          className="font-mono text-xs whitespace-nowrap text-brand-700 hover:underline"
+        >
+          {receipt}
+        </a>
+        {canCancel && (
+          <ConfirmAction
+            iconOnly
+            ariaLabel={`Cancel ${receipt}`}
+            className="text-xs text-ink-500 hover:text-red-600"
+            title={`Cancel payment ${receipt}?`}
+            body={`${amount}. Only if it was recorded by mistake. If it's the latest receipt, the next payment reuses its number.`}
+            yes="Yes, cancel payment"
+            no="No, keep it"
+            onConfirm={() => deletePayment(id)}
+          >
+            Cancel
+          </ConfirmAction>
+        )}
+      </span>
+    </li>
+  );
+}
+export function VoidButton({ id, number }: { id: string; number: string }) {
+  return (
     <ConfirmAction
-      iconOnly
-      className="text-xs text-ink-500 hover:text-red-600"
-      ariaLabel={`Cancel ${receipt}`}
-      question={`Cancel ${receipt}? Only if it was recorded by mistake.`}
-      yes="Yes, cancel payment"
-      onConfirm={() => deletePayment(id)}
+      variant="ghost"
+      title={`Void invoice ${number}?`}
+      body="It stays on record as cancelled and drops out of what's owed. You can restore it later."
+      yes="Yes, void it"
+      no="No, keep it"
+      onConfirm={() => voidInvoice(id)}
     >
-      Cancel
+      Void invoice
     </ConfirmAction>
   );
 }
-
-export function VoidButton({ id }: { id: string }) {
-  const [confirm, setConfirm] = useState(false);
-  const [pending, start] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  if (!confirm)
-    return (
-      <Button size="sm" variant="ghost" onClick={() => setConfirm(true)}>
-        Void invoice
-      </Button>
-    );
-  return (
-    <span className="flex flex-wrap items-center gap-2">
-      <span className="text-sm text-ink-600">
-        Void it? It stays on record as cancelled.
-      </span>
-      <Button
-        size="sm"
-        variant="danger"
-        disabled={pending}
-        onClick={() =>
-          start(async () => setError((await voidInvoice(id)).message ?? null))
-        }
-      >
-        Yes, void
-      </Button>
-      <Button size="sm" variant="ghost" onClick={() => setConfirm(false)}>
-        No
-      </Button>
-      {error && <span className="text-xs text-red-600">{error}</span>}
-    </span>
-  );
-}
-
 export function RestoreButton({ id }: { id: string }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);

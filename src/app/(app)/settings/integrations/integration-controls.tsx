@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { initialFormState } from "@/lib/form";
 import { removeChatWebhook, saveChatSettings } from "./actions";
-import { ConfirmAction } from "@/components/ui/confirm-action";
+import { ConfirmAction, ConfirmDialog } from "@/components/ui/confirm-action";
 
 type Result = { ok?: boolean; message: string };
 
@@ -29,39 +29,26 @@ export function ActionButton({
   const run = () => start(async () => setResult(await action()));
   return (
     <span className="inline-flex flex-wrap items-center gap-3">
-      {asking ? (
-        <span className="inline-flex flex-wrap items-center gap-2">
-          <span className="text-sm text-ink-600">{confirm}</span>
-          <Button
-            type="button"
-            size="sm"
-            disabled={pending}
-            onClick={() => {
-              setAsking(false);
-              run();
-            }}
-          >
-            Yes
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => setAsking(false)}
-          >
-            No
-          </Button>
-        </span>
-      ) : (
-        <Button
-          type="button"
-          size="sm"
-          variant={variant}
-          disabled={pending}
-          onClick={() => (confirm ? setAsking(true) : run())}
-        >
-          {pending ? "Working…" : children}
-        </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant={variant}
+        disabled={pending}
+        onClick={() => (confirm ? setAsking(true) : run())}
+      >
+        {pending ? "Working…" : children}
+      </Button>
+      {confirm && (
+        <ConfirmDialog
+          open={asking}
+          title={confirm}
+          yes="Yes, go ahead"
+          onClose={() => setAsking(false)}
+          onYes={() => {
+            setAsking(false);
+            run();
+          }}
+        />
       )}
       {result && (
         <span
@@ -107,7 +94,8 @@ export function ChatForm({
           </span>
           <ConfirmAction
             variant="ghost"
-            question="Disconnect team chat? Messages stop until you add a webhook again."
+            title="Disconnect team chat?"
+            body="Messages stop until you add a webhook again."
             yes="Yes, disconnect"
             onConfirm={async () => void (await removeChatWebhook())}
           >

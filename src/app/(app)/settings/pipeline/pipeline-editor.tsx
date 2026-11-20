@@ -145,12 +145,13 @@ export function PipelineEditor({
                   iconOnly
                   ariaLabel={`Remove ${stage.name}`}
                   className="flex w-8 justify-center rounded p-1 text-ink-400 hover:bg-red-50 hover:text-red-600"
-                  question={`Remove "${stage.name}"?`}
+                  title={`Remove the "${stage.name}" stage?`}
+                  body="Deals in this stage must be moved first."
                   yes="Yes, remove"
                   onConfirm={async () => {
                     const r = await deleteStage(stage.id);
-                    setError(r.message ?? null);
-                    setSaved(r.message ? null : `Removed "${stage.name}".`);
+                    if (!r.message) setSaved(`Removed "${stage.name}".`);
+                    return r;
                   }}
                 >
                   <Trash2 className="size-4" />

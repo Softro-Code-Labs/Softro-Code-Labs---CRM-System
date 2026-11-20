@@ -377,7 +377,8 @@ export function ServicesManager({
                           iconOnly
                           className="rounded p-1.5 text-ink-500 hover:bg-red-50 hover:text-red-600"
                           ariaLabel={`Remove ${s.name}`}
-                          question={`Remove ${s.name}?`}
+                          title={`Remove ${s.name}?`}
+                          body="It comes off this project's list and the Delivery Pack. The account itself isn't touched."
                           yes="Yes, remove"
                           onConfirm={async () =>
                             void (await deleteService(s.id))

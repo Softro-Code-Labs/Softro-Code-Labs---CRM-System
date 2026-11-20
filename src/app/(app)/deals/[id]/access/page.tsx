@@ -80,6 +80,8 @@ export default async function ProjectAccessPage({ params }: Props) {
             <ConfirmDelete
               action={deleteAccess.bind(null, access.id)}
               label="Remove register"
+              title="Remove this project's access register?"
+              body="The Gmail details, services, checklist and Delivery Pack are removed from the CRM. The accounts themselves aren't touched."
             />
           )
         }

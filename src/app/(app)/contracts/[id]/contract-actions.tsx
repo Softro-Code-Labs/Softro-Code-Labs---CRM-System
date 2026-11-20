@@ -5,16 +5,15 @@ import { Ban, Pause, Play, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ContractStatus } from "@/generated/prisma/enums";
 import { renewContract, setContractStatus } from "../actions";
+import { ConfirmAction } from "@/components/ui/confirm-action";
 
 export function ContractActions({ id, status, canRenew }: { id: string; status: ContractStatus; canRenew: boolean }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [confirmCancel, setConfirmCancel] = useState(false);
   const run = (fn: () => Promise<{ message?: string } | void>) =>
     startTransition(async () => {
       const r = await fn();
       setError(r?.message ?? null);
-      setConfirmCancel(false);
     });
 
   if (status === "ENDED") return null;
@@ -36,22 +35,18 @@ export function ContractActions({ id, status, canRenew }: { id: string; status: 
             <Play className="size-4" aria-hidden /> Reactivate
           </Button>
         )}
-        {status !== "CANCELLED" &&
-          (confirmCancel ? (
-            <>
-              <span className="self-center text-sm text-ink-600">Cancel this contract?</span>
-              <Button size="sm" variant="danger" disabled={pending} onClick={() => run(() => setContractStatus(id, "CANCELLED"))}>
-                Yes, cancel it
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setConfirmCancel(false)}>
-                No
-              </Button>
-            </>
-          ) : (
-            <Button size="sm" variant="ghost" disabled={pending} onClick={() => setConfirmCancel(true)}>
-              <Ban className="size-4" aria-hidden /> Cancel contract
-            </Button>
-          ))}
+        {status !== "CANCELLED" && (
+          <ConfirmAction
+            variant="ghost"
+            title="Cancel this contract?"
+            body="Renewal reminders stop and it's marked cancelled. You can reactivate it later."
+            yes="Yes, cancel contract"
+            no="No, keep it"
+            onConfirm={() => setContractStatus(id, "CANCELLED")}
+          >
+            <Ban className="size-4" aria-hidden /> Cancel contract
+          </ConfirmAction>
+        )}
       </div>
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>

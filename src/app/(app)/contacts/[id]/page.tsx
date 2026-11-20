@@ -56,7 +56,7 @@ export default async function ContactPage({ params }: Props) {
         breadcrumbs={[{ label: "Contacts", href: "/contacts" }, { label: name }]}
         actions={
           <>
-            {can(user.role, "contact:delete") && <ConfirmDelete action={deleteContact.bind(null, contact.id)} />}
+            {can(user.role, "contact:delete") && <ConfirmDelete action={deleteContact.bind(null, contact.id)} title="Delete this contact?" body="This can't be undone." />}
             {can(user.role, "contact:update") && (
               <LinkButton href={`/contacts/${contact.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

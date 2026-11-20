@@ -69,7 +69,7 @@ export default async function LeadPage({ params }: Props) {
         breadcrumbs={[{ label: "Leads", href: "/leads" }, { label: lead.title }]}
         actions={
           <>
-            {can(user.role, "lead:delete") && <ConfirmDelete action={deleteLead.bind(null, lead.id)} />}
+            {can(user.role, "lead:delete") && <ConfirmDelete action={deleteLead.bind(null, lead.id)} title="Delete this lead?" body="Its notes and tasks go with it. This can't be undone." />}
             {can(user.role, "lead:update") && (
               <LinkButton href={`/leads/${lead.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

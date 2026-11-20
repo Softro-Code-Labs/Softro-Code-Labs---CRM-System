@@ -188,7 +188,8 @@ export function CalendarCard({ hasLink }: { hasLink: boolean }) {
         {(hasLink || url) && (
           <ConfirmAction
             variant="ghost"
-            question="Turn off your calendar link? Calendars using it stop updating."
+            title="Turn off your calendar link?"
+            body="Calendars using it stop updating. You can make a new link later."
             yes="Yes, turn off"
             onConfirm={async () => {
               await removeCalendarLink();
