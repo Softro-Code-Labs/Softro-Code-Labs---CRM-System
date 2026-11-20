@@ -65,7 +65,7 @@ export default async function DealPage({ params }: Props) {
         breadcrumbs={[{ label: "Deals", href: "/deals" }, { label: deal.title }]}
         actions={
           <>
-            {can(user.role, "deal:delete") && <ConfirmDelete action={deleteDeal.bind(null, deal.id)} />}
+            {can(user.role, "deal:delete") && <ConfirmDelete action={deleteDeal.bind(null, deal.id)} title={`Delete the deal "${deal.title}"?`} body="Its notes and tasks go with it. This can't be undone." />}
             {canEdit && (
               <LinkButton href={`/deals/${deal.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

@@ -52,7 +52,7 @@ export function QuoteDocument({ quote, org }: { quote: FullQuote; org: Org }) {
           {client && <p className="font-semibold text-ink-900">{client.name}</p>}
           {contact && (
             <p className="text-ink-700">
-              Attn: {fullName(contact)}
+              Contact: {fullName(contact)}
               {contact.jobTitle && `, ${contact.jobTitle}`}
             </p>
           )}

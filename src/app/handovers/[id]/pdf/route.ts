@@ -8,7 +8,7 @@ import type { HandoverSnapshot } from "@/lib/project-access";
 
 export const runtime = "nodejs";
 
-/** GET /handovers/:id/pdf: a handover document exactly as it was issued (add ?download=1 to save). */
+/** GET /handovers/:id/pdf: a Project Delivery Pack exactly as it was issued (add ?download=1 to save). */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.redirect(new URL("/login", request.url));
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const snapshot = handover.snapshot as unknown as HandoverSnapshot;
 
   const pdf = await renderHandoverPdf(snapshot, org);
-  const filename = `${snapshot.number} Handover ${snapshot.project.client ?? snapshot.project.title}`.replace(/[^\w\s.-]/g, "").replace(/\s+/g, " ").trim() + ".pdf";
+  const filename = `${snapshot.number} Project Delivery Pack ${snapshot.project.client ?? snapshot.project.title}`.replace(/[^\w\s.-]/g, "").replace(/\s+/g, " ").trim() + ".pdf";
   return new NextResponse(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",

@@ -14,7 +14,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { InvoiceDocument } from "@/components/crm/invoice-document";
-import { CancelPaymentButton, PaymentForm, VoidButton } from "./invoice-controls";
+import { PaymentForm, PaymentItem, RestoreButton, VoidButton } from "./invoice-controls";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -39,7 +39,8 @@ export default async function InvoicePage({ params }: Props) {
         breadcrumbs={[{ label: "Invoices", href: "/invoices" }, { label: invoice.number }]}
         actions={
           <>
-            {invoice.status === "ISSUED" && Number(invoice.amountPaid) === 0 && can(user.role, "invoice:void") && <VoidButton id={invoice.id} />}
+            {invoice.status === "ISSUED" && Number(invoice.amountPaid) === 0 && can(user.role, "invoice:void") && <VoidButton id={invoice.id} number={invoice.number} />}
+            {invoice.status === "VOID" && can(user.role, "invoice:void") && <RestoreButton id={invoice.id} />}
             {isEditable(invoice) && can(user.role, "invoice:update") && (
               <LinkButton href={`/invoices/${invoice.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit
@@ -93,21 +94,14 @@ export default async function InvoicePage({ params }: Props) {
             {invoice.payments.length ? (
               <ul className="divide-y divide-ink-100">
                 {invoice.payments.map((p) => (
-                  <li key={p.id} className="flex items-start justify-between gap-3 px-5 py-3 text-sm">
-                    <span>
-                      <span className="font-medium text-ink-900 tabular-nums">{formatMoney(p.amount, invoice.currency)}</span>
-                      <span className="block text-xs text-ink-500">
-                        {formatDate(p.paidAt)} · {PAYMENT_METHOD_LABELS[p.method]}
-                        {p.reference && ` · ${p.reference}`}
-                      </span>
-                    </span>
-                    <span className="flex flex-col items-end gap-1">
-                      <a href={`/receipts/${p.id}/pdf`} target="_blank" rel="noopener" className="font-mono text-xs whitespace-nowrap text-brand-700 hover:underline">
-                        {p.receiptNumber}
-                      </a>
-                      {can(user.role, "payment:delete") && <CancelPaymentButton id={p.id} receipt={p.receiptNumber} />}
-                    </span>
-                  </li>
+                  <PaymentItem
+                    key={p.id}
+                    id={p.id}
+                    receipt={p.receiptNumber}
+                    amount={formatMoney(p.amount, invoice.currency)}
+                    detail={[formatDate(p.paidAt), PAYMENT_METHOD_LABELS[p.method], p.reference].filter(Boolean).join(" · ")}
+                    canCancel={can(user.role, "payment:delete")}
+                  />
                 ))}
               </ul>
             ) : (

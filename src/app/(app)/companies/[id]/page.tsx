@@ -78,7 +78,7 @@ export default async function CompanyPage({ params }: Props) {
         breadcrumbs={[{ label: "Companies", href: "/companies" }, { label: company.name }]}
         actions={
           <>
-            {can(user.role, "company:delete") && <ConfirmDelete action={deleteCompany.bind(null, company.id)} />}
+            {can(user.role, "company:delete") && <ConfirmDelete action={deleteCompany.bind(null, company.id)} title={`Delete ${company.name}?`} body="Its contacts and deals stay, without the company. This can't be undone." />}
             {can(user.role, "company:update") && (
               <LinkButton href={`/companies/${company.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

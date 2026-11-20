@@ -19,7 +19,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 11. [Invoices and receipts](#11-invoices-and-receipts)
 12. [Contracts: maintenance, hosting and support](#12-contracts-maintenance-hosting-and-support)
 13. [Support tickets](#13-support-tickets)
-14. [Project access and handover](#14-project-access-and-handover)
+14. [Project access and delivery](#14-project-access-and-delivery)
 15. [Reports](#15-reports)
 16. [Emails, team chat and your calendar](#16-emails-team-chat-and-your-calendar)
 17. [The dashboard](#17-the-dashboard)
@@ -94,7 +94,7 @@ Each person has one role. Ask an admin if you need more access.
 | Edit company details used on quotes and invoices | ✅ | — | — | — | — |
 | Add team members, change roles, reset passwords and two-step sign-in | ✅ | — | — | — | — |
 | See the audit log | ✅ | — | — | — | — |
-| See and update project access (accounts, services, handover) | ✅ | ✅ | ✅ | ✅ | — |
+| See and update project access (accounts, services, delivery pack, login sheet) | ✅ | ✅ | ✅ | ✅ | — |
 | Remove a whole project access register | ✅ | ✅ | — | — | — |
 | Integrations, security rules and system health | ✅ | — | — | — | — |
 | Turn on two-step sign-in for yourself | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -359,7 +359,7 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 
 ## 11. Invoices and receipts
 
-An **invoice** asks the client to pay. A **receipt** confirms we received the money. Together with the quote and the handover document, these are the only papers most Sri Lankan clients need from us.
+An **invoice** asks the client to pay. A **receipt** confirms we received the money. Together with the quote and the Project Delivery Pack, these are the only papers most Sri Lankan clients need from us.
 
 ### Invoice an accepted quote (the usual way)
 
@@ -408,8 +408,10 @@ You can't record more than the balance. Receipts for cheques say *subject to rea
 
 ### Mistakes
 
-- **Wrong payment?** A manager or admin clicks **Cancel** next to it. The receipt number isn't reused, so tell the client to ignore that receipt.
+- **Wrong payment?** A manager or admin clicks **Cancel** next to it. If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
 - **Wrong invoice?** If nothing has been paid, a manager or admin can **Void** it, then create the right one. Invoices are never deleted, so the numbers stay in order for the accountant.
+- **Voided by mistake?** A manager or admin opens it and clicks **Restore invoice**. It's unpaid again with the same number. The CRM won't restore it if the quote has been invoiced again since, because that would bill the client twice: void the replacement first.
+- **Something the screens can't undo** (a wrong number, test invoices on the live CRM): admins use the ready-made scripts in [DATABASE-FIXES.md](DATABASE-FIXES.md).
 
 > **Ask the accountant** to check one Tax Invoice before you send your first, in case they want anything else on it.
 
@@ -496,11 +498,11 @@ Tabs: **Open**, **Mine**, **Reply overdue**, **Waiting on client**, **Resolved**
 
 ---
 
-## 14. Project access and handover
+## 14. Project access and delivery
 
-Every project gets its **own Google account** (a Gmail), and every service for that project is signed up with it: Vercel, GitHub, the database, hosting and so on. Use **Sign in with Google**, or save the password in that Google account. Signing in to Chrome with that Gmail then brings back all its passwords and bookmarks, so **you don't need to keep a separate browser profile** for each project.
+Every project gets its **own Google account** (a Gmail), and every service for that project is signed up with it: Vercel, GitHub, the database, hosting and so on. Use **Continue with Google** (or **Continue with GitHub**) where a service offers it. Otherwise sign up with the Gmail and its own password, and save that password in Google Password Manager. Signing in to Chrome with that Gmail then brings back all its passwords and bookmarks, so **you don't need to keep a separate browser profile** for each project.
 
-The CRM keeps the **map**: which Gmail, which services, who owns them and when they renew. **Passwords, keys and 2-step codes are never typed into the CRM.** They stay in the company password manager, and the CRM refuses text that looks like one.
+The CRM keeps the **map**: which Gmail, which services, who owns them and when they renew. **Passwords, keys and 2-step codes are never typed into the CRM.** They stay in Google Password Manager, and the CRM refuses text that looks like one. The only time you type passwords is to make the **login sheet** for the client, and they aren't saved even then.
 
 ### Set it up
 
@@ -511,10 +513,10 @@ Open a **won deal** and click **Project access → Set up** (or **Project access
 | **Project Gmail** | e.g. `galle.hardware.softro@gmail.com` |
 | **2-step verification** | Use an **authenticator app**. Save its setup key and backup codes in the password manager, so it doesn't depend on one person's phone. |
 | **Recovery email / phone** | **Company** ones (admin@softrocodelabs.com and the office number), never personal |
-| **Password and backup codes are kept in** | *Where* they are, e.g. "Bitwarden → Softro Projects → Galle Hardware" |
-| **Settings (.env) are kept in** | e.g. "Vercel project settings". For Vercel projects, `vercel env pull` rebuilds the file. Otherwise keep a copy in the project's Google Drive, which has version history. This text appears in the handover document. |
+| **Password and backup codes are kept in** | *Where* they are, e.g. "Gmail password in Google Password Manager (Softro admin) · backup codes in company Drive → Security" |
+| **Settings (.env) are kept in** | e.g. "Vercel project settings". For Vercel projects, `vercel env pull` rebuilds the file. Otherwise keep a copy in the project's Google Drive, which has version history. This text appears in the Project Delivery Pack. |
 
-Then **Add a service** for each account: domain, hosting, Vercel, GitHub, database, email, payments… Give its address, login email, how you sign in, **who owns it** (Softro, the client or shared) and, for anything paid, **when it renews**. A renewal date creates a reminder task 30 days before.
+Then **Add a service** for each account: domain, hosting, Vercel, GitHub, database, email, payments… Give its address, login email, how you sign in (*Continue with Google*, *Continue with GitHub*, *Email + password* or *Other*), **who owns it** (Softro, the client or shared) and, for anything paid, **when it renews**. A renewal date creates a reminder task 30 days before.
 
 ### Keep it alive: the 6-monthly check
 
@@ -524,9 +526,20 @@ Google can delete personal accounts that haven't been used for 2 years, and clie
 
 Work through the **close-out checklist**: logins saved, backup codes saved, settings saved, client handed over, **browser profile removed**, local `.env` files deleted. Then click **Archive project access**. Nothing is deleted. When the client asks for maintenance, press **Reopen for maintenance**, sign in to the project Gmail in Chrome, and everything is back.
 
-### Handover document for the client
+### What the client gets: two documents
 
-**Create handover PDF** makes a numbered document (e.g. **H-2026-0001**) with the services, who owns each one, renewal dates, support details and a sign-off section. It never includes passwords. Send those separately through a **secure link that expires** (e.g. Bitwarden Send), and ask the client to change them after they take over. Each document is saved, so you can download it again later exactly as it was sent.
+**1. Project Delivery Pack** (no passwords). **Create Project Delivery Pack** makes a numbered document (e.g. **DP-2026-0001**) with the project Gmail, every service, who owns each one, renewal dates, support details and a sign-off section. It's saved, so you can download it again exactly as it was sent. Email it freely.
+
+**2. Login sheet** (the passwords). At the bottom of the Project access page:
+
+1. Type the **Gmail password** and, if you're handing them over, the unused **backup codes**.
+2. Type the password for each service that uses *Email + password* or *Other*. Services that use *Continue with Google* or *Continue with GitHub* don't need one; the sheet says how to sign in. Leave a box empty to give that password another way.
+3. Choose a **PDF password** (8+ characters), e.g. something the client will recognise.
+4. Click **Download login sheet**. The PDF is locked with that password (AES-256), and the form clears itself.
+
+**Nothing you type is saved**: not in the database, not in the audit log (it only records that a sheet was made). If you need it again, make a new one.
+
+Send the file by email or WhatsApp, and tell the client the **PDF password separately**, by phone or in a different chat, never in the same message. Ask them to change each password after they take over.
 
 ---
 

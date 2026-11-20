@@ -7,7 +7,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { initialFormState, type FormState } from "@/lib/form";
-import { CURRENCY_OPTIONS, QUOTE_UNITS, SERVICE_TYPE_OPTIONS } from "@/lib/crm-meta";
+import { CURRENCY_OPTIONS, SERVICE_TYPE_OPTIONS, unitOptions } from "@/lib/crm-meta";
 import { saveProduct, setProductActive } from "./actions";
 
 export type ProductValues = { name: string; description: string; unit: string; unitPrice: string; currency: string; serviceType: string };
@@ -21,12 +21,7 @@ function Fields({ state, initial }: { state: FormState; initial: ProductValues }
       <SelectField label="Service" name="serviceType" options={SERVICE_TYPE_OPTIONS} placeholder="—" defaultValue={v("serviceType")} error={e.serviceType} className="sm:col-span-3" />
       <TextField label="Price" name="unitPrice" inputMode="decimal" required defaultValue={v("unitPrice")} error={e.unitPrice} className="sm:col-span-2" />
       <SelectField label="Currency" name="currency" options={CURRENCY_OPTIONS} defaultValue={v("currency")} error={e.currency} />
-      <TextField label="Per" name="unit" list="quote-units" required defaultValue={v("unit")} error={e.unit} className="sm:col-span-3" />
-      <datalist id="quote-units">
-        {QUOTE_UNITS.map((u) => (
-          <option key={u} value={u} />
-        ))}
-      </datalist>
+      <SelectField label="Per" name="unit" required options={unitOptions(v("unit"))} defaultValue={v("unit") || "project"} error={e.unit} className="sm:col-span-3" />
       <TextAreaField label="Description (printed on the quote)" name="description" rows={2} defaultValue={v("description")} error={e.description} className="sm:col-span-6" />
     </div>
   );

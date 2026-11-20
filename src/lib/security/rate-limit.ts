@@ -41,6 +41,8 @@ export const LIMITS = {
   twoFactorPerUser: { limit: 6, windowSeconds: 10 * 60 },
   /** Profile photo uploads per person. */
   avatarUploadsPerUser: { limit: 10, windowSeconds: 10 * 60 },
+  /** Login sheets per person (each one holds a project's passwords). */
+  loginSheetsPerUser: { limit: 10, windowSeconds: 60 * 60 },
   /** Website enquiries from one address. */
   websiteLeadPerIp: { limit: 10, windowSeconds: 10 * 60 },
 } as const;

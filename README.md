@@ -5,7 +5,7 @@ Softro Code Labs' own CRM: **leads, deals, quotes, invoices, contracts, support 
 Live at **[softro-code-labs-crm-system.vercel.app](https://softro-code-labs-crm-system.vercel.app)**, moving to **crm.softrocodelabs.com** (team members only)
 
 > New here? Start with **[SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md)**. It explains the whole project in plain words.
-> Using the CRM day to day? Read the **[user guide](docs/USER-GUIDE.md)**.
+> Using the CRM day to day? Read the **[user guide](docs/USER-GUIDE.md)**. Admins fixing a numbering or test-data mistake: **[database fixes](docs/DATABASE-FIXES.md)**.
 
 **Built with:** Next.js 16 · React 19 · TypeScript · PostgreSQL (Neon) · Prisma 7 · Tailwind CSS v4 · Zod · jose · React-PDF · Resend · Vitest · Playwright · Vercel
 
@@ -55,7 +55,7 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change quote maths (discounts, VAT) | `src/lib/quote-math.ts` |
 | Change reply deadlines and working days | `src/lib/working-days.ts`, ticket times in `src/lib/tickets.ts` |
 | Change report figures | `src/lib/reports.ts`, CSV exports in `src/app/(app)/reports/export/route.ts` |
-| Change project access (accounts register, checklist, handover PDF) | `src/app/(app)/deals/[id]/access/`, `src/lib/project-access.ts`, `src/lib/pdf/handover-pdf.tsx`, secret detection in `src/lib/security/secret-guard.ts` |
+| Change project access (accounts register, checklist, delivery pack, login sheet) | `src/app/(app)/deals/[id]/access/`, `src/lib/project-access.ts`, `src/lib/pdf/handover-pdf.tsx`, `src/lib/pdf/login-sheet-pdf.tsx`, secret detection in `src/lib/security/secret-guard.ts` |
 | Change emails, team chat messages, the morning summary or the calendar feed | `src/lib/integrations/` |
 | Change profile photos (size, formats) | `src/lib/avatar.ts`, upload in `src/app/(app)/settings/profile/avatar-*.tsx`, served by `src/app/avatars/` |
 | Change sign-in, sessions or two-step sign-in | `src/app/login/`, `src/lib/auth.ts`, `src/lib/session.ts`, `src/lib/security/` |
@@ -65,12 +65,15 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change dark/light mode or the switcher | `src/lib/theme/`, `src/components/theme/theme-switcher.tsx` |
 | Change the logo | `src/components/brand/` |
 | Change the staff guide | `docs/USER-GUIDE.md` |
+| Fix a numbering mistake or remove test invoices, receipts or quotes | `docs/DATABASE-FIXES.md` (ready-made SQL for the Neon SQL Editor) |
 
 **Adding a field to something (e.g. a "budget" on deals):** add it in `prisma/schema.prisma` → `pnpm db:migrate --name deal_budget` → add it to the Zod schema in `src/lib/validation/` → add the input to the form and show it on the detail page. Every page and action already re-checks the user's role, so no extra security work is needed.
 
 ## Settings (environment variables)
 
 Set these in `.env` locally, and in **Vercel → Settings → Environment Variables** for the live CRM. Mark the 🔒 ones **Sensitive**, and **redeploy** after any change.
+
+How to read the table: **🔒** = turn on **Sensitive** in Vercel (it can't be read back, so keep a copy in the password manager). In the **Production** and **Preview** columns, **✅** or a value = add it to that environment, **—** = leave it out of that environment. Tick only the environments shown when you add a variable; don't choose "All Environments".
 
 | Variable | Production | Preview | What it's for |
 |---|---|---|---|
@@ -131,7 +134,7 @@ Responses: `201` created · `401` wrong key · `422` invalid data · `429` too m
 | Layer | Command | Covers |
 |---|---|---|
 | **Unit** (53) | `pnpm test` | Two-step codes (RFC 6238 vectors), encryption, recovery codes, working days in Sri Lanka time, quote maths and VAT, amounts in words, invoice states and balances, ticket SLA, permissions, report periods, CSV safety, email escaping, webhook allow-list, secret guard, avatars, plan usage |
-| **Browser** (18) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets, theme, profile photos, project access and handover, quote → advance invoice → payment and receipt → balance → paid, plan usage panel |
+| **Browser** (19) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets, theme, profile photos, project access, delivery pack and login sheet, quote → advance invoice → payment and receipt → balance → paid, plan usage panel |
 
 Browser tests create and change records, so run them against a **separate test database**, never Neon:
 

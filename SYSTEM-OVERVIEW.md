@@ -45,7 +45,7 @@ The rules for every role live in one file, `src/lib/permissions.ts`, and are che
 | **Activities** | Calls, WhatsApp chats, emails, meetings, tasks and notes on every record | Tasks have owners and due dates, and show on the dashboard and in calendars. |
 | **Contracts** | Maintenance, hosting, support retainers and subscriptions | Numbered **C-…**. A renewal task appears before the end date; one click renews. |
 | **Support** | Client problems as tickets, with replies and internal notes | Numbered **T-…**. First reply due by priority (4 h urgent → 72 h low) or the contract's promise. |
-| **Project access** | Each project's Google account, the services made with it, who owns them, renewals, and a handover PDF for the client | **No secrets stored**: passwords stay in the password manager. A 6-monthly sign-in check keeps each project Gmail alive. |
+| **Project access** | Each project's Google account, the services made with it, who owns them, renewals, a **Project Delivery Pack** PDF for the client, and a password-locked **login sheet** | **No secrets stored**: passwords stay in Google Password Manager; the login sheet is made from passwords typed in at that moment and never saved. A 6-monthly sign-in check keeps each project Gmail alive. |
 | **Reports** | Revenue, win rate, forecast, lead sources, team and support performance | Pick any period or person, and export to CSV. |
 | **Settings** | Team, pipeline, company details, price list, integrations, security, system health, audit log | Most are admin-only. |
 
@@ -215,7 +215,7 @@ Next.js 16 · React 19 · TypeScript · PostgreSQL (Neon) · Prisma 7 · Tailwin
 | Who can do what | `src/lib/permissions.ts` |
 | Sign-in checks, sessions, 2FA, rate limits | `src/lib/auth.ts`, `src/lib/session.ts`, `src/lib/security/` |
 | Business rules (working days, quote maths, invoices, SLA, reports) | `src/lib/working-days.ts`, `quote-math.ts`, `invoices.ts`, `amount-in-words.ts`, `tickets.ts`, `reports.ts` |
-| PDFs (quote, invoice, receipt, handover) | `src/lib/pdf/` |
+| PDFs (quote, invoice, receipt, delivery pack, login sheet) | `src/lib/pdf/` |
 | Emails, chat, morning summary, calendar | `src/lib/integrations/` |
 | Error log and start-up checks | `src/lib/monitoring/`, `src/instrumentation.ts`, `src/lib/env.ts` |
 | Shared look (buttons, fields, cards) | `src/components/ui/`, colours in `src/app/globals.css` |
@@ -243,7 +243,7 @@ Nine steps, each one usable on its own before the next began.
 | **8. Integrations** | Emails through Resend, the morning summary, team chat alerts, calendar links, accounting export |
 | **9. Hardening** | Two-step sign-in, rate limits, error monitoring, health check, tests, CI, auto-migrations, nightly backups |
 
-Added since: dark mode, a plan-usage panel for admins (Neon storage and compute, with an 80% warning in the morning email), profile photos, the project access register with a handover PDF, and **invoices and receipts** (advance and balance invoices from accepted quotes, contract invoices, payments with receipts, a Tax Invoice layout, and an *Accepted by* block on quotes).
+Added since: dark mode, a plan-usage panel for admins (Neon storage and compute, with an 80% warning in the morning email), profile photos, the project access register with a Project Delivery Pack and a password-locked login sheet, and **invoices and receipts** (advance and balance invoices from accepted quotes, contract invoices, payments with receipts, a Tax Invoice layout, and an *Accepted by* block on quotes).
 
 ---
 

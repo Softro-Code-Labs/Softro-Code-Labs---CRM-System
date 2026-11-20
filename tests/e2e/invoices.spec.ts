@@ -81,3 +81,76 @@ test("accepted quote → 50% advance invoice → payment and receipt → balance
   const [{ paid }] = await sql(`SELECT count(*)::int AS paid FROM "Invoice" WHERE "quoteId" = $1 AND status = 'PAID'`, [quoteId]);
   expect(paid).toBe(2);
 });
+
+test("a voided invoice can be restored, unless the quote was invoiced again", async ({ page }) => {
+  const quoteId = await acceptedQuote(`E2E Restore ${uid()}`);
+  await signIn(page, USERS.admin);
+
+  await page.goto(`/quotes/${quoteId}`);
+  await page.getByLabel("Full amount").check();
+  await page.getByRole("button", { name: "Create invoice" }).click();
+  await expect(page).toHaveURL(/\/invoices\/[^/]+$/);
+  const first = page.url();
+
+  await page.getByRole("button", { name: "Void invoice" }).click();
+  await page.getByRole("button", { name: "Yes, void" }).click();
+  await expect(page.getByText("Void", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Restore invoice" }).click();
+  await expect(page.getByRole("button", { name: "Void invoice" })).toBeVisible();
+  await expect(page.getByText("Record a payment")).toBeVisible();
+
+  // Void again, invoice the quote again, then try to restore the first: refused.
+  await page.getByRole("button", { name: "Void invoice" }).click();
+  await page.getByRole("button", { name: "Yes, void" }).click();
+  await expect(page.getByRole("button", { name: "Restore invoice" })).toBeVisible();
+  await page.goto(`/quotes/${quoteId}`);
+  await page.getByLabel("Full amount").check();
+  await page.getByRole("button", { name: "Create invoice" }).click();
+  await expect(page).not.toHaveURL(new RegExp(`/quotes/`));
+  await page.goto(first);
+  await page.getByRole("button", { name: "Restore invoice" }).click();
+  await expect(page.getByText(/Can't restore: Q-E2E-.* has been invoiced again/)).toBeVisible();
+});
+
+test("cancelling the latest payment frees its receipt number; an older one leaves a gap", async ({ page }) => {
+  const quoteId = await acceptedQuote(`E2E Receipt reuse ${uid()}`);
+  await signIn(page, USERS.admin);
+  await page.goto(`/quotes/${quoteId}`);
+  await page.getByLabel("Full amount").check();
+  await page.getByRole("button", { name: "Create invoice" }).click();
+  await expect(page).toHaveURL(/\/invoices\/[^/]+$/);
+
+  const pay = async (amount: string) => {
+    await page.reload();
+    await page.getByLabel("Amount received").fill(amount);
+    await expect(page.getByLabel("Amount received")).toHaveValue(amount);
+    await page.getByRole("button", { name: "Record payment" }).click();
+    const msg = page.getByText(/Payment recorded\. Receipt RCT-\d{4}-\d{4}\./);
+    await expect(msg).toBeVisible();
+    return (await msg.textContent())!.match(/RCT-\d{4}-\d{4}/)![0];
+  };
+  const cancel = async (receipt: string) => {
+    await page.getByRole("button", { name: `Cancel ${receipt}` }).click();
+    await expect(page.getByRole("dialog", { name: `Cancel payment ${receipt}?` })).toBeVisible();
+    await page.getByRole("button", { name: "Yes, cancel payment" }).click();
+    await expect(page.getByRole("link", { name: receipt })).toHaveCount(0);
+  };
+
+  // Latest receipt cancelled → the next payment gets the same number.
+  const first = await pay("1000");
+  // Asks first; "No" keeps the payment.
+  await page.getByRole("button", { name: `Cancel ${first}` }).click();
+  await expect(page.getByRole("dialog", { name: `Cancel payment ${first}?` })).toBeVisible();
+  await page.getByRole("button", { name: "No, keep it" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: first })).toBeVisible();
+  await cancel(first);
+  expect(await pay("1000")).toBe(first);
+
+  // An older receipt cancelled → its number isn't reused (no duplicates).
+  const second = await pay("2000");
+  await cancel(first);
+  const third = await pay("1500");
+  expect(third).not.toBe(first);
+  expect(Number(third.slice(-4))).toBe(Number(second.slice(-4)) + 1);
+});

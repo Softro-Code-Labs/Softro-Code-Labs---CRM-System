@@ -24,7 +24,7 @@ export const accessInclude = {
   },
   lastCheckedBy: { select: { name: true } },
   services: { orderBy: [{ position: "asc" }, { createdAt: "asc" }] },
-  handovers: { orderBy: { issuedAt: "desc" }, include: { issuedBy: { select: { name: true } } } },
+  handovers: { orderBy: { issuedAt: "desc" }, take: 1, include: { issuedBy: { select: { name: true } } } }, // one pack per project
 } satisfies Prisma.ProjectAccessInclude;
 
 export type FullAccess = Prisma.ProjectAccessGetPayload<{ include: typeof accessInclude }>;
@@ -115,11 +115,13 @@ export async function deleteOpenTasks(tx: Prisma.TransactionClient, ids: (string
   if (list.length) await tx.activity.deleteMany({ where: { id: { in: list }, completedAt: null } });
 }
 
-/* ── Handover document ─────────────────────────────────────────────── */
+/* ── Project Delivery Pack ─────────────────────────────────────────────── */
 
 /** What the client sees. Frozen when issued, so the same PDF can be downloaded again later. No internal notes, no secret locations. */
 export type HandoverSnapshot = {
   number: string;
+  /** 1 when first made; goes up each time the pack is updated. Older snapshots don't have it. */
+  version?: number;
   issuedAt: string;
   issuedBy: string | null;
   project: { title: string; client: string | null; contact: string | null };

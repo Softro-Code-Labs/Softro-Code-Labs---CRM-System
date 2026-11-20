@@ -21,6 +21,7 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test"
   },
   "dependencies": {
+    "@cantoo/pdf-lib": "2.11.1",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "@react-pdf/renderer": "^4.9.0",
@@ -59,5 +60,10 @@
   "engines": {
     "node": ">=20.9"
   },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@10.28.0",
+  "pnpm": {
+    "overrides": {
+      "effect": "^3.22.1"
+    }
+  }
 }

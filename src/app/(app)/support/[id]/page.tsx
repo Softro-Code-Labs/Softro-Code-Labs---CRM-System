@@ -62,7 +62,7 @@ export default async function TicketPage({ params }: Props) {
         breadcrumbs={[{ label: "Support", href: "/support" }, { label: t.number }]}
         actions={
           <>
-            {can(user.role, "ticket:delete") && <ConfirmDelete action={deleteTicket.bind(null, t.id)} />}
+            {can(user.role, "ticket:delete") && <ConfirmDelete action={deleteTicket.bind(null, t.id)} title={`Delete ticket ${t.number}?`} body="Its replies go with it. This can't be undone." />}
             {canEdit && (
               <LinkButton href={`/support/${t.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

@@ -58,7 +58,7 @@ export default async function QuotePage({ params }: Props) {
         breadcrumbs={[{ label: "Quotes", href: "/quotes" }, { label: quote.number }]}
         actions={
           <>
-            {canDelete && <ConfirmDelete action={deleteQuote.bind(null, quote.id)} />}
+            {canDelete && <ConfirmDelete action={deleteQuote.bind(null, quote.id)} title={`Delete quote ${quote.number}?`} body="This can't be undone." />}
             {canEdit && !locked && (
               <LinkButton href={`/quotes/${quote.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

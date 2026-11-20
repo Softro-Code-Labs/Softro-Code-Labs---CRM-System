@@ -108,7 +108,13 @@ export const QUOTE_STATUS_TONE: Record<import("@/generated/prisma/enums").QuoteS
 };
 
 /** Common units for quote lines. People can also type their own. */
-export const QUOTE_UNITS = ["project", "hour", "day", "month", "year", "page", "screen", "licence", "user", "item"];
+export const QUOTE_UNITS = ["project", "hour", "day", "week", "month", "year", "page", "screen", "session", "user", "licence", "item"];
+
+/** Units for a dropdown. Keeps a unit saved earlier (e.g. "visit") selectable even if it isn't in the list. */
+export function unitOptions(current?: string | null) {
+  const list = current && !QUOTE_UNITS.includes(current) ? [...QUOTE_UNITS, current] : QUOTE_UNITS;
+  return list.map((u) => ({ value: u, label: u }));
+}
 
 type E = typeof import("@/generated/prisma/enums");
 type ContractType = E["ContractType"][keyof E["ContractType"]];
@@ -192,8 +198,9 @@ export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
 export const SERVICE_CATEGORY_OPTIONS = options(SERVICE_CATEGORY_LABELS);
 
 export const SIGN_IN_LABELS: Record<SignInMethod, string> = {
-  GOOGLE: "Sign in with Google",
-  PASSWORD_IN_GOOGLE: "Email + password (saved in Google)",
+  GOOGLE: "Continue with Google",
+  GITHUB: "Continue with GitHub",
+  PASSWORD_IN_GOOGLE: "Email + password",
   OTHER: "Other (see notes)",
 };
 export const SIGN_IN_OPTIONS = options(SIGN_IN_LABELS);
