@@ -11,7 +11,7 @@ import { getOrgSettings } from "@/lib/queries/org";
 import { nextNumber } from "@/lib/numbering";
 import { colomboDayBounds } from "@/lib/working-days";
 import { invoiceSchema, paymentSchema, type InvoiceInput } from "@/lib/validation/invoice";
-import { balanceDue, buildInvoiceData, isEditable, linesFromContract, linesFromQuote, syncFollowUpTask, type FromQuoteMode } from "@/lib/invoices";
+import { balanceDue, buildInvoiceData, invoicedNetForQuote, isEditable, linesFromContract, linesFromQuote, syncFollowUpTask, type FromQuoteMode } from "@/lib/invoices";
 
 const DAY = 86_400_000;
 
@@ -246,6 +246,31 @@ export async function voidInvoice(id: string): Promise<{ message?: string }> {
     await syncFollowUpTask(tx, updated, null);
   });
   await audit({ actorId: user.id, action: "update", entity: "Invoice", entityId: id, summary: `Voided ${inv.number}` });
+  refresh(inv);
+  return {};
+}
+
+/** Undoes a void made by mistake. The invoice keeps its number and is unpaid again. */
+export async function restoreInvoice(id: string): Promise<{ message?: string }> {
+  const user = await authorizeAction("invoice:void");
+  if (!user) return { message: FORBIDDEN_MESSAGE };
+  const inv = await db.invoice.findUnique({ where: { id }, include: { quote: { select: { number: true, subtotal: true, discountTotal: true } } } });
+  if (!inv) return {};
+  if (inv.status !== "VOID") return { message: "This invoice isn't void." };
+  if (inv.quoteId && inv.quote) {
+    // Don't bill the client twice if a replacement invoice was made for the same part of the quote.
+    const quoteNet = Number(inv.quote.subtotal) - Number(inv.quote.discountTotal);
+    const others = await invoicedNetForQuote(inv.quoteId);
+    const mine = Number(inv.subtotal) - Number(inv.discountTotal);
+    if (others + mine > quoteNet + 0.005)
+      return { message: `Can't restore: ${inv.quote.number} has been invoiced again since, and this would bill more than the quote. Void the replacement first.` };
+  }
+  const owner = await dealOwner(inv.dealId);
+  await db.$transaction(async (tx) => {
+    const updated = await tx.invoice.update({ where: { id }, data: { status: "ISSUED", voidedAt: null } });
+    await syncFollowUpTask(tx, updated, owner);
+  });
+  await audit({ actorId: user.id, action: "update", entity: "Invoice", entityId: id, summary: `Restored ${inv.number} (was void)` });
   refresh(inv);
   return {};
 }

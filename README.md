@@ -72,6 +72,8 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 
 Set these in `.env` locally, and in **Vercel → Settings → Environment Variables** for the live CRM. Mark the 🔒 ones **Sensitive**, and **redeploy** after any change.
 
+How to read the table: **🔒** = turn on **Sensitive** in Vercel (it can't be read back, so keep a copy in the password manager). In the **Production** and **Preview** columns, **✅** or a value = add it to that environment, **—** = leave it out of that environment. Tick only the environments shown when you add a variable; don't choose "All Environments".
+
 | Variable | Production | Preview | What it's for |
 |---|---|---|---|
 | 🔒 `DATABASE_URL` | main Neon database | a **separate** Neon branch | The database. Never point previews at real data. |
@@ -131,7 +133,7 @@ Responses: `201` created · `401` wrong key · `422` invalid data · `429` too m
 | Layer | Command | Covers |
 |---|---|---|
 | **Unit** (53) | `pnpm test` | Two-step codes (RFC 6238 vectors), encryption, recovery codes, working days in Sri Lanka time, quote maths and VAT, amounts in words, invoice states and balances, ticket SLA, permissions, report periods, CSV safety, email escaping, webhook allow-list, secret guard, avatars, plan usage |
-| **Browser** (18) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets, theme, profile photos, project access and handover, quote → advance invoice → payment and receipt → balance → paid, plan usage panel |
+| **Browser** (19) | `pnpm test:e2e` | Health and security headers, sign-in and account lock, viewer limits, two-step set-up / sign-in / recovery code, the 2FA company rule, lead → deal → won → report export, support tickets, theme, profile photos, project access and handover, quote → advance invoice → payment and receipt → balance → paid, plan usage panel |
 
 Browser tests create and change records, so run them against a **separate test database**, never Neon:
 

@@ -1,14 +1,14 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { FileDown } from "lucide-react";
+import { FileDown, RotateCcw } from "lucide-react";
 import { SelectField, TextField } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { initialFormState, type FormState } from "@/lib/form";
 import { PAYMENT_METHOD_OPTIONS } from "@/lib/crm-meta";
-import { deletePayment, recordPayment, voidInvoice } from "../actions";
+import { deletePayment, recordPayment, restoreInvoice, voidInvoice } from "../actions";
 
 export function PaymentForm({ invoiceId, balance, today }: { invoiceId: string; balance: string; today: string }) {
   const [state, action] = useActionState<FormState & { receiptId?: string }, FormData>(recordPayment.bind(null, invoiceId), initialFormState);
@@ -72,6 +72,19 @@ export function VoidButton({ id }: { id: string }) {
         No
       </Button>
       {error && <span className="text-xs text-red-600">{error}</span>}
+    </span>
+  );
+}
+
+export function RestoreButton({ id }: { id: string }) {
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      {error && <span className="text-xs text-red-600">{error}</span>}
+      <Button size="sm" variant="secondary" disabled={pending} onClick={() => start(async () => setError((await restoreInvoice(id)).message ?? null))}>
+        <RotateCcw className="size-4" aria-hidden /> Restore invoice
+      </Button>
     </span>
   );
 }

@@ -14,7 +14,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { InvoiceDocument } from "@/components/crm/invoice-document";
-import { CancelPaymentButton, PaymentForm, VoidButton } from "./invoice-controls";
+import { CancelPaymentButton, PaymentForm, RestoreButton, VoidButton } from "./invoice-controls";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -40,6 +40,7 @@ export default async function InvoicePage({ params }: Props) {
         actions={
           <>
             {invoice.status === "ISSUED" && Number(invoice.amountPaid) === 0 && can(user.role, "invoice:void") && <VoidButton id={invoice.id} />}
+            {invoice.status === "VOID" && can(user.role, "invoice:void") && <RestoreButton id={invoice.id} />}
             {isEditable(invoice) && can(user.role, "invoice:update") && (
               <LinkButton href={`/invoices/${invoice.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit

@@ -81,3 +81,33 @@ test("accepted quote → 50% advance invoice → payment and receipt → balance
   const [{ paid }] = await sql(`SELECT count(*)::int AS paid FROM "Invoice" WHERE "quoteId" = $1 AND status = 'PAID'`, [quoteId]);
   expect(paid).toBe(2);
 });
+
+test("a voided invoice can be restored, unless the quote was invoiced again", async ({ page }) => {
+  const quoteId = await acceptedQuote(`E2E Restore ${uid()}`);
+  await signIn(page, USERS.admin);
+
+  await page.goto(`/quotes/${quoteId}`);
+  await page.getByLabel("Full amount").check();
+  await page.getByRole("button", { name: "Create invoice" }).click();
+  await expect(page).toHaveURL(/\/invoices\/[^/]+$/);
+  const first = page.url();
+
+  await page.getByRole("button", { name: "Void invoice" }).click();
+  await page.getByRole("button", { name: "Yes, void" }).click();
+  await expect(page.getByText("Void", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Restore invoice" }).click();
+  await expect(page.getByRole("button", { name: "Void invoice" })).toBeVisible();
+  await expect(page.getByText("Record a payment")).toBeVisible();
+
+  // Void again, invoice the quote again, then try to restore the first: refused.
+  await page.getByRole("button", { name: "Void invoice" }).click();
+  await page.getByRole("button", { name: "Yes, void" }).click();
+  await expect(page.getByRole("button", { name: "Restore invoice" })).toBeVisible();
+  await page.goto(`/quotes/${quoteId}`);
+  await page.getByLabel("Full amount").check();
+  await page.getByRole("button", { name: "Create invoice" }).click();
+  await expect(page).not.toHaveURL(new RegExp(`/quotes/`));
+  await page.goto(first);
+  await page.getByRole("button", { name: "Restore invoice" }).click();
+  await expect(page.getByText(/Can't restore: Q-E2E-.* has been invoiced again/)).toBeVisible();
+});
