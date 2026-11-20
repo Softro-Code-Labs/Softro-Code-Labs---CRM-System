@@ -115,7 +115,7 @@ export async function deleteOpenTasks(tx: Prisma.TransactionClient, ids: (string
   if (list.length) await tx.activity.deleteMany({ where: { id: { in: list }, completedAt: null } });
 }
 
-/* ── Handover document ─────────────────────────────────────────────── */
+/* ── Project Delivery Pack ─────────────────────────────────────────────── */
 
 /** What the client sees. Frozen when issued, so the same PDF can be downloaded again later. No internal notes, no secret locations. */
 export type HandoverSnapshot = {

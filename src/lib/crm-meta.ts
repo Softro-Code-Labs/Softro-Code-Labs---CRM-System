@@ -198,8 +198,9 @@ export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
 export const SERVICE_CATEGORY_OPTIONS = options(SERVICE_CATEGORY_LABELS);
 
 export const SIGN_IN_LABELS: Record<SignInMethod, string> = {
-  GOOGLE: "Sign in with Google",
-  PASSWORD_IN_GOOGLE: "Email + password (saved in Google)",
+  GOOGLE: "Continue with Google",
+  GITHUB: "Continue with GitHub",
+  PASSWORD_IN_GOOGLE: "Email + password",
   OTHER: "Other (see notes)",
 };
 export const SIGN_IN_OPTIONS = options(SIGN_IN_LABELS);

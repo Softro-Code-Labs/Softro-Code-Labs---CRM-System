@@ -742,6 +742,7 @@ enum ServiceCategory {
 
 enum SignInMethod {
   GOOGLE
+  GITHUB
   PASSWORD_IN_GOOGLE
   OTHER
 }
@@ -761,7 +762,7 @@ model ProjectAccess {
   recoveryEmail      String?
   recoveryPhone      String?
   twoStep            TwoStepMethod @default(AUTHENTICATOR)
-  secretsLocation    String? // where the Gmail password and backup codes are kept, e.g. "Bitwarden → Galle Hardware"
+  secretsLocation    String? // where the Gmail password and backup codes are kept, e.g. "Google Password Manager · backup codes in company Drive"
   envLocation        String? // where the settings live, e.g. "Vercel project settings; Drive /env"
   notes              String?
   // Close-out checklist

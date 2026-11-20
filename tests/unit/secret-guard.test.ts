@@ -22,11 +22,11 @@ describe("secret guard", () => {
 
   it("lets ordinary access notes through", () => {
     const fine = [
-      "Bitwarden → Softro Projects → Galle Hardware",
+      "Google Password Manager (Softro admin) → Galle Hardware",
       "Vercel project settings; copy in Drive /env (version history)",
       "https://vercel.com/softro/galle-hardware",
       "projects+galle@softrocodelabs.com",
-      "Password is in Bitwarden, not here",
+      "Password is in Google Password Manager, not here",
       "Renew the domain before March; client pays",
       "Client's Stripe account, they added us as a developer",
       "077 123 4567",

@@ -126,7 +126,7 @@ export async function setArchived(accessId: string, archived: boolean): Promise<
   return { ok: true };
 }
 
-/** Issues a numbered handover document. Its content is frozen now; the PDF can be downloaded again later. */
+/** Issues a numbered Project Delivery Pack. Its content is frozen now; the PDF can be downloaded again later. */
 export async function createHandover(accessId: string): Promise<{ id?: string; message?: string }> {
   const user = await authorizeAction("access:manage");
   if (!user) return { message: FORBIDDEN_MESSAGE };
@@ -135,11 +135,11 @@ export async function createHandover(accessId: string): Promise<{ id?: string; m
   if (!access.services.length && !access.googleEmail) return { message: "Add the project's account or services first." };
 
   const handover = await db.$transaction(async (tx) => {
-    const number = await nextNumber(tx, "H");
+    const number = await nextNumber(tx, "DP");
     const snapshot = await buildHandoverSnapshot(access, number, user.name);
     return tx.handover.create({ data: { number, accessId, issuedById: user.id, snapshot } });
   });
-  await audit({ actorId: user.id, action: "create", entity: "ProjectAccess", entityId: access.dealId, summary: `Handover document ${handover.number}: ${access.deal.title}` });
+  await audit({ actorId: user.id, action: "create", entity: "ProjectAccess", entityId: access.dealId, summary: `Project Delivery Pack ${handover.number}: ${access.deal.title}` });
   refresh(access.dealId);
   return { id: handover.id };
 }

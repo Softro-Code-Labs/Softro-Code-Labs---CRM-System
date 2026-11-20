@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import { signIn, signOut, sql, uid, USERS } from "./fixtures";
 
@@ -26,10 +27,10 @@ test("project access: record the Gmail and services, refuse secrets, check, clos
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText(/looks like a password or key/)).toBeVisible();
 
-  await page.getByLabel("Password and backup codes are kept in").fill("Bitwarden → Softro Projects → Hotel");
+  await page.getByLabel("Password and backup codes are kept in").fill("Google Password Manager (Softro admin) → Hotel");
   await page.getByLabel("Settings (.env) are kept in").fill("Vercel project settings");
   await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByText("Saved.")).toBeVisible();
+  await expect(page.getByText("Saved.", { exact: true })).toBeVisible();
   await expect(page.getByText("Never checked.")).toBeVisible();
 
   // Add a service with a renewal date → a reminder task is created.
@@ -54,14 +55,43 @@ test("project access: record the Gmail and services, refuse secrets, check, clos
   await page.getByRole("button", { name: "Archive project access" }).click();
   await expect(page.getByRole("button", { name: "Reopen for maintenance" })).toBeVisible();
 
-  // Handover document: numbered, frozen, a real PDF.
-  const [popup] = await Promise.all([page.waitForEvent("popup"), page.getByRole("button", { name: "Create handover PDF" }).click()]);
+  // Project Delivery Pack: numbered, frozen, a real PDF.
+  const [popup] = await Promise.all([page.waitForEvent("popup"), page.getByRole("button", { name: "Create Project Delivery Pack" }).click()]);
   await popup.close();
-  const link = page.getByRole("link", { name: /H-\d{4}-\d{4}/ });
+  const link = page.getByRole("link", { name: /DP-\d{4}-\d{4}/ });
   await expect(link).toBeVisible();
   const res = await page.request.get((await link.getAttribute("href"))!);
   expect(res.headers()["content-type"]).toBe("application/pdf");
   expect((await res.body()).subarray(0, 5).toString()).toBe("%PDF-");
+
+  // Login sheet: passwords typed now, put in a locked PDF, never saved.
+  await sql(`UPDATE "ProjectService" SET "signIn" = 'PASSWORD_IN_GOOGLE' WHERE name = 'Domain (hotel.lk)' AND "accessId" IN (SELECT id FROM "ProjectAccess" WHERE "dealId" = $1)`, [dealId]);
+  await page.reload();
+  const gmailPw = `Gmail-${Date.now()}-pw`;
+  const domainPw = `Domain-${Date.now()}-pw`;
+  await page.getByLabel(/^Gmail password/).fill(gmailPw);
+  await page.getByLabel("Domain (hotel.lk) password").fill(domainPw);
+  await page.getByLabel("PDF password").fill("short");
+  await page.getByRole("button", { name: "Download login sheet" }).click();
+  await expect(page.getByText("Use at least 8 characters for the PDF password.")).toBeVisible();
+  await page.getByLabel("PDF password").fill("hotel-2026-open");
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download login sheet" }).click()]);
+  expect(download.suggestedFilename()).toMatch(/^Login sheet .*\.pdf$/);
+  const sheet = await readFile((await download.path())!);
+  expect(sheet.subarray(0, 5).toString()).toBe("%PDF-");
+  expect(sheet.includes("/Encrypt")).toBe(true);
+  expect(sheet.includes(gmailPw)).toBe(false);
+  expect(sheet.includes(domainPw)).toBe(false);
+  await expect(page.getByText("The passwords weren't saved, and the form has been cleared.")).toBeVisible();
+  await expect(page.getByLabel(/^Gmail password/)).toHaveValue("");
+  const leaks = await sql(
+    `SELECT (SELECT count(*) FROM "AuditLog" WHERE summary LIKE '%' || $1 || '%' OR summary LIKE '%' || $2 || '%')
+          + (SELECT count(*) FROM "ProjectService" WHERE coalesce(notes, '') LIKE '%' || $2 || '%')
+          + (SELECT count(*) FROM "ProjectAccess" WHERE coalesce(notes, '') LIKE '%' || $1 || '%') AS n`,
+    [gmailPw, domainPw],
+  );
+  expect(Number(leaks[0].n)).toBe(0);
+  await expect.poll(async () => (await sql(`SELECT count(*)::int AS n FROM "AuditLog" WHERE summary LIKE 'Login sheet made for %' || $1 || '%'`, [title]))[0].n).toBe(1);
 
   // It's listed on the Project access page, under Archived.
   await page.goto("/access?tab=archived");

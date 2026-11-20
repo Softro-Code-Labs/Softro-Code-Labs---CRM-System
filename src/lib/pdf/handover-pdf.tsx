@@ -36,11 +36,11 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
   const renewals = h.services.filter((x) => x.renewsAt).sort((a, b) => a.renewsAt!.localeCompare(b.renewsAt!));
 
   return (
-    <Document title={`${h.number} Project handover: ${h.project.title}`} author={org.companyName} subject="Project handover" creator="Softro CRM">
+    <Document title={`${h.number} Project Delivery Pack: ${h.project.title}`} author={org.companyName} subject="Project Delivery Pack" creator="Softro CRM">
       <Page size="A4" style={s.page}>
         <View style={s.footerLine} fixed />
         <Text style={s.footerLeft} fixed>
-          {org.companyName} · Project handover
+          {org.companyName} · Project Delivery Pack
         </Text>
         <Text style={s.footerRight} fixed>
           {h.number}
@@ -56,7 +56,7 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
             </View>
           </View>
           <View>
-            <Text style={s.title}>Project handover</Text>
+            <Text style={s.title}>Project Delivery Pack</Text>
             <Text style={s.number}>{h.number}</Text>
             <Text style={[s.small, { textAlign: "right", marginTop: 4 }]}>Date: {formatDate(h.issuedAt)}</Text>
           </View>
@@ -157,14 +157,14 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
         <View style={s.note} wrap={false}>
           <Text style={{ fontWeight: 600, fontSize: 9 }}>Passwords are not in this document</Text>
           <Text style={[s.p, { marginTop: 2 }]}>
-            For your security, passwords, keys and 2-step codes are shared separately through a secure link that expires. Please change them after
-            you take over each account, and keep them in a password manager.
+            For your security, passwords are in a separate login sheet, a PDF locked with its own password that we give you separately (by phone
+            or WhatsApp). Please change each password after you take over the account, and keep them in your password manager.
           </Text>
         </View>
 
         <View style={s.sign} wrap={false}>
           <View style={s.signBox}>
-            <Text style={s.small}>Handed over by: {org.companyName}</Text>
+            <Text style={s.small}>Delivered by: {org.companyName}</Text>
             <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
           </View>
           <View style={s.signBox}>

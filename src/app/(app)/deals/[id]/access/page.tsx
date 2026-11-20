@@ -1,24 +1,45 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, CalendarClock, FileText, KeyRound, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarClock,
+  FileText,
+  KeyRound,
+  ShieldCheck,
+} from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { formatDate, toDateInput } from "@/lib/utils";
 import { checkState, getAccessForDeal } from "@/lib/project-access";
-import { ACCESS_CHECKLIST, TWO_STEP_LABELS, type AccessChecklistKey } from "@/lib/crm-meta";
+import {
+  ACCESS_CHECKLIST,
+  TWO_STEP_LABELS,
+  type AccessChecklistKey,
+} from "@/lib/crm-meta";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
-import { AccountForm, ArchivedBadge, Checklist, CheckButton, HandoverButton, ServicesManager } from "./access-controls";
+import {
+  AccountForm,
+  ArchivedBadge,
+  Checklist,
+  CheckButton,
+  HandoverButton,
+  LoginSheetForm,
+  ServicesManager,
+} from "./access-controls";
 import { deleteAccess } from "./actions";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const deal = await db.deal.findUnique({ where: { id }, select: { title: true } });
+  const deal = await db.deal.findUnique({
+    where: { id },
+    select: { title: true },
+  });
   return { title: deal ? `Access · ${deal.title}` : "Project access" };
 }
 
@@ -26,7 +47,15 @@ export default async function ProjectAccessPage({ params }: Props) {
   const user = await requirePermission("access:view");
   const { id } = await params;
   const [deal, access] = await Promise.all([
-    db.deal.findUnique({ where: { id }, select: { id: true, title: true, status: true, company: { select: { id: true, name: true } } } }),
+    db.deal.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        company: { select: { id: true, name: true } },
+      },
+    }),
     getAccessForDeal(id),
   ]);
   if (!deal) notFound();
@@ -39,27 +68,45 @@ export default async function ProjectAccessPage({ params }: Props) {
       <PageHeader
         title={`Project access · ${deal.title}`}
         description="Where this project's accounts live and how they're protected. Passwords, keys and codes stay in the password manager, never here."
-        breadcrumbs={[{ label: "Deals", href: "/deals" }, { label: deal.title, href: `/deals/${deal.id}` }, { label: "Access" }]}
-        actions={access && can(user.role, "access:delete") && <ConfirmDelete action={deleteAccess.bind(null, access.id)} label="Remove register" />}
+        breadcrumbs={[
+          { label: "Deals", href: "/deals" },
+          { label: deal.title, href: `/deals/${deal.id}` },
+          { label: "Access" },
+        ]}
+        actions={
+          access &&
+          can(user.role, "access:delete") && (
+            <ConfirmDelete
+              action={deleteAccess.bind(null, access.id)}
+              label="Remove register"
+            />
+          )
+        }
       />
 
       {archived && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-ink-200 bg-ink-50 px-4 py-3 text-sm text-ink-700">
-          <ArchivedBadge /> Archived {access?.archivedAt && formatDate(access.archivedAt)}. Everything is kept. Reopen it when the client asks for maintenance.
+          <ArchivedBadge /> Archived{" "}
+          {access?.archivedAt && formatDate(access.archivedAt)}. Everything is
+          kept. Reopen it when the client asks for maintenance.
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card>
-            <CardHeader title="Project Google account" description="Sign up for every service with this account, and save passwords and bookmarks in it. Signing in to Chrome with it brings them all back, so no separate browser profile needs to be kept." />
+            <CardHeader
+              title="Project Google account"
+              description="Sign up for every service with this account, and save passwords and bookmarks in it. Signing in to Chrome with it brings them all back, so no separate browser profile needs to be kept."
+            />
             <CardBody>
               <AccountForm
                 dealId={deal.id}
                 canEdit={canEdit}
                 initial={{
                   googleEmail: access?.googleEmail ?? "",
-                  recoveryEmail: access?.recoveryEmail ?? "admin@softrocodelabs.com",
+                  recoveryEmail:
+                    access?.recoveryEmail ?? "admin@softrocodelabs.com",
                   recoveryPhone: access?.recoveryPhone ?? "",
                   twoStep: access?.twoStep ?? "AUTHENTICATOR",
                   secretsLocation: access?.secretsLocation ?? "",
@@ -69,7 +116,6 @@ export default async function ProjectAccessPage({ params }: Props) {
               />
             </CardBody>
           </Card>
-
         </div>
 
         <div className="space-y-6">
@@ -82,21 +128,38 @@ export default async function ProjectAccessPage({ params }: Props) {
                 <>
                   {check?.state === "overdue" || check?.state === "never" ? (
                     <p className="flex items-start gap-2 font-medium text-red-600">
-                      <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
-                      {check.state === "never" ? "Never checked." : "Check overdue."} Sign in to the Gmail and confirm the 2-step codes work.
+                      <AlertTriangle
+                        className="mt-0.5 size-4 shrink-0"
+                        aria-hidden
+                      />
+                      {check.state === "never"
+                        ? "Never checked."
+                        : "Check overdue."}{" "}
+                      Sign in to the Gmail and confirm the 2-step codes work.
                     </p>
                   ) : (
                     <p className="flex items-start gap-2 text-emerald-700">
-                      <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden /> Checked {formatDate(access.lastCheckedAt)}
-                      {access.lastCheckedBy && ` by ${access.lastCheckedBy.name}`}.
+                      <ShieldCheck
+                        className="mt-0.5 size-4 shrink-0"
+                        aria-hidden
+                      />{" "}
+                      Checked {formatDate(access.lastCheckedAt)}
+                      {access.lastCheckedBy &&
+                        ` by ${access.lastCheckedBy.name}`}
+                      .
                     </p>
                   )}
                   {check?.dueAt && (
                     <p className="flex items-center gap-2 text-xs text-ink-500">
-                      <CalendarClock className="size-3.5" aria-hidden /> Next check by {formatDate(check.dueAt)}. A task reminds the deal owner.
+                      <CalendarClock className="size-3.5" aria-hidden /> Next
+                      check by {formatDate(check.dueAt)}. A task reminds the
+                      deal owner.
                     </p>
                   )}
-                  <p className="text-xs text-ink-500">2-step: {TWO_STEP_LABELS[access.twoStep]}{access.twoStep === "NONE" && ". Turn it on!"}</p>
+                  <p className="text-xs text-ink-500">
+                    2-step: {TWO_STEP_LABELS[access.twoStep]}
+                    {access.twoStep === "NONE" && ". Turn it on!"}
+                  </p>
                   {canEdit && <CheckButton accessId={access.id} />}
                 </>
               )}
@@ -105,13 +168,20 @@ export default async function ProjectAccessPage({ params }: Props) {
 
           {access && (
             <Card>
-              <CardHeader title="Close-out checklist" description="When the project is finished. Then archive it: nothing is deleted." />
+              <CardHeader
+                title="Close-out checklist"
+                description="When the project is finished. Then archive it: nothing is deleted."
+              />
               <CardBody>
                 <Checklist
                   accessId={access.id}
                   archived={archived}
                   canEdit={canEdit}
-                  values={Object.fromEntries(ACCESS_CHECKLIST.map((c) => [c.key, access[c.key]])) as Record<AccessChecklistKey, boolean>}
+                  values={
+                    Object.fromEntries(
+                      ACCESS_CHECKLIST.map((c) => [c.key, access[c.key]]),
+                    ) as Record<AccessChecklistKey, boolean>
+                  }
                 />
               </CardBody>
             </Card>
@@ -119,14 +189,25 @@ export default async function ProjectAccessPage({ params }: Props) {
 
           {access && (
             <Card>
-              <CardHeader title="Handover documents" description="For the client: services, owners, renewals and support. Never passwords. Send those by a secure link." />
+              <CardHeader
+                title="Project Delivery Pack"
+                description="For the client: services, owners, renewals and support. No passwords: those go in the login sheet."
+              />
               {access.handovers.length > 0 && (
                 <ul className="divide-y divide-ink-100 border-b border-ink-100">
                   {access.handovers.map((h) => (
                     <li key={h.id}>
-                      <a href={`/handovers/${h.id}/pdf`} target="_blank" rel="noopener" className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ink-50">
+                      <a
+                        href={`/handovers/${h.id}/pdf`}
+                        target="_blank"
+                        rel="noopener"
+                        className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ink-50"
+                      >
                         <span className="flex items-center gap-2 text-ink-800">
-                          <FileText className="size-4 text-ink-400" aria-hidden />
+                          <FileText
+                            className="size-4 text-ink-400"
+                            aria-hidden
+                          />
                           <span className="font-mono">{h.number}</span>
                         </span>
                         <span className="text-xs text-ink-500">
@@ -149,7 +230,10 @@ export default async function ProjectAccessPage({ params }: Props) {
           {deal.company && (
             <p className="flex items-center gap-2 px-1 text-xs text-ink-500">
               <KeyRound className="size-3.5" aria-hidden /> All projects for{" "}
-              <Link href={`/access?q=${encodeURIComponent(deal.company.name)}`} className="text-brand-700 hover:underline">
+              <Link
+                href={`/access?q=${encodeURIComponent(deal.company.name)}`}
+                className="text-brand-700 hover:underline"
+              >
                 {deal.company.name}
               </Link>
             </p>
@@ -158,7 +242,10 @@ export default async function ProjectAccessPage({ params }: Props) {
       </div>
 
       <Card>
-        <CardHeader title={`Services (${access?.services.length ?? 0})`} description="Every account made for this project. No passwords: just where it is and how to get in." />
+        <CardHeader
+          title={`Services (${access?.services.length ?? 0})`}
+          description="Every account made for this project. No passwords: just where it is and how to get in."
+        />
         <ServicesManager
           accessId={access?.id ?? null}
           canEdit={canEdit}
@@ -177,6 +264,29 @@ export default async function ProjectAccessPage({ params }: Props) {
           }))}
         />
       </Card>
+
+      {access &&
+        canEdit &&
+        (access.googleEmail || access.services.length > 0) && (
+          <Card>
+            <CardHeader
+              title="Login sheet"
+              description="The passwords, for the client: a separate PDF locked with its own password. Nothing you type here is saved."
+            />
+            <CardBody>
+              <LoginSheetForm
+                dealId={deal.id}
+                gmail={access.googleEmail}
+                services={access.services.map((x) => ({
+                  id: x.id,
+                  name: x.name,
+                  signIn: x.signIn,
+                  loginEmail: x.loginEmail,
+                }))}
+              />
+            </CardBody>
+          </Card>
+        )}
     </div>
   );
 }
