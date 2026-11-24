@@ -5,7 +5,7 @@ test.describe("sign-in", () => {
   test("wrong password is refused without saying which part was wrong", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill(USERS.admin.email);
-    await page.getByLabel("Password").fill("not-the-password");
+    await page.getByLabel("Password", { exact: true }).fill("not-the-password");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByText("Incorrect email or password.")).toBeVisible();
   });
@@ -13,7 +13,7 @@ test.describe("sign-in", () => {
   test("five wrong passwords lock the account", async ({ page }) => {
     const attempt = async (password: string) => {
       await page.getByLabel("Email").fill(USERS.locked.email);
-      await page.getByLabel("Password").fill(password);
+      await page.getByLabel("Password", { exact: true }).fill(password);
       // Wait for the server's answer, so we never read the previous attempt's message.
       await Promise.all([page.waitForResponse((r) => r.request().method() === "POST" && r.url().includes("/login")), page.getByRole("button", { name: "Sign in" }).click()]);
     };
