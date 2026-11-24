@@ -12,6 +12,20 @@ import { convertLeadSchema } from "@/lib/validation/deal";
 import { formToObject, zodErrors, type FormState } from "@/lib/form";
 import { addWorkingDays, REPLY_WITHIN_WORKING_DAYS } from "@/lib/working-days";
 import type { LeadStatus } from "@/generated/prisma/enums";
+import { canSee, mayAssignOwner } from "@/lib/visibility";
+
+const NOT_YOURS = "You can't see this lead. It belongs to someone outside your team.";
+const OWNER_NOT_ALLOWED = "You can only assign leads to yourself or, for managers, to people in your team.";
+const TAKE_FIRST = "This lead is on the New Leads board. Take it first, then you can work on it.";
+
+/** The lead, if this person may change it: they can see it, and it isn't waiting unclaimed on the board (Admins can always). */
+async function editableLead(user: { id: string; role: import("@/generated/prisma/enums").Role }, id: string) {
+  const lead = await db.lead.findUnique({ where: { id }, select: { status: true, respondedAt: true, title: true, ownerId: true, source: true } });
+  if (!lead) return { message: "This lead no longer exists." } as const;
+  if (!(await canSee(user, "lead", id))) return { message: NOT_YOURS } as const;
+  if (user.role !== "ADMIN" && !lead.ownerId && lead.source === "WEBSITE_FORM") return { message: TAKE_FIRST } as const;
+  return { lead } as const;
+}
 
 function revalidateLead(id?: string) {
   revalidatePath("/leads");
@@ -32,6 +46,7 @@ export async function createLead(_prev: FormState, formData: FormData): Promise<
   const parsed = leadSchema.safeParse(values);
   if (!parsed.success) return { errors: zodErrors(parsed.error), values };
   if (!(await companyExists(parsed.data.companyId))) return { errors: { companyId: ["That company no longer exists."] }, values };
+  if (!(await mayAssignOwner(user, parsed.data.ownerId ?? user.id))) return { errors: { ownerId: [OWNER_NOT_ALLOWED] }, values };
 
   const now = new Date();
   const alreadyReplied = values.alreadyReplied === "on";
@@ -42,6 +57,7 @@ export async function createLead(_prev: FormState, formData: FormData): Promise<
       ...data,
       status: alreadyReplied ? "CONTACTED" : "NEW",
       ownerId: data.ownerId ?? user.id,
+      createdById: user.id,
       respondBy: addWorkingDays(now, REPLY_WITHIN_WORKING_DAYS),
       respondedAt: alreadyReplied ? now : null,
     },
@@ -62,8 +78,12 @@ export async function updateLead(id: string, _prev: FormState, formData: FormDat
   if (!parsed.success) return { errors: zodErrors(parsed.error), values };
   if (!(await companyExists(parsed.data.companyId))) return { errors: { companyId: ["That company no longer exists."] }, values };
 
-  const existing = await db.lead.findUnique({ where: { id }, select: { status: true, respondedAt: true, ownerId: true } });
-  if (!existing) return { message: "This lead no longer exists." };
+  const found = await editableLead(user, id);
+  if ("message" in found) return { message: found.message, values };
+  const existing = found.lead;
+  if (parsed.data.ownerId !== existing.ownerId && !(await mayAssignOwner(user, parsed.data.ownerId))) {
+    return { errors: { ownerId: [OWNER_NOT_ALLOWED] }, values };
+  }
   if (existing.status === "CONVERTED" && parsed.data.status !== "CONVERTED") {
     return { errors: { status: ["This lead was converted to a deal. Edit the deal instead."] }, values };
   }
@@ -92,8 +112,9 @@ export async function markLeadResponded(id: string) {
   const user = await authorizeAction("lead:update");
   if (!user) return { message: FORBIDDEN_MESSAGE };
 
-  const lead = await db.lead.findUnique({ where: { id }, select: { status: true, respondedAt: true, title: true } });
-  if (!lead) return { message: "This lead no longer exists." };
+  const found = await editableLead(user, id);
+  if ("message" in found) return { message: found.message };
+  const lead = found.lead;
   if (!lead.respondedAt) {
     await db.lead.update({
       where: { id },
@@ -108,8 +129,9 @@ export async function setLeadStatus(id: string, status: Exclude<LeadStatus, "CON
   const user = await authorizeAction("lead:update");
   if (!user) return { message: FORBIDDEN_MESSAGE };
 
-  const lead = await db.lead.findUnique({ where: { id }, select: { status: true, respondedAt: true, title: true } });
-  if (!lead) return { message: "This lead no longer exists." };
+  const found = await editableLead(user, id);
+  if ("message" in found) return { message: found.message };
+  const lead = found.lead;
   if (lead.status === "CONVERTED") return { message: "This lead was already converted to a deal." };
 
   const reason = String(formData?.get("reason") ?? "").trim().slice(0, 500) || null;
@@ -131,6 +153,7 @@ export async function deleteLead(id: string) {
 
   const lead = await db.lead.findUnique({ where: { id }, select: { title: true } });
   if (!lead) return { message: "This lead no longer exists." };
+  if (!(await canSee(user, "lead", id))) return { message: NOT_YOURS };
 
   await db.lead.delete({ where: { id } });
   await audit({ actorId: user.id, action: "delete", entity: "Lead", entityId: id, summary: lead.title });
@@ -150,7 +173,11 @@ export async function convertLead(id: string, _prev: FormState, formData: FormDa
 
   const lead = await db.lead.findUnique({ where: { id } });
   if (!lead) return { message: "This lead no longer exists." };
+  if (!(await canSee(user, "lead", id))) return { message: NOT_YOURS };
   if (lead.status === "CONVERTED") return { message: "This lead was already converted to a deal." };
+  if (!(await mayAssignOwner(user, input.ownerId ?? user.id))) return { errors: { ownerId: [OWNER_NOT_ALLOWED] }, values };
+  // Converting a lead from the New Leads board takes it at the same time.
+  const takesBoardLead = !lead.ownerId && lead.source === "WEBSITE_FORM";
 
   const stage = await db.pipelineStage.findUnique({ where: { id: input.stageId }, include: { pipeline: true } });
   if (!stage || stage.isWon || stage.isLost) return { errors: { stageId: ["Pick an open stage"] }, values };
@@ -196,6 +223,7 @@ export async function convertLead(id: string, _prev: FormState, formData: FormDa
         stageId: stage.id,
         expectedCloseDate: input.expectedCloseDate,
         ownerId: input.ownerId ?? user.id,
+        createdById: user.id,
         companyId,
         contactId,
         leadId: lead.id,
@@ -208,6 +236,7 @@ export async function convertLead(id: string, _prev: FormState, formData: FormDa
       data: {
         status: "CONVERTED",
         convertedAt: new Date(),
+        ...(takesBoardLead && { ownerId: input.ownerId ?? user.id }),
         companyId,
         respondedAt: lead.respondedAt ?? new Date(),
       },
@@ -221,4 +250,26 @@ export async function convertLead(id: string, _prev: FormState, formData: FormDa
   revalidateLead(id);
   revalidatePath("/deals");
   redirect(`/deals/${deal.id}`);
+}
+
+/**
+ * Takes a website lead from the New Leads board: it becomes yours, and from then on only you,
+ * your manager and Admins see it. If two people press at once, the first one wins.
+ */
+export async function takeLead(id: string): Promise<{ message?: string }> {
+  const user = await authorizeAction("lead:update");
+  if (!user) return { message: FORBIDDEN_MESSAGE };
+  const taken = await db.lead.updateMany({
+    where: { id, ownerId: null, source: "WEBSITE_FORM", status: { in: ["NEW", "CONTACTED", "QUALIFIED"] } },
+    data: { ownerId: user.id },
+  });
+  if (taken.count === 0) {
+    const lead = await db.lead.findUnique({ where: { id }, select: { owner: { select: { name: true } } } });
+    return { message: lead?.owner ? `${lead.owner.name} has already taken this lead.` : "This lead is no longer on the board." };
+  }
+  const lead = await db.lead.findUniqueOrThrow({ where: { id }, select: { title: true } });
+  await audit({ actorId: user.id, action: "update", entity: "Lead", entityId: id, summary: `${lead.title}: taken from the New Leads board` });
+  revalidateLead(id);
+  revalidatePath("/leads/board");
+  redirect(`/leads/${id}`);
 }

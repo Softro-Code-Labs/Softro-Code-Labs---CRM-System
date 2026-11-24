@@ -4,6 +4,7 @@ import { can } from "@/lib/permissions";
 import { getQuote } from "@/lib/quotes";
 import { getOrgSettings } from "@/lib/queries/org";
 import { renderQuotePdf } from "@/lib/pdf/quote-pdf";
+import { canSee } from "@/lib/visibility";
 
 export const runtime = "nodejs";
 
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   const [quote, org] = await Promise.all([getQuote(id), getOrgSettings()]);
-  if (!quote) return new NextResponse("Quote not found", { status: 404 });
+  if (!quote || !(await canSee(user, "quote", id))) return new NextResponse("Quote not found", { status: 404 });
 
   const pdf = await renderQuotePdf(quote, org);
   const client = quote.company?.name ?? "";

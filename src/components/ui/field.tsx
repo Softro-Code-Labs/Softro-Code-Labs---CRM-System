@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { PasswordInput } from "./password-input";
 
 const control =
   "block w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm text-ink-900 shadow-sm placeholder:text-ink-400 focus:border-ink-700 focus:ring-2 focus:ring-ink-900/10 focus:outline-none disabled:bg-ink-100 aria-[invalid=true]:border-red-500";
@@ -38,19 +39,20 @@ export function TextField({
   hint,
   required,
   className,
+  type,
   ...props
 }: FieldProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, "name">) {
+  const shared = {
+    id: name,
+    name,
+    required,
+    "aria-invalid": error?.length ? true : undefined,
+    "aria-describedby": error?.length ? `${name}-error` : undefined,
+    className: control,
+  } as const;
   return (
     <FieldShell {...{ label, name, error, hint, required, className }}>
-      <input
-        id={name}
-        name={name}
-        required={required}
-        aria-invalid={error?.length ? true : undefined}
-        aria-describedby={error?.length ? `${name}-error` : undefined}
-        className={control}
-        {...props}
-      />
+      {type === "password" ? <PasswordInput {...shared} {...props} /> : <input {...shared} type={type} {...props} />}
     </FieldShell>
   );
 }

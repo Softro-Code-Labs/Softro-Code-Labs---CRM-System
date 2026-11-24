@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { getQuote } from "@/lib/quotes";
 import { toDateInput } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -11,10 +12,10 @@ import { saveQuote } from "../../actions";
 export const metadata: Metadata = { title: "Edit quote" };
 
 export default async function EditQuotePage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePermission("quote:update");
+  const user = await requirePermission("quote:update");
   const { id } = await params;
-  const [quote, options] = await Promise.all([getQuote(id), getEditorOptions()]);
-  if (!quote) notFound();
+  const [quote, options] = await Promise.all([getQuote(id), getEditorOptions(user)]);
+  if (!quote || !(await canSee(user, "quote", id))) notFound();
   if (quote.status === "ACCEPTED" || quote.status === "DECLINED") redirect(`/quotes/${id}`);
 
   return (

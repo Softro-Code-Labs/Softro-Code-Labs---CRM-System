@@ -4,6 +4,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { quoteTotals } from "@/lib/quote-math";
 import { nextNumber } from "@/lib/numbering";
 import type { QuoteInput } from "@/lib/validation/quote";
+import { sealSelect } from "@/lib/seal";
 
 /** Next quote number for the year, e.g. Q-2026-0007. */
 export function nextQuoteNumber(tx: Prisma.TransactionClient, date = new Date()) {
@@ -49,6 +50,7 @@ export const quoteInclude = {
   contact: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, mobile: true, jobTitle: true } },
   deal: { select: { id: true, title: true, status: true } },
   createdBy: { select: { name: true, email: true, phone: true, jobTitle: true } },
+  seal: { select: sealSelect },
 } satisfies Prisma.QuoteInclude;
 
 export type FullQuote = Prisma.QuoteGetPayload<{ include: typeof quoteInclude }>;

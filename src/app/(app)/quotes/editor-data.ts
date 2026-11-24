@@ -4,13 +4,18 @@ import { getCompanyOptions } from "@/lib/queries/companies";
 import { getContactOptions } from "@/lib/queries/contacts";
 import type { EditorItem } from "./quote-editor";
 import type { FullQuote } from "@/lib/quotes";
+import type { Role } from "@/generated/prisma/enums";
+import { getVisibility } from "@/lib/visibility";
 
-export async function getEditorOptions() {
+/** Choices for the quote and invoice editors. Deals are limited to the ones this person can see. */
+export async function getEditorOptions(viewer: { id: string; role: Role }) {
+  const v = await getVisibility(viewer);
   const [products, companies, contacts, deals] = await Promise.all([
     db.product.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     getCompanyOptions(),
     getContactOptions(),
     db.deal.findMany({
+      where: v.deal,
       orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
       take: 500,
       select: { id: true, title: true, status: true, companyId: true, contactId: true, company: { select: { name: true } } },

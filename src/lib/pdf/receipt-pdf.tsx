@@ -1,5 +1,6 @@
 import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
-import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED } from "./shared";
+import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED, SealedSignaturePdf } from "./shared";
+import { sealSelect } from "@/lib/seal";
 import type { Prisma } from "@/generated/prisma/client";
 import type { getOrgSettings } from "@/lib/queries/org";
 import { amountInWords } from "@/lib/amount-in-words";
@@ -10,6 +11,7 @@ type Org = Awaited<ReturnType<typeof getOrgSettings>>;
 
 export const receiptInclude = {
   recordedBy: { select: { name: true } },
+  seal: { select: sealSelect },
   invoice: {
     select: {
       id: true,
@@ -116,11 +118,15 @@ function ReceiptPdf({ p, org }: { p: FullReceipt; org: Org }) {
         {p.method === "CHEQUE" ? <Text style={[s.small, { marginTop: 8 }]}>Payments by cheque are subject to realisation.</Text> : null}
 
         <View style={[s.row, { justifyContent: "flex-end", marginTop: 44 }]} wrap={false}>
-          <View style={{ width: 210 }}>
-            <View style={s.signLine} />
-            <Text style={s.small}>Received by{p.recordedBy ? `: ${p.recordedBy.name}` : ""}</Text>
-            <Text style={s.small}>For {org.companyName}</Text>
-          </View>
+          {p.seal ? (
+            <SealedSignaturePdf seal={p.seal} registrationNo={org.registrationNo} width={230} caption={`For ${org.companyName}`} />
+          ) : (
+            <View style={{ width: 210 }}>
+              <View style={s.signLine} />
+              <Text style={s.small}>Received by{p.recordedBy ? `: ${p.recordedBy.name}` : ""}</Text>
+              <Text style={s.small}>For {org.companyName}</Text>
+            </View>
+          )}
         </View>
       </Page>
     </Document>

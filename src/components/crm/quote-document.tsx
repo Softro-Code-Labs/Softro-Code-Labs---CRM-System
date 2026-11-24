@@ -3,6 +3,7 @@ import type { getOrgSettings } from "@/lib/queries/org";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
 import { formatQuantity } from "@/lib/quote-math";
 import { SoftroMark } from "@/components/brand/logo";
+import { SealedSignature } from "@/components/crm/company-seal";
 
 type Org = Awaited<ReturnType<typeof getOrgSettings>>;
 
@@ -123,27 +124,24 @@ export function QuoteDocument({ quote, org }: { quote: FullQuote; org: Org }) {
         </div>
       </dl>
 
-      {(quote.terms || org.bankDetails) && (
-        <section className="mt-8 grid gap-6 border-t border-ink-100 pt-6 text-xs text-ink-600 sm:grid-cols-2">
-          {quote.terms && (
-            <div>
-              <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">Terms</p>
-              <p className="whitespace-pre-line">{quote.terms}</p>
-            </div>
-          )}
-          {org.bankDetails && (
-            <div>
-              <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">Payment details</p>
-              <p className="whitespace-pre-line">{org.bankDetails}</p>
-            </div>
-          )}
+      {/* Bank details are deliberately left off quotes: they go on invoices only. */}
+      {quote.terms && (
+        <section className="mt-8 border-t border-ink-100 pt-6 text-xs text-ink-600">
+          <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">Terms</p>
+          <p className="whitespace-pre-line">{quote.terms}</p>
         </section>
       )}
       <section className="mt-10 grid gap-8 text-xs text-ink-500 sm:grid-cols-2">
         <div>
           <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">For {org.companyName}</p>
-          <div className="h-10 border-b border-ink-300" />
-          <p className="mt-1">{quote.createdBy?.name ?? "Authorised signatory"}</p>
+          {quote.seal ? (
+            <SealedSignature seal={quote.seal} registrationNo={org.registrationNo} />
+          ) : (
+            <>
+              <div className="h-10 border-b border-ink-300" />
+              <p className="mt-1">{quote.createdBy?.name ?? "Authorised signatory"}</p>
+            </>
+          )}
         </div>
         <div>
           <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">Accepted by the client</p>

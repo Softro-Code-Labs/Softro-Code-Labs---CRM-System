@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { canSee, getOwnerOptions } from "@/lib/visibility";
 import { getCompanyOptions } from "@/lib/queries/companies";
 import { getContactOptions } from "@/lib/queries/contacts";
 import { getDefaultPipeline } from "@/lib/queries/pipeline";
@@ -14,16 +14,16 @@ import { updateDeal } from "../../actions";
 export const metadata: Metadata = { title: "Edit deal" };
 
 export default async function EditDealPage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePermission("deal:update");
+  const user = await requirePermission("deal:update");
   const { id } = await params;
-  const [deal, owners, companies, contacts, pipeline] = await Promise.all([
+  const [deal, companies, contacts, pipeline] = await Promise.all([
     db.deal.findUnique({ where: { id } }),
-    getAssignableUsers(),
     getCompanyOptions(),
     getContactOptions(),
     getDefaultPipeline(),
   ]);
-  if (!deal) notFound();
+  if (!deal || !(await canSee(user, "deal", id))) notFound();
+  const owners = await getOwnerOptions(user, deal.ownerId);
 
   return (
     <div className="mx-auto max-w-3xl">

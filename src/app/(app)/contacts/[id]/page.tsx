@@ -6,6 +6,7 @@ import { DEAL_STATUS_TONE, LANGUAGE_LABELS } from "@/lib/crm-meta";
 import { WhatsAppButton } from "@/components/crm/whatsapp-button";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -28,12 +29,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ContactPage({ params }: Props) {
   const user = await requirePermission("contact:view");
   const { id } = await params;
+  const v = await getVisibility(user);
   const contact = await db.contact.findUnique({
     where: { id },
     include: {
       company: { select: { id: true, name: true } },
       owner: { select: { name: true } },
       deals: {
+        where: v.deal,
         orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
         select: { id: true, title: true, value: true, currency: true, status: true, stage: { select: { name: true } } },
       },

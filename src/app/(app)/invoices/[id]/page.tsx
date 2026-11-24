@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { FileDown, Pencil } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, toDateInput } from "@/lib/utils";
 import { getOrgSettings } from "@/lib/queries/org";
@@ -15,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { InvoiceDocument } from "@/components/crm/invoice-document";
 import { PaymentForm, PaymentItem, RestoreButton, VoidButton } from "./invoice-controls";
+import { SealControl } from "@/components/crm/seal-control";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -28,9 +30,12 @@ export default async function InvoicePage({ params }: Props) {
   const user = await requirePermission("invoice:view");
   const { id } = await params;
   const [invoice, org] = await Promise.all([getInvoice(id), getOrgSettings()]);
-  if (!invoice) notFound();
+  if (!invoice || !(await canSee(user, "invoice", id))) notFound();
   const state = invoiceState(invoice);
   const balance = balanceDue(invoice);
+  const sealed = Boolean(invoice.seal);
+  const canSeal = can(user.role, "document:seal");
+  const hasSignature = canSeal && Boolean((await db.user.findUnique({ where: { id: user.id }, select: { signatureUpdatedAt: true } }))?.signatureUpdatedAt);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -39,9 +44,9 @@ export default async function InvoicePage({ params }: Props) {
         breadcrumbs={[{ label: "Invoices", href: "/invoices" }, { label: invoice.number }]}
         actions={
           <>
-            {invoice.status === "ISSUED" && Number(invoice.amountPaid) === 0 && can(user.role, "invoice:void") && <VoidButton id={invoice.id} number={invoice.number} />}
+            {invoice.status === "ISSUED" && Number(invoice.amountPaid) === 0 && !sealed && can(user.role, "invoice:void") && <VoidButton id={invoice.id} number={invoice.number} />}
             {invoice.status === "VOID" && can(user.role, "invoice:void") && <RestoreButton id={invoice.id} />}
-            {isEditable(invoice) && can(user.role, "invoice:update") && (
+            {isEditable(invoice) && !sealed && can(user.role, "invoice:update") && (
               <LinkButton href={`/invoices/${invoice.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit
               </LinkButton>
@@ -54,7 +59,16 @@ export default async function InvoicePage({ params }: Props) {
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-6">
+          {(sealed || (canSeal && invoice.status !== "VOID")) && (
+            <SealControl
+              kind="invoice"
+              id={invoice.id}
+              sealed={invoice.seal ? { by: invoice.seal.signerName, on: formatDate(invoice.seal.sealedAt) } : null}
+              canSeal={canSeal}
+              hasSignature={hasSignature}
+            />
+          )}
           <InvoiceDocument invoice={invoice} org={org} />
         </div>
 
@@ -100,7 +114,17 @@ export default async function InvoicePage({ params }: Props) {
                     receipt={p.receiptNumber}
                     amount={formatMoney(p.amount, invoice.currency)}
                     detail={[formatDate(p.paidAt), PAYMENT_METHOD_LABELS[p.method], p.reference].filter(Boolean).join(" · ")}
-                    canCancel={can(user.role, "payment:delete")}
+                    canCancel={can(user.role, "payment:delete") && !p.seal}
+                    seal={
+                      <SealControl
+                        compact
+                        kind="receipt"
+                        id={p.id}
+                        sealed={p.seal ? { by: p.seal.signerName, on: formatDate(p.seal.sealedAt) } : null}
+                        canSeal={canSeal}
+                        hasSignature={hasSignature}
+                      />
+                    }
                   />
                 ))}
               </ul>

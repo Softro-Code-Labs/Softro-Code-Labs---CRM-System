@@ -1,5 +1,5 @@
 import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
-import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED } from "./shared";
+import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED, SealedSignaturePdf } from "./shared";
 import type { FullQuote } from "@/lib/quotes";
 import type { getOrgSettings } from "@/lib/queries/org";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
@@ -41,6 +41,7 @@ function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
   const contact = quote.contact;
   const orgLine = [org.phone, org.email, org.website?.replace(/^https?:\/\//, "")].filter(Boolean).join("  ·  ");
   const idLine = [org.registrationNo && `BR ${org.registrationNo}`, org.vatNumber && `TIN/VAT ${org.vatNumber}`].filter(Boolean).join("  ·  ");
+  const terms = (quote.terms ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
   return (
     <Document title={`${quote.number} ${quote.title}`} author={org.companyName} subject="Quotation" creator="Softro CRM">
@@ -143,25 +144,31 @@ function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
           </View>
         </View>
 
-        {org.bankDetails ? (
-          <View style={{ marginTop: 22, borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 12 }} wrap={false}>
-            <Text style={s.label}>Payment details</Text>
-            <Text style={{ fontSize: 8.5, color: MUTED }}>{org.bankDetails}</Text>
-          </View>
-        ) : null}
-        {quote.terms ? (
-          <View style={{ marginTop: 14 }}>
-            <Text style={s.label} minPresenceAhead={40}>Terms</Text>
-            <Text style={{ fontSize: 8.5, color: MUTED }}>{quote.terms}</Text>
+        {/* Bank details are deliberately left off quotes: they go on invoices only. */}
+        {terms.length ? (
+          <View style={{ marginTop: 22, borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 12 }}>
+            <Text style={s.label} minPresenceAhead={60}>Terms</Text>
+            {/* Each paragraph (a block separated by a blank line) stays whole: it moves to the next page rather than splitting. */}
+            {terms.map((para, i) => (
+              <Text key={i} style={{ fontSize: 8.5, color: MUTED, marginTop: i ? 7 : 0 }} wrap={false}>
+                {para}
+              </Text>
+            ))}
           </View>
         ) : null}
 
         <View style={[s.row, { gap: 28, marginTop: 30 }]} wrap={false}>
           <View style={{ flex: 1 }}>
             <Text style={s.label}>For {org.companyName}</Text>
-            <Text style={[s.small, { marginBottom: 2 }]}> </Text>
-            <View style={s.signLine} />
-            <Text style={s.small}>{quote.createdBy?.name ?? "Authorised signatory"}</Text>
+            {quote.seal ? (
+              <SealedSignaturePdf seal={quote.seal} registrationNo={org.registrationNo} width={220} />
+            ) : (
+              <>
+                <Text style={[s.small, { marginBottom: 2 }]}> </Text>
+                <View style={s.signLine} />
+                <Text style={s.small}>{quote.createdBy?.name ?? "Authorised signatory"}</Text>
+              </>
+            )}
           </View>
           <View style={{ flex: 1.3 }}>
             <Text style={s.label}>Accepted by the client</Text>

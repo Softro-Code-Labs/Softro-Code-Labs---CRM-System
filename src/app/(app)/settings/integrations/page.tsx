@@ -111,14 +111,14 @@ export default async function IntegrationsPage() {
         </p>
         <ul className="space-y-1">
           <li>
-            New enquiries go to:{" "}
+            New enquiries wait on the New Leads board. Email alert goes to:{" "}
             {owner ? (
               <strong className="text-ink-800">
                 {owner.name}
-                {!owner.isActive && " (deactivated, so leads are unassigned)"}
+                {!owner.isActive && " (deactivated, so no alert is sent)"}
               </strong>
             ) : process.env.WEBSITE_LEAD_OWNER_EMAIL ? (
-              <span className="text-red-600">{process.env.WEBSITE_LEAD_OWNER_EMAIL} isn&apos;t a CRM user, so leads are unassigned</span>
+              <span className="text-red-600">{process.env.WEBSITE_LEAD_OWNER_EMAIL} isn&apos;t a CRM user, so no alert is sent</span>
             ) : (
               <span>nobody (set <Env>WEBSITE_LEAD_OWNER_EMAIL</Env>)</span>
             )}

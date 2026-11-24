@@ -4,6 +4,7 @@ import { Plus, Receipt } from "lucide-react";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { balanceDue, invoiceState } from "@/lib/invoices";
 import { colomboDayBounds, startOfColomboMonth } from "@/lib/working-days";
@@ -45,7 +46,9 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
     void: { status: "VOID" },
     all: {},
   };
+  const v = await getVisibility(user);
   const where: Prisma.InvoiceWhereInput = {
+    AND: [v.invoice],
     ...byTab[tab],
     ...(q && {
       OR: [
@@ -67,8 +70,8 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
       take: PAGE_SIZE,
       include: { company: { select: { name: true } }, contact: { select: { firstName: true, lastName: true } } },
     }),
-    db.invoice.findMany({ where: { status: "ISSUED" }, select: { total: true, amountPaid: true, currency: true, dueDate: true } }),
-    db.payment.findMany({ where: { paidAt: { gte: startOfColomboMonth() } }, select: { amount: true, invoice: { select: { currency: true } } } }),
+    db.invoice.findMany({ where: { AND: [v.invoice], status: "ISSUED" }, select: { total: true, amountPaid: true, currency: true, dueDate: true } }),
+    db.payment.findMany({ where: { invoice: v.invoice, paidAt: { gte: startOfColomboMonth() } }, select: { amount: true, invoice: { select: { currency: true } } } }),
   ]);
 
   const owed = open.map((i) => ({ value: balanceDue(i), currency: i.currency }));

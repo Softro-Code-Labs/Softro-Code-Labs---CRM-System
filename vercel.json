@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "node scripts/vercel-build.mjs",
+  "regions": ["sin1"],
   "crons": [{ "path": "/api/cron/daily-digest", "schedule": "30 2 * * 1-5" }]
 }

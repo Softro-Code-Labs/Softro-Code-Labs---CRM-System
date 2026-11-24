@@ -25,6 +25,8 @@ import { Pagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/search-input";
 import { ReplyBadge } from "@/components/crm/reply-badge";
 import { FilterSelect } from "@/components/ui/filter-select";
+import { BOARD_LEAD_WHERE, getVisibility } from "@/lib/visibility";
+import { Inbox } from "lucide-react";
 
 export const metadata: Metadata = { title: "Leads" };
 
@@ -53,6 +55,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const source = pick(firstParam(sp.source), Object.values(LeadSource));
   const service = pick(firstParam(sp.service), Object.values(ServiceType));
   const page = parsePage(sp.page);
+  const v = await getVisibility(user);
 
   const statusFilter: Prisma.LeadWhereInput =
     tab === "open"
@@ -64,6 +67,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           : { status: tab as LeadStatus };
 
   const where: Prisma.LeadWhereInput = {
+    AND: [v.lead],
     ...statusFilter,
     ...(source && { source }),
     ...(service && { serviceType: service }),
@@ -79,7 +83,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     }),
   };
 
-  const [total, leads, needsReplyCount] = await Promise.all([
+  const [total, leads, needsReplyCount, boardCount] = await Promise.all([
     db.lead.count({ where }),
     db.lead.findMany({
       where,
@@ -103,7 +107,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         owner: { select: { name: true } },
       },
     }),
-    db.lead.count({ where: { status: { in: OPEN_LEAD_STATUSES }, respondedAt: null } }),
+    db.lead.count({ where: { AND: [v.lead], status: { in: OPEN_LEAD_STATUSES }, respondedAt: null } }),
+    db.lead.count({ where: BOARD_LEAD_WHERE }),
   ]);
 
   const params = { q: q || undefined, tab: tab === "open" ? undefined : tab, source, service };
@@ -124,11 +129,17 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         title="Leads"
         description="New enquiries from WhatsApp, the website and referrals. We reply within 2 working days."
         actions={
-          can(user.role, "lead:create") && (
-            <LinkButton href="/leads/new">
-              <Plus className="size-4" aria-hidden /> New lead
+          <>
+            <LinkButton href="/leads/board" variant="secondary">
+              <Inbox className="size-4" aria-hidden /> New web leads
+              {boardCount > 0 && <span className="rounded-full bg-brand-600 px-1.5 text-xs font-semibold text-white">{boardCount}</span>}
             </LinkButton>
-          )
+            {can(user.role, "lead:create") && (
+              <LinkButton href="/leads/new">
+                <Plus className="size-4" aria-hidden /> New lead
+              </LinkButton>
+            )}
+          </>
         }
       />
 
@@ -208,7 +219,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                     <td className="px-5 py-3 text-right whitespace-nowrap text-ink-600 tabular-nums">
                       {lead.estimatedValue ? formatMoney(lead.estimatedValue, lead.currency) : "—"}
                     </td>
-                    <td className="px-5 py-3 text-ink-600">{lead.owner?.name ?? "—"}</td>
+                    <td className="px-5 py-3 text-ink-600">{lead.owner?.name ?? (lead.source === "WEBSITE_FORM" ? <span className="text-sky-700">On the board</span> : "—")}</td>
                     <td className="px-5 py-3 whitespace-nowrap text-ink-500">{formatDate(lead.createdAt)}</td>
                   </tr>
                 ))}

@@ -13,7 +13,7 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
   const user = await requirePermission("contract:manage");
   const sp = await searchParams;
   const [options, deal] = await Promise.all([
-    getContractFormOptions(),
+    getContractFormOptions(user),
     sp.dealId ? db.deal.findUnique({ where: { id: sp.dealId }, select: { id: true, title: true, companyId: true, contactId: true, currency: true } }) : null,
   ]);
   const companyId = deal?.companyId ?? options.companies.find((c) => c.id === sp.companyId)?.id ?? "";

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { audit } from "@/lib/audit";
 import { fullName, toDateInput } from "@/lib/utils";
@@ -37,14 +38,19 @@ export async function GET(request: NextRequest) {
   const type = sp.get("type") as ExportType;
   if (!TYPES.includes(type)) return new NextResponse("Unknown export type", { status: 400 });
   const period = resolvePeriod({ period: sp.get("period") ?? undefined, from: sp.get("from") ?? undefined, to: sp.get("to") ?? undefined });
-  const ownerId = sp.get("owner") || undefined;
+  // Same scope as the Reports page: Sales export their own records, Managers their team's, Admins everything.
+  const v = await getVisibility(user);
+  const requestedOwner = sp.get("owner") || undefined;
+  const ownerId = requestedOwner && (v.ids === null || v.ids.includes(requestedOwner)) ? requestedOwner : undefined;
+  if (requestedOwner && !ownerId) return new NextResponse("Forbidden", { status: 403 });
+  const people = v.ids;
   const inPeriod = { gte: period.from, lt: period.to };
 
   let csv: string;
   let rows = 0;
   if (type === "deals") {
     const deals = await db.deal.findMany({
-      where: { OR: [{ createdAt: inPeriod }, { closedAt: inPeriod }], ...(ownerId && { ownerId }) },
+      where: { AND: [v.deal, { OR: [{ createdAt: inPeriod }, { closedAt: inPeriod }] }], ...(ownerId && { ownerId }) },
       orderBy: { createdAt: "asc" },
       include: {
         stage: { select: { name: true, probability: true } },
@@ -65,7 +71,7 @@ export async function GET(request: NextRequest) {
     );
   } else if (type === "leads") {
     const leads = await db.lead.findMany({
-      where: { createdAt: inPeriod, ...(ownerId && { ownerId }) },
+      where: { AND: [v.lead], createdAt: inPeriod, ...(ownerId && { ownerId }) },
       orderBy: { createdAt: "asc" },
       include: { owner: { select: { name: true } }, convertedDeal: { select: { status: true } } },
     });
@@ -80,7 +86,7 @@ export async function GET(request: NextRequest) {
     );
   } else if (type === "tickets") {
     const tickets = await db.ticket.findMany({
-      where: { createdAt: inPeriod, ...(ownerId && { assignedToId: ownerId }) },
+      where: { createdAt: inPeriod, ...(ownerId ? { assignedToId: ownerId } : people && { assignedToId: { in: people } }) },
       orderBy: { createdAt: "asc" },
       include: {
         company: { select: { name: true } },
@@ -102,7 +108,7 @@ export async function GET(request: NextRequest) {
   } else if (type === "quotes") {
     // Accounting: one row per quote line, accepted quotes only, with quote totals repeated on each line.
     const quotes = await db.quote.findMany({
-      where: { status: "ACCEPTED", acceptedAt: inPeriod, ...(ownerId && { createdById: ownerId }) },
+      where: { AND: [v.quote], status: "ACCEPTED", acceptedAt: inPeriod, ...(ownerId && { createdById: ownerId }) },
       orderBy: [{ acceptedAt: "asc" }, { number: "asc" }],
       include: {
         company: { select: { name: true, email: true, addressLine: true } },
@@ -123,7 +129,7 @@ export async function GET(request: NextRequest) {
       ),
     );
   } else {
-    const team = await teamReport({ period });
+    const team = await teamReport({ period, people });
     rows = team.length;
     csv = toCsv(
       ["Person", "Role", "Leads", "Leads replied on time %", "Deals won", "Deals lost", "Win rate %", `Won value (${process.env.DEFAULT_CURRENCY ?? "LKR"})`, "Open pipeline", "Tasks done", "Tickets resolved", "Tickets replied on time %"],

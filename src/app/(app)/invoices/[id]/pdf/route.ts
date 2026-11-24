@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { getInvoice } from "@/lib/invoices";
+import { canSee } from "@/lib/visibility";
 import { getOrgSettings } from "@/lib/queries/org";
 import { renderInvoicePdf } from "@/lib/pdf/invoice-pdf";
 
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   const [quote, org] = await Promise.all([getInvoice(id), getOrgSettings()]);
-  if (!quote) return new NextResponse("Invoice not found", { status: 404 });
+  if (!quote || !(await canSee(user, "invoice", id))) return new NextResponse("Invoice not found", { status: 404 });
 
   const pdf = await renderInvoicePdf(quote, org);
   const client = quote.company?.name ?? "";

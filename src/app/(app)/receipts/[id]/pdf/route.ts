@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { getOrgSettings } from "@/lib/queries/org";
 import { receiptInclude, renderReceiptPdf } from "@/lib/pdf/receipt-pdf";
+import { canSee } from "@/lib/visibility";
 
 export const runtime = "nodejs";
 
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   const [payment, org] = await Promise.all([db.payment.findUnique({ where: { id }, include: receiptInclude }), getOrgSettings()]);
-  if (!payment) return new NextResponse("Receipt not found", { status: 404 });
+  if (!payment || !(await canSee(user, "payment", id))) return new NextResponse("Receipt not found", { status: 404 });
 
   const pdf = await renderReceiptPdf(payment, org);
   const client = payment.invoice.company?.name ?? "";

@@ -10,6 +10,11 @@ import { formatMoney } from "@/lib/utils";
 import { getOrgSettings } from "@/lib/queries/org";
 import { nextNumber } from "@/lib/numbering";
 import { colomboDayBounds } from "@/lib/working-days";
+import { SEALED_LOCK_MESSAGE } from "@/lib/seal";
+import { canSee } from "@/lib/visibility";
+import type { Role } from "@/generated/prisma/enums";
+
+const NOT_YOURS = "You can't see this invoice. It belongs to someone outside your team.";
 import { invoiceSchema, paymentSchema, type InvoiceInput } from "@/lib/validation/invoice";
 import { balanceDue, buildInvoiceData, invoicedNetForQuote, isEditable, linesFromContract, linesFromQuote, syncFollowUpTask, type FromQuoteMode } from "@/lib/invoices";
 
@@ -32,10 +37,11 @@ async function dealOwner(dealId: string | null) {
 }
 
 /** Fills company/contact from the deal or contract, and checks they belong together. */
-async function resolveLinks(input: InvoiceInput): Promise<{ errors: Record<string, string[]> } | { ok: true }> {
+async function resolveLinks(input: InvoiceInput, viewer: { id: string; role: Role }): Promise<{ errors: Record<string, string[]> } | { ok: true }> {
   if (input.dealId) {
     const deal = await db.deal.findUnique({ where: { id: input.dealId }, select: { companyId: true, contactId: true } });
     if (!deal) return { errors: { dealId: ["That deal no longer exists."] } };
+    if (!(await canSee(viewer, "deal", input.dealId))) return { errors: { dealId: ["You can't use a deal from outside your team."] } };
     input.companyId ??= deal.companyId;
     input.contactId ??= deal.contactId;
   }
@@ -63,14 +69,16 @@ export async function saveInvoice(id: string | null, _prev: FormState, formData:
     const itemError = Object.entries(errors).find(([k]) => k.startsWith("items"))?.[1]?.[0];
     return { errors, values, message: itemError };
   }
-  const links = await resolveLinks(parsed.data);
+  const links = await resolveLinks(parsed.data, user);
   if ("errors" in links) return { ...links, values, message: Object.values(links.errors)[0]?.[0] };
   const { invoice, items } = buildInvoiceData(parsed.data);
   const owner = await dealOwner(invoice.dealId);
 
   if (id) {
-    const existing = await db.invoice.findUnique({ where: { id }, select: { status: true, amountPaid: true } });
+    const existing = await db.invoice.findUnique({ where: { id }, select: { status: true, amountPaid: true, seal: { select: { id: true } } } });
     if (!existing) return { message: "This invoice no longer exists." };
+    if (!(await canSee(user, "invoice", id))) return { message: NOT_YOURS, values };
+    if (existing.seal) return { message: SEALED_LOCK_MESSAGE, values };
     if (!isEditable(existing)) return { message: "Invoices with payments, or void ones, can't be changed.", values };
     await db.$transaction(async (tx) => {
       await tx.invoiceItem.deleteMany({ where: { invoiceId: id } });
@@ -99,6 +107,7 @@ export async function invoiceFromQuote(quoteId: string, mode: FromQuoteMode, per
   if (mode === "percent" && !(percent > 0 && percent < 100)) return { message: "Enter a percentage between 1 and 99." };
   const [quote, org] = await Promise.all([db.quote.findUnique({ where: { id: quoteId }, include: { items: { orderBy: { position: "asc" } } } }), getOrgSettings()]);
   if (!quote) return { message: "This quote no longer exists." };
+  if (!(await canSee(user, "quote", quoteId))) return { message: "You can't see this quote. It belongs to someone outside your team." };
   if (quote.status !== "ACCEPTED") return { message: "Only accepted quotes can be invoiced." };
   const owner = await dealOwner(quote.dealId);
   const today = colomboDayBounds(new Date()).start;
@@ -191,6 +200,7 @@ export async function recordPayment(invoiceId: string, _prev: FormState, formDat
   if (!parsed.success) return { errors: zodErrors(parsed.error), values };
   const inv = await db.invoice.findUnique({ where: { id: invoiceId } });
   if (!inv) return { message: "This invoice no longer exists." };
+  if (!(await canSee(user, "invoice", invoiceId))) return { message: NOT_YOURS };
   if (inv.status !== "ISSUED") return { message: inv.status === "PAID" ? "This invoice is already paid." : "This invoice is void." };
   const due = balanceDue(inv);
   const amount = Math.round(parsed.data.amount * 100) / 100;
@@ -222,8 +232,10 @@ export async function recordPayment(invoiceId: string, _prev: FormState, formDat
 export async function deletePayment(paymentId: string): Promise<{ message?: string }> {
   const user = await authorizeAction("payment:delete");
   if (!user) return { message: FORBIDDEN_MESSAGE };
-  const p = await db.payment.findUnique({ where: { id: paymentId }, include: { invoice: true } });
+  const p = await db.payment.findUnique({ where: { id: paymentId }, include: { invoice: true, seal: { select: { id: true } } } });
   if (!p) return {};
+  if (!(await canSee(user, "invoice", p.invoiceId))) return { message: NOT_YOURS };
+  if (p.seal) return { message: "This receipt is sealed. Remove the seal first, then cancel it." };
   const owner = await dealOwner(p.invoice.dealId);
   let reused = false;
   await db.$transaction(async (tx) => {
@@ -246,8 +258,10 @@ export async function deletePayment(paymentId: string): Promise<{ message?: stri
 export async function voidInvoice(id: string): Promise<{ message?: string }> {
   const user = await authorizeAction("invoice:void");
   if (!user) return { message: FORBIDDEN_MESSAGE };
-  const inv = await db.invoice.findUnique({ where: { id } });
+  const inv = await db.invoice.findUnique({ where: { id }, include: { seal: { select: { id: true } } } });
   if (!inv) return {};
+  if (!(await canSee(user, "invoice", id))) return { message: NOT_YOURS };
+  if (inv.seal) return { message: "This invoice is sealed. Remove the seal first, then void it." };
   if (Number(inv.amountPaid) > 0) return { message: "This invoice has payments. Cancel them first." };
   await db.$transaction(async (tx) => {
     const updated = await tx.invoice.update({ where: { id }, data: { status: "VOID", voidedAt: new Date() } });
@@ -264,6 +278,7 @@ export async function restoreInvoice(id: string): Promise<{ message?: string }> 
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const inv = await db.invoice.findUnique({ where: { id }, include: { quote: { select: { number: true, subtotal: true, discountTotal: true } } } });
   if (!inv) return {};
+  if (!(await canSee(user, "invoice", id))) return { message: NOT_YOURS };
   if (inv.status !== "VOID") return { message: "This invoice isn't void." };
   if (inv.quoteId && inv.quote) {
     // Don't bill the client twice if a replacement invoice was made for the same part of the quote.

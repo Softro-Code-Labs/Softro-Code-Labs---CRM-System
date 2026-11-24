@@ -12,16 +12,18 @@ import { initialFormState } from "@/lib/form";
 import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "@/lib/permissions";
 import type { UserFormState } from "./actions";
 
-type Values = { name: string; email: string; role: Role; jobTitle: string; phone: string };
+type Values = { name: string; email: string; role: Role; jobTitle: string; phone: string; managerId: string };
 
 export function UserForm({
   action,
   initial,
   isEdit,
+  managers,
 }: {
   action: (prev: UserFormState, formData: FormData) => Promise<UserFormState>;
   initial: Values;
   isEdit?: boolean;
+  managers: { id: string; name: string }[];
 }) {
   const [state, formAction] = useActionState(action, initialFormState as UserFormState);
   const v = (k: keyof Values) => state.values?.[k] ?? initial[k] ?? "";
@@ -60,6 +62,17 @@ export function UserForm({
               error={e.role}
             />
             <p className="mt-1.5 text-xs text-ink-500">The full permissions table is in the user guide (docs/USER-GUIDE.md), section 3.</p>
+          </div>
+          <div className="sm:col-span-2">
+            <SelectField
+              label="Manager (team)"
+              name="managerId"
+              placeholder="No manager"
+              options={managers.map((m) => ({ value: m.id, label: m.name }))}
+              defaultValue={v("managerId")}
+              error={e.managerId}
+              hint="For Sales, Support and Viewer. Their manager sees their leads, deals and quotations. Admins and Managers aren't in a team."
+            />
           </div>
         </div>
       </Card>

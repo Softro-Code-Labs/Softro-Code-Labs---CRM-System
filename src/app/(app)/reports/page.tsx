@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requirePermission } from "@/lib/auth";
 import { can, ROLE_LABELS } from "@/lib/permissions";
 import { firstParam, formatMoneyTotals, toDateInput } from "@/lib/utils";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { getAssignableOwners, getVisibleUserIds } from "@/lib/visibility";
 import { LEAD_SOURCE_LABELS, SERVICE_TYPE_LABELS, TICKET_PRIORITY_LABELS } from "@/lib/crm-meta";
 import { forecastReport, leadReport, MAIN_CURRENCY, resolvePeriod, salesReport, supportReport, teamReport } from "@/lib/reports";
 import { PageHeader } from "@/components/ui/page-header";
@@ -40,10 +40,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const user = await requirePermission("report:view");
   const sp = await searchParams;
   const period = resolvePeriod({ period: firstParam(sp.period), from: firstParam(sp.from), to: firstParam(sp.to) });
-  const users = await getAssignableUsers();
+  // Sales report on themselves, Managers on their team, Admins on the whole company.
+  const [users, people] = await Promise.all([getAssignableOwners(user), getVisibleUserIds(user.id, user.role)]);
   const ownerParam = firstParam(sp.owner);
   const owner = users.find((u) => u.id === ownerParam);
-  const filters = { period, ownerId: owner?.id };
+  const filters = { period, ownerId: owner?.id, people };
+  const scopeLabel = people === null ? "Whole company" : people.length === 1 ? "Just you" : "Your team";
   const C = MAIN_CURRENCY;
 
   const [sales, forecast, leads, team, support] = await Promise.all([
@@ -66,7 +68,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     <div className="space-y-10">
       <PageHeader
         title="Reports"
-        description={`${period.label}${owner ? ` · ${owner.name}` : " · Whole team"}. Money charts are in ${C}.`}
+        description={`${period.label}${owner ? ` · ${owner.name}` : ` · ${scopeLabel}`}. Money charts are in ${C}.`}
         actions={
           can(user.role, "report:export") && (
             <ExportMenu
@@ -84,7 +86,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       <div className="-mt-6 flex flex-wrap items-center gap-2">
         <PeriodPicker from={toDateInput(period.from)} to={toDateInput(lastDay)} />
-        <FilterSelect param="owner" label="Whole team" options={users.map((u) => ({ value: u.id, label: u.name }))} />
+        <FilterSelect param="owner" label={scopeLabel} options={users.map((u) => ({ value: u.id, label: u.name }))} />
       </div>
 
       <Section title="Sales" description="Deals won or lost in the period.">

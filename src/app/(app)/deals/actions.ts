@@ -7,6 +7,10 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { authorizeAction, FORBIDDEN_MESSAGE } from "@/lib/auth";
+import { canSee, mayAssignOwner } from "@/lib/visibility";
+
+const NOT_YOURS = "You can\'t see this deal. It belongs to someone outside your team.";
+const OWNER_NOT_ALLOWED = "You can only assign deals to yourself or, for managers, to people in your team.";
 import { dealSchema, lostReasonSchema, type DealInput } from "@/lib/validation/deal";
 import { formToObject, zodErrors, type FormState } from "@/lib/form";
 
@@ -43,8 +47,10 @@ export async function createDeal(_prev: FormState, formData: FormData): Promise<
   const links = await checkLinks(parsed.data);
   if ("errors" in links) return { ...links, values };
 
+  if (!(await mayAssignOwner(user, parsed.data.ownerId ?? user.id))) return { errors: { ownerId: [OWNER_NOT_ALLOWED] }, values };
+
   const deal = await db.deal.create({
-    data: { ...parsed.data, pipelineId: links.stage.pipelineId, ownerId: parsed.data.ownerId ?? user.id },
+    data: { ...parsed.data, pipelineId: links.stage.pipelineId, ownerId: parsed.data.ownerId ?? user.id, createdById: user.id },
   });
   await audit({ actorId: user.id, action: "create", entity: "Deal", entityId: deal.id, summary: deal.title });
 
@@ -59,11 +65,15 @@ export async function updateDeal(id: string, _prev: FormState, formData: FormDat
   const values = formToObject(formData);
   const existing = await db.deal.findUnique({ where: { id }, include: { stage: true } });
   if (!existing) return { message: "This deal no longer exists." };
+  if (!(await canSee(user, "deal", id))) return { message: NOT_YOURS, values };
 
   // Closed deals keep their Won/Lost stage; the form doesn't offer it.
   if (existing.status !== "OPEN") values.stageId = existing.stageId;
   const parsed = dealSchema.safeParse(values);
   if (!parsed.success) return { errors: zodErrors(parsed.error), values };
+  if (parsed.data.ownerId !== existing.ownerId && !(await mayAssignOwner(user, parsed.data.ownerId))) {
+    return { errors: { ownerId: [OWNER_NOT_ALLOWED] }, values };
+  }
 
   if (existing.status === "OPEN") {
     const links = await checkLinks(parsed.data);
@@ -93,6 +103,7 @@ export async function moveDealStage(id: string, stageId: string) {
     db.pipelineStage.findUnique({ where: { id: stageId } }),
   ]);
   if (!deal) return { message: "This deal no longer exists." };
+  if (!(await canSee(user, "deal", id))) return { message: NOT_YOURS };
   if (!stage || stage.pipelineId !== deal.pipelineId || stage.isWon || stage.isLost) return { message: "That stage isn't available." };
   if (deal.status !== "OPEN") return { message: "Reopen the deal before moving it." };
   if (deal.stageId === stageId) return;
@@ -115,6 +126,7 @@ async function closeDeal(id: string, outcome: "WON" | "LOST", lostReason: string
 
   const deal = await db.deal.findUnique({ where: { id }, include: { pipeline: { include: { stages: true } } } });
   if (!deal) return { message: "This deal no longer exists." };
+  if (!(await canSee(user, "deal", id))) return { message: NOT_YOURS };
   const stage = deal.pipeline.stages.find((s) => (outcome === "WON" ? s.isWon : s.isLost));
   if (!stage) return { message: `This pipeline has no ${outcome === "WON" ? "Won" : "Lost"} stage.` };
 
@@ -149,6 +161,7 @@ export async function reopenDeal(id: string) {
 
   const deal = await db.deal.findUnique({ where: { id }, include: { pipeline: { include: { stages: { orderBy: { position: "desc" } } } } } });
   if (!deal) return { message: "This deal no longer exists." };
+  if (!(await canSee(user, "deal", id))) return { message: NOT_YOURS };
   // Back to the last open stage (e.g. "Design approval").
   const stage = deal.pipeline.stages.find((s) => !s.isWon && !s.isLost);
   if (!stage) return { message: "This pipeline has no open stages." };
@@ -167,6 +180,7 @@ export async function deleteDeal(id: string) {
 
   const deal = await db.deal.findUnique({ where: { id }, select: { title: true, companyId: true, leadId: true } });
   if (!deal) return { message: "This deal no longer exists." };
+  if (!(await canSee(user, "deal", id))) return { message: NOT_YOURS };
 
   await db.$transaction(async (tx) => {
     await tx.deal.delete({ where: { id } });

@@ -45,12 +45,15 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change a screen (list, detail, form) | `src/app/(app)/<area>/` (`leads`, `deals`, `quotes`, `contracts`, `support`, `reports`, `settings`…) |
 | Change what happens when someone saves | `actions.ts` next to that screen (server actions) |
 | Change who can do what | `src/lib/permissions.ts` (one map for every role) |
+| Change who **sees** which leads, deals, quotes and invoices (own / team / all), the New web leads board, or who can be made owner | `src/lib/visibility.ts`; teams are `User.managerId`, set in `src/app/(app)/settings/users/` |
 | Change form rules and error messages | `src/lib/validation/` |
 | Change labels, colours of statuses, dropdown options | `src/lib/crm-meta.ts` |
 | Change the sidebar | `src/components/layout/nav-items.ts` |
 | Change buttons, fields, cards, badges | `src/components/ui/` |
 | Change the quote PDF | `src/lib/pdf/quote-pdf.tsx`, fonts in `src/assets/fonts/` |
 | Change the invoice or receipt PDF | `src/lib/pdf/invoice-pdf.tsx`, `src/lib/pdf/receipt-pdf.tsx`; amount in words in `src/lib/amount-in-words.ts` |
+| Change the company seal artwork | `scripts/make-seal.cjs`, then `node scripts/make-seal.cjs` (writes `src/lib/seal-artwork.ts`). Never edit the generated file by hand |
+| Change sealing (who, when, what locks) or signatures | `src/app/(app)/seal-actions.ts`, `src/lib/seal.ts`, PDF parts in `src/lib/pdf/shared.tsx`; signature clean-up in `src/lib/signature.ts`, upload in `src/app/(app)/settings/profile/signature-*.ts(x)` |
 | Change invoicing rules (advance/balance, payments, follow-up task) | `src/lib/invoices.ts`, `src/app/(app)/invoices/actions.ts` |
 | Change quote maths (discounts, VAT) | `src/lib/quote-math.ts` |
 | Change reply deadlines and working days | `src/lib/working-days.ts`, ticket times in `src/lib/tickets.ts` |
@@ -69,6 +72,8 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 
 **Adding a field to something (e.g. a "budget" on deals):** add it in `prisma/schema.prisma` → `pnpm db:migrate --name deal_budget` → add it to the Zod schema in `src/lib/validation/` → add the input to the form and show it on the detail page. Every page and action already re-checks the user's role, so no extra security work is needed.
 
+**Adding a new list, page, report or action that reads leads, deals, quotes, invoices or receipts:** always limit it with `getVisibility(user)` (`where: { AND: [v.deal, …] }`) or check one record with `canSee(user, "deal", id)`. Without that, Sales would see other people's records.
+
 ## Settings (environment variables)
 
 Set these in `.env` locally, and in **Vercel → Settings → Environment Variables** for the live CRM. Mark the 🔒 ones **Sensitive**, and **redeploy** after any change.
@@ -84,7 +89,7 @@ How to read the table: **🔒** = turn on **Sensitive** in Vercel (it can't be r
 | `DEFAULT_CURRENCY` | `LKR` | `LKR` | Currency for new deals and report charts |
 | `APP_URL` | `https://crm.softrocodelabs.com` | — | Links in emails and calendar events |
 | 🔒 `WEBSITE_LEAD_API_KEY` | ✅ | — | Lets the company website send enquiries. Same value in the website project. 24+ characters. |
-| `WEBSITE_LEAD_OWNER_EMAIL` | ✅ | — | Who new website enquiries are assigned to |
+| `WEBSITE_LEAD_OWNER_EMAIL` | ✅ | — | Who gets an email for each new website enquiry (enquiries wait unassigned on the New Leads board) |
 | 🔒 `RESEND_API_KEY` | ✅ | — | Sends emails. Its **own** Resend key (Sending access, softrocodelabs.com only) |
 | `EMAIL_FROM` | `Softro CRM <crm@softrocodelabs.com>` | — | Sender address, on a domain verified in Resend |
 | 🔒 `CRON_SECRET` | ✅ | — | Protects the 8 am summary job. 16+ characters |
@@ -168,7 +173,9 @@ In GitHub → Settings → Branches, protect `main` so the **CI** checks must pa
 - [ ] Settings → **System health**: database OK, every required setting shows **Set**, **Plan usage** shows storage (and compute, once `NEON_API_KEY` is set)
 - [ ] Vercel on the **Pro** plan: the free Hobby plan is for non-commercial use only
 - [ ] Settings → **Integrations**: test email arrives, test chat message arrives
-- [ ] A test enquiry from the website appears in **Leads** and its owner gets an email
+- [ ] A test enquiry from the website appears on **Leads → New web leads** and `WEBSITE_LEAD_OWNER_EMAIL` gets an email
+- [ ] Every Sales user has a **Manager (team)** set (Settings → Team members)
+- [ ] **Settings → Company details**: BR number filled in (printed on the company seal); each admin and manager has added a **Signature** under My profile
 - [ ] **Two-step sign-in** on for every admin, then **Require for admins and managers** switched on (Settings → Security)
 - [ ] GitHub secrets `BACKUP_DATABASE_URL` and `BACKUP_PASSPHRASE` set, and **Database backup** run once by hand
 - [ ] An uptime monitor (UptimeRobot or Better Stack) watching `https://crm.softrocodelabs.com/api/health`
@@ -193,6 +200,8 @@ Check the data, then make that branch the main one in Neon, or copy back only wh
 ## Good to know
 
 - **Every page and every action re-checks the user.** `src/proxy.ts` only redirects signed-out visitors; real permission checks happen in `src/lib/auth.ts` on each request. A deactivated person loses access immediately.
+- **Two layers of access.** `permissions.ts` says *what* a role may do; `visibility.ts` says *whose records* they see: Sales (and Support, Viewer) their own, a Manager their own and their team's, Admins everything. Website leads nobody has taken are visible to all on the New web leads board.
+- **Sealed documents are frozen.** A quote, invoice or receipt with a `DocumentSeal` can't be edited, deleted, voided or cancelled until an Admin or Manager removes the seal. The signer's name, title and signature are copied into the seal, so the PDF never changes afterwards.
 - **Money is never added across currencies.** Totals show per currency (LKR, USD…). Report charts use `DEFAULT_CURRENCY` only and list other currencies separately.
 - **Times are Sri Lanka time** (UTC+05:30) everywhere: reply deadlines, reports, the morning summary. Weekends are skipped; public and poya holidays are not counted yet.
 - **Numbers like Q-2026-0001, C-…, T-…** come from the `Counter` table inside a transaction, so two people can never get the same number.

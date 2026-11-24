@@ -88,12 +88,23 @@ function sumByCurrency(rows: { currency: string; value: number }[]) {
   return [...m.entries()].map(([currency, value]) => ({ currency, value })).sort((a, b) => b.value - a.value);
 }
 
-export type ReportFilters = { period: Period; ownerId?: string };
+/**
+ * `ownerId` narrows to one person. `people` is who the viewer may report on
+ * (Sales: themselves, Manager: their team, Admin: null = everyone).
+ */
+export type ReportFilters = { period: Period; ownerId?: string; people?: string[] | null };
+
+/** The owner condition for a report query: one person, the viewer's people, or nobody in particular. */
+function whose(ownerId?: string, people?: string[] | null): string | { in: string[] } | undefined {
+  if (ownerId) return ownerId;
+  return people ? { in: people } : undefined;
+}
 
 /* ---------------------------------------------------------------- Sales */
 
-export async function salesReport({ period, ownerId }: ReportFilters) {
-  const owner = ownerId ? { ownerId } : {};
+export async function salesReport({ period, ownerId, people }: ReportFilters) {
+  const w = whose(ownerId, people);
+  const owner = w ? { ownerId: w } : {};
   const closed = await db.deal.findMany({
     where: { ...owner, status: { in: ["WON", "LOST"] }, closedAt: { gte: period.from, lt: period.to } },
     select: {
@@ -150,9 +161,10 @@ export async function salesReport({ period, ownerId }: ReportFilters) {
 /* ------------------------------------------------------------- Forecast */
 
 /** Open deals by expected close month (next 6 months), with a probability-weighted value. Not tied to the period. */
-export async function forecastReport({ ownerId }: { ownerId?: string }, now = new Date()) {
+export async function forecastReport({ ownerId, people }: { ownerId?: string; people?: string[] | null }, now = new Date()) {
+  const w = whose(ownerId, people);
   const deals = await db.deal.findMany({
-    where: { status: "OPEN", currency: MAIN_CURRENCY, ...(ownerId && { ownerId }) },
+    where: { status: "OPEN", currency: MAIN_CURRENCY, ...(w && { ownerId: w }) },
     select: { value: true, expectedCloseDate: true, stage: { select: { probability: true } } },
   });
   const { y, m } = local(now);
@@ -176,9 +188,10 @@ export async function forecastReport({ ownerId }: { ownerId?: string }, now = ne
 
 /* ---------------------------------------------------------------- Leads */
 
-export async function leadReport({ period, ownerId }: ReportFilters) {
+export async function leadReport({ period, ownerId, people }: ReportFilters) {
+  const w = whose(ownerId, people);
   const leads = await db.lead.findMany({
-    where: { createdAt: { gte: period.from, lt: period.to }, ...(ownerId && { ownerId }) },
+    where: { createdAt: { gte: period.from, lt: period.to }, ...(w && { ownerId: w }) },
     select: {
       source: true, status: true, respondBy: true, respondedAt: true, createdAt: true,
       convertedDeal: { select: { status: true, value: true, currency: true } },
@@ -220,10 +233,10 @@ function median(values: number[]) {
 
 /* ----------------------------------------------------------------- Team */
 
-export async function teamReport({ period }: ReportFilters) {
+export async function teamReport({ period, people }: ReportFilters) {
   const inPeriod = { gte: period.from, lt: period.to };
   const [users, leads, deals, openDeals, activities, tickets] = await Promise.all([
-    db.user.findMany({ where: { isActive: true }, select: { id: true, name: true, role: true }, orderBy: { name: "asc" } }),
+    db.user.findMany({ where: { isActive: true, ...(people && { id: { in: people } }) }, select: { id: true, name: true, role: true }, orderBy: { name: "asc" } }),
     db.lead.findMany({ where: { createdAt: inPeriod, ownerId: { not: null } }, select: { ownerId: true, respondBy: true, respondedAt: true } }),
     db.deal.findMany({ where: { status: { in: ["WON", "LOST"] }, closedAt: inPeriod, ownerId: { not: null } }, select: { ownerId: true, status: true, value: true, currency: true } }),
     db.deal.findMany({ where: { status: "OPEN", currency: MAIN_CURRENCY, ownerId: { not: null } }, select: { ownerId: true, value: true } }),
@@ -259,15 +272,18 @@ export async function teamReport({ period }: ReportFilters) {
 
 /* -------------------------------------------------------------- Support */
 
-export async function supportReport({ period, ownerId }: ReportFilters, now = new Date()) {
+export async function supportReport({ period, ownerId, people }: ReportFilters, now = new Date()) {
   const inPeriod = { gte: period.from, lt: period.to };
-  const who: Prisma.TicketWhereInput = ownerId ? { assignedToId: ownerId } : {};
+  const w = whose(ownerId, people);
+  const who: Prisma.TicketWhereInput = w ? { assignedToId: w } : {};
+  // Contract revenue is a company-wide figure: only Admins (people = null) see all of it.
+  const contractWho: Prisma.ContractWhereInput = people ? { ownerId: { in: people } } : {};
   const [opened, resolved, openNow, contracts, renewals] = await Promise.all([
     db.ticket.findMany({ where: { ...who, createdAt: inPeriod }, select: { priority: true, createdAt: true, firstResponseAt: true, responseDueAt: true, contractId: true } }),
     db.ticket.count({ where: { ...who, resolvedAt: inPeriod } }),
     db.ticket.count({ where: { ...who, status: { in: ["OPEN", "IN_PROGRESS", "WAITING_ON_CLIENT"] } } }),
-    db.contract.findMany({ where: { status: "ACTIVE" }, select: { amount: true, currency: true, billingCycle: true } }),
-    db.contract.count({ where: { status: "ACTIVE", endDate: { gte: now, lt: new Date(now.getTime() + 90 * DAY) } } }),
+    db.contract.findMany({ where: { ...contractWho, status: "ACTIVE" }, select: { amount: true, currency: true, billingCycle: true } }),
+    db.contract.count({ where: { ...contractWho, status: "ACTIVE", endDate: { gte: now, lt: new Date(now.getTime() + 90 * DAY) } } }),
   ]);
   const replied = opened.filter((t) => t.firstResponseAt && t.responseDueAt);
   const hours = opened.filter((t) => t.firstResponseAt).map((t) => (t.firstResponseAt!.getTime() - t.createdAt.getTime()) / 3_600_000);

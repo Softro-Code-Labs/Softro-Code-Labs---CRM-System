@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { quoteTotals, type LineInput } from "@/lib/quote-math";
 import type { InvoiceInput } from "@/lib/validation/invoice";
 import { BILLING_CYCLE_LABELS } from "@/lib/crm-meta";
+import { sealSelect } from "@/lib/seal";
 
 const DAY = 86_400_000;
 const n = (v: { toString(): string } | number | null | undefined) => (v == null ? 0 : Number(v.toString()));
@@ -17,7 +18,8 @@ export const invoiceInclude = {
   quote: { select: { id: true, number: true, title: true, total: true } },
   contract: { select: { id: true, number: true, title: true } },
   createdBy: { select: { name: true, email: true, phone: true } },
-  payments: { orderBy: { paidAt: "asc" }, include: { recordedBy: { select: { name: true } } } },
+  payments: { orderBy: { paidAt: "asc" }, include: { recordedBy: { select: { name: true } }, seal: { select: { signerName: true, sealedAt: true } } } },
+  seal: { select: sealSelect },
 } satisfies Prisma.InvoiceInclude;
 
 export type FullInvoice = Prisma.InvoiceGetPayload<{ include: typeof invoiceInclude }>;

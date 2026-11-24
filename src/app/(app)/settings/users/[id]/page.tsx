@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { UserForm } from "../user-form";
+import { getManagers } from "@/lib/queries/users";
 import { updateUser } from "../actions";
 import { UserAdminActions } from "./user-admin-actions";
 
@@ -45,7 +46,8 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
       <UserForm
         action={updateUser.bind(null, user.id)}
         isEdit
-        initial={{ name: user.name, email: user.email, role: user.role, jobTitle: user.jobTitle ?? "", phone: user.phone ?? "" }}
+        initial={{ name: user.name, email: user.email, role: user.role, jobTitle: user.jobTitle ?? "", phone: user.phone ?? "", managerId: user.managerId ?? "" }}
+        managers={await getManagers(user.id)}
       />
 
       <Card>
