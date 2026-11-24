@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,8 +10,26 @@ import type { Role } from "@/generated/prisma/enums";
 import { SoftroCrmLogo } from "@/components/brand/logo";
 import { NAV_SECTIONS } from "./nav-items";
 
+/** A small spinner on the item you just clicked, until its page arrives. */
+function PendingDot() {
+  const { pending } = useLinkStatus();
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "size-3 shrink-0 rounded-full border-[1.5px] border-white/25 border-t-white transition-opacity duration-150 motion-safe:animate-spin",
+        pending ? "opacity-100 delay-100" : "opacity-0",
+      )}
+    />
+  );
+}
+
 export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; onClose: () => void }) {
   const pathname = usePathname();
+  // Highlight the clicked item straight away, before its page has loaded.
+  // It's remembered with the page it was clicked on, so it lapses by itself once the address changes.
+  const [clicked, setClicked] = useState<{ href: string; from: string } | null>(null);
+  const pendingHref = clicked && clicked.from === pathname ? clicked.href : null;
 
   return (
     <>
@@ -41,7 +60,7 @@ export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; on
                 )}
                 <ul className="space-y-0.5">
                   {items.map((item) => {
-                    const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                    const active = pendingHref ? pendingHref === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
                     const Icon = item.icon;
                     const content = (
                       <>
@@ -61,7 +80,10 @@ export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; on
                         ) : (
                           <Link
                             href={item.href}
-                            onClick={onClose}
+                            onClick={() => {
+                              setClicked({ href: item.href, from: pathname });
+                              onClose();
+                            }}
                             aria-current={active ? "page" : undefined}
                             className={cn(
                               "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -70,6 +92,7 @@ export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; on
                           >
                             {active && <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand-500" aria-hidden />}
                             {content}
+                            <PendingDot />
                           </Link>
                         )}
                       </li>

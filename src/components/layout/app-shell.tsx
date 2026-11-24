@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { NavigationProgress } from "./navigation-progress";
 import { LogOut, Menu } from "lucide-react";
 import { Sidebar } from "./sidebar";
 import { SoftroMark } from "@/components/brand/logo";
@@ -17,6 +18,9 @@ export function AppShell({ user, theme, children }: { user: CurrentUser; theme: 
 
   return (
     <div className="min-h-full">
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
       <Sidebar role={user.role} open={open} onClose={() => setOpen(false)} />
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-ink-200 bg-white/90 px-4 backdrop-blur sm:px-6">

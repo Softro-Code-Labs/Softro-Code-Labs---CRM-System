@@ -26,7 +26,12 @@ const csp = [
 
 const nextConfig: NextConfig = {
   // Profile photos are resized in the browser first; this leaves room for the rare one that can't be.
-  experimental: { serverActions: { bodySizeLimit: "3mb" } },
+  experimental: {
+    serverActions: { bodySizeLimit: "3mb" },
+    // Going back to a page seen in the last 30 seconds shows it instantly from the browser's copy.
+    // Saving anything clears that copy (revalidatePath), so people never see their own change missing.
+    staleTimes: { dynamic: 30 },
+  },
   // The CRM is fully authenticated and per-user, so every page renders at
   // request time. Cache Components is left off to keep data flow simple.
   output: "standalone",
