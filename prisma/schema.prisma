@@ -151,39 +151,43 @@ enum ActivityPriority {
 // ─────────────────────────────────────────────────────────────
 
 model User {
-  id                 String    @id @default(cuid())
-  email              String    @unique
+  id                 String          @id @default(cuid())
+  email              String          @unique
   name               String
   passwordHash       String
-  role               Role      @default(SALES)
-  isActive           Boolean   @default(true)
+  role               Role            @default(SALES)
+  isActive           Boolean         @default(true)
   jobTitle           String?
   phone              String?
   lastLoginAt        DateTime?
   // Security
-  mustChangePassword Boolean   @default(false) // set for new users and after an admin reset
-  sessionVersion     Int       @default(0) // bump to sign the user out everywhere
-  failedLoginCount   Int       @default(0)
+  mustChangePassword Boolean         @default(false) // set for new users and after an admin reset
+  sessionVersion     Int             @default(0) // bump to sign the user out everywhere
+  failedLoginCount   Int             @default(0)
   lockedUntil        DateTime? // temporary lock after too many wrong passwords
   passwordChangedAt  DateTime?
   // Notifications & integrations
-  emailNotifications Boolean   @default(true) // email me when something is assigned to me
-  dailyDigest        Boolean   @default(true) // 8 am summary on working days
-  calendarTokenHash  String?   @unique // SHA-256 of the private calendar feed token
+  emailNotifications Boolean         @default(true) // email me when something is assigned to me
+  dailyDigest        Boolean         @default(true) // 8 am summary on working days
+  calendarTokenHash  String?         @unique // SHA-256 of the private calendar feed token
   // Two-step sign-in (authenticator app)
   totpSecret         String? // AES-256-GCM encrypted base32 secret
   totpEnabledAt      DateTime?
   totpLastStep       Int? // last accepted 30-second step, so a code can't be used twice
-  recoveryCodeHashes String[]  @default([]) // SHA-256 of unused one-time recovery codes
+  recoveryCodeHashes String[]        @default([]) // SHA-256 of unused one-time recovery codes
   // Profile photo: the image itself is in UserAvatar so ordinary user queries stay small.
   avatarUpdatedAt    DateTime? // also the cache-busting version in the photo's URL
   avatar             UserAvatar?
+  // Signature printed on documents this person seals (Admins and Managers). Image is in UserSignature.
+  signatureUpdatedAt DateTime?
+  signature          UserSignature?
+  documentSeals      DocumentSeal[]  @relation("DocumentSealer")
   accessChecks       ProjectAccess[] @relation("AccessCheckedBy")
   handoversIssued    Handover[]      @relation("HandoverIssuer")
   invoicesCreated    Invoice[]       @relation("InvoiceCreator")
   paymentsRecorded   Payment[]       @relation("PaymentRecorder")
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   ownedCompanies     Company[]       @relation("CompanyOwner")
   ownedContacts      Contact[]       @relation("ContactOwner")
@@ -358,12 +362,12 @@ model Deal {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
-  pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
-  stage      PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
-  company    Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  contact    Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  owner      User?         @relation("DealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  lead       Lead?         @relation("LeadConversion", fields: [leadId], references: [id], onDelete: SetNull)
+  pipeline   Pipeline       @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
+  stage      PipelineStage  @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  company    Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact    Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  owner      User?          @relation("DealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  lead       Lead?          @relation("LeadConversion", fields: [leadId], references: [id], onDelete: SetNull)
   activities Activity[]
   notes      Note[]
   quotes     Quote[]
@@ -506,12 +510,13 @@ model Quote {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  deal      Deal?       @relation(fields: [dealId], references: [id], onDelete: SetNull)
-  company   Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  contact   Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  createdBy User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  deal      Deal?         @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  company   Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact   Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  createdBy User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
   items     QuoteItem[]
   invoices  Invoice[]
+  seal      DocumentSeal?
 
   @@index([status])
   @@index([dealId])
@@ -550,19 +555,19 @@ model Counter {
  * Softro's own details, printed on quotes. A single row with id "default".
  */
 model OrgSettings {
-  id                  String   @id @default("default")
-  companyName         String   @default("Softro Code Labs")
+  id                  String    @id @default("default")
+  companyName         String    @default("Softro Code Labs")
   address             String?
   phone               String?
   email               String?
   website             String?
   registrationNo      String? // business registration (BR) number
   vatNumber           String? // TIN / VAT number, if registered
-  defaultTaxLabel     String   @default("VAT")
-  defaultTaxRate      Decimal  @default(0) @db.Decimal(5, 2)
-  defaultValidityDays Int      @default(14)
+  defaultTaxLabel     String    @default("VAT")
+  defaultTaxRate      Decimal   @default(0) @db.Decimal(5, 2)
+  defaultValidityDays Int       @default(14)
   defaultTerms        String?
-  invoiceDueDays      Int      @default(14) // invoices are due this many days after the invoice date
+  invoiceDueDays      Int       @default(14) // invoices are due this many days after the invoice date
   invoiceTerms        String? // printed on invoices, e.g. how to pay
   bankDetails         String?
   quoteFooter         String?
@@ -617,7 +622,7 @@ model Contract {
   renewedFrom Contract? @relation("ContractRenewal", fields: [renewedFromId], references: [id], onDelete: SetNull)
   renewedTo   Contract? @relation("ContractRenewal")
   tickets     Ticket[]
-  invoices  Invoice[]
+  invoices    Invoice[]
 
   @@index([status, endDate])
   @@index([companyId])
@@ -705,6 +710,33 @@ model ErrorEvent {
 }
 
 /// A person's profile photo: 256×256 WebP, re-encoded on upload (no EXIF or location data). ~10–25 KB.
+// A person's signature, as a transparent PNG (ink only).
+model UserSignature {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Bytes
+  updatedAt DateTime @updatedAt
+}
+
+// The company seal applied to one quote, invoice or receipt by an Admin or Manager.
+// Name, title and signature are copied at sealing time, so the document never changes afterwards.
+model DocumentSeal {
+  id          String   @id @default(cuid())
+  quoteId     String?  @unique
+  invoiceId   String?  @unique
+  paymentId   String?  @unique // a receipt
+  sealedById  String?
+  signerName  String
+  signerTitle String?
+  signature   Bytes // transparent PNG
+  sealedAt    DateTime @default(now())
+
+  quote    Quote?   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  invoice  Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  payment  Payment? @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  sealedBy User?    @relation("DocumentSealer", fields: [sealedById], references: [id], onDelete: SetNull)
+}
+
 model UserAvatar {
   userId    String   @id
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -881,6 +913,7 @@ model Invoice {
   createdBy User?         @relation("InvoiceCreator", fields: [createdById], references: [id], onDelete: SetNull)
   items     InvoiceItem[]
   payments  Payment[]
+  seal      DocumentSeal?
 
   @@index([status])
   @@index([dueDate])
@@ -920,8 +953,9 @@ model Payment {
   recordedById  String?
   createdAt     DateTime      @default(now())
 
-  invoice    Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
-  recordedBy User?   @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+  invoice    Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  recordedBy User?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+  seal       DocumentSeal?
 
   @@index([invoiceId])
   @@index([paidAt])

@@ -12,6 +12,7 @@ import { formToObject, zodErrors, type FormState } from "@/lib/form";
 import { formatMoney } from "@/lib/utils";
 import { getOrgSettings } from "@/lib/queries/org";
 import type { QuoteStatus } from "@/generated/prisma/enums";
+import { SEALED_LOCK_MESSAGE } from "@/lib/seal";
 
 function refresh(quote: { id: string; dealId: string | null; companyId: string | null }) {
   revalidatePath("/quotes");
@@ -60,8 +61,9 @@ export async function saveQuote(id: string | null, _prev: FormState, formData: F
   const { quote, items } = buildQuoteData(parsed.data);
 
   if (id) {
-    const existing = await db.quote.findUnique({ where: { id }, select: { status: true } });
+    const existing = await db.quote.findUnique({ where: { id }, select: { status: true, seal: { select: { id: true } } } });
     if (!existing) return { message: "This quote no longer exists." };
+    if (existing.seal) return { message: SEALED_LOCK_MESSAGE, values };
     if (existing.status === "ACCEPTED" || existing.status === "DECLINED") {
       return { message: "Accepted and declined quotes are locked. Duplicate it to make a new version.", values };
     }
@@ -180,8 +182,9 @@ export async function deleteQuote(id: string) {
   const user = await authorizeAction("quote:update");
   if (!user) return { message: FORBIDDEN_MESSAGE };
 
-  const quote = await db.quote.findUnique({ where: { id } });
+  const quote = await db.quote.findUnique({ where: { id }, include: { seal: { select: { id: true } } } });
   if (!quote) return { message: "This quote no longer exists." };
+  if (quote.seal) return { message: SEALED_LOCK_MESSAGE };
   // Anyone who can edit quotes can delete their own drafts; managers can delete any quote.
   const ownDraft = quote.status === "DRAFT" && quote.createdById === user.id;
   if (!ownDraft && !can(user.role, "quote:delete")) return { message: "Only managers can delete quotes that were sent. Mark it declined instead." };

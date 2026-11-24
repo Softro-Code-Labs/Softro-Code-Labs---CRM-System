@@ -19,6 +19,7 @@ import { QuoteDocument } from "@/components/crm/quote-document";
 import { deleteQuote } from "../actions";
 import { QuoteStatusActions } from "./quote-actions";
 import { InvoiceFromQuote } from "./invoice-from-quote";
+import { SealControl } from "@/components/crm/seal-control";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -40,9 +41,12 @@ export default async function QuotePage({ params }: Props) {
   const invoicedNet = invoices.filter((i) => i.status !== "VOID").reduce((sum, i) => sum + Number(i.subtotal) - Number(i.discountTotal), 0);
   const remaining = Math.round((quoteNet - invoicedNet) * 100) / 100;
 
-  const locked = quote.status === "ACCEPTED" || quote.status === "DECLINED";
+  const sealed = Boolean(quote.seal);
+  const locked = quote.status === "ACCEPTED" || quote.status === "DECLINED" || sealed;
   const canEdit = can(user.role, "quote:update");
-  const canDelete = can(user.role, "quote:delete") || (canEdit && quote.status === "DRAFT" && quote.createdById === user.id);
+  const canDelete = !sealed && (can(user.role, "quote:delete") || (canEdit && quote.status === "DRAFT" && quote.createdById === user.id));
+  const canSeal = can(user.role, "document:seal");
+  const hasSignature = canSeal && Boolean((await db.user.findUnique({ where: { id: user.id }, select: { signatureUpdatedAt: true } }))?.signatureUpdatedAt);
   const expired = isExpired(quote);
   const timeline = [
     ["Created", quote.createdAt],
@@ -149,6 +153,18 @@ export default async function QuotePage({ params }: Props) {
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-900">
           <span className="font-semibold">Internal note: </span>
           <span className="whitespace-pre-line">{quote.notes}</span>
+        </div>
+      )}
+
+      {(sealed || (canSeal && quote.status !== "DECLINED")) && (
+        <div className="mb-6">
+          <SealControl
+            kind="quote"
+            id={quote.id}
+            sealed={quote.seal ? { by: quote.seal.signerName, on: formatDate(quote.seal.sealedAt) } : null}
+            canSeal={canSeal}
+            hasSignature={hasSignature}
+          />
         </div>
       )}
 

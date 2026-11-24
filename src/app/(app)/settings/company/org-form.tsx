@@ -46,7 +46,7 @@ export function OrgForm({ initial }: { initial: OrgValues }) {
           <TextField label="Default tax rate (%)" name="defaultTaxRate" inputMode="decimal" hint="0 if you don't charge VAT." defaultValue={v("defaultTaxRate")} error={e.defaultTaxRate} />
           <TextField label="Valid for (days)" name="defaultValidityDays" inputMode="numeric" defaultValue={v("defaultValidityDays")} error={e.defaultValidityDays} />
           <TextAreaField label="Default terms" name="defaultTerms" rows={6} hint="Payment schedule, what's included, revisions, warranty…" defaultValue={v("defaultTerms")} error={e.defaultTerms} className="sm:col-span-3" />
-          <TextAreaField label="Bank details" name="bankDetails" rows={4} hint="Printed on quotes so clients can pay the advance." defaultValue={v("bankDetails")} error={e.bankDetails} className="sm:col-span-3" />
+          <TextAreaField label="Bank details" name="bankDetails" rows={4} hint="Printed on invoices only, not on quotes." defaultValue={v("bankDetails")} error={e.bankDetails} className="sm:col-span-3" />
           <TextField label="Footer line" name="quoteFooter" placeholder="Thank you for considering Softro Code Labs." defaultValue={v("quoteFooter")} error={e.quoteFooter} className="sm:col-span-3" />
         </div>
       </Card>

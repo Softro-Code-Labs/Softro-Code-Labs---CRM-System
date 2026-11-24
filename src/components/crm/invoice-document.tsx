@@ -5,6 +5,7 @@ import type { getOrgSettings } from "@/lib/queries/org";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
 import { formatQuantity } from "@/lib/quote-math";
 import { SoftroMark } from "@/components/brand/logo";
+import { SealedSignature } from "@/components/crm/company-seal";
 
 type Org = Awaited<ReturnType<typeof getOrgSettings>>;
 
@@ -154,6 +155,12 @@ export function InvoiceDocument({ invoice: quote, org }: { invoice: FullInvoice;
               <p className="whitespace-pre-line">{org.bankDetails}</p>
             </div>
           )}
+        </section>
+      )}
+      {quote.seal && (
+        <section className="mt-8 ml-auto max-w-xs text-xs text-ink-500">
+          <p className="mb-1 font-semibold tracking-wide text-ink-400 uppercase">For {org.companyName}</p>
+          <SealedSignature seal={quote.seal} registrationNo={org.registrationNo} />
         </section>
       )}
       <p className="mt-8 text-center text-xs text-ink-400">Thank you for your business.</p>

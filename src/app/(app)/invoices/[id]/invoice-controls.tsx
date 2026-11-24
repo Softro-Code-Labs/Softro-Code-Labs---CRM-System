@@ -96,12 +96,14 @@ export function PaymentItem({
   amount,
   detail,
   canCancel,
+  seal,
 }: {
   id: string;
   receipt: string;
   amount: string;
   detail: string;
   canCancel: boolean;
+  seal?: React.ReactNode;
 }) {
   return (
     <li className="flex items-start justify-between gap-3 px-5 py-3 text-sm">
@@ -118,6 +120,7 @@ export function PaymentItem({
         >
           {receipt}
         </a>
+        {seal}
         {canCancel && (
           <ConfirmAction
             iconOnly

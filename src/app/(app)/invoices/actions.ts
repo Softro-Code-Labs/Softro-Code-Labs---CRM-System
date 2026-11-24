@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/utils";
 import { getOrgSettings } from "@/lib/queries/org";
 import { nextNumber } from "@/lib/numbering";
 import { colomboDayBounds } from "@/lib/working-days";
+import { SEALED_LOCK_MESSAGE } from "@/lib/seal";
 import { invoiceSchema, paymentSchema, type InvoiceInput } from "@/lib/validation/invoice";
 import { balanceDue, buildInvoiceData, invoicedNetForQuote, isEditable, linesFromContract, linesFromQuote, syncFollowUpTask, type FromQuoteMode } from "@/lib/invoices";
 
@@ -69,8 +70,9 @@ export async function saveInvoice(id: string | null, _prev: FormState, formData:
   const owner = await dealOwner(invoice.dealId);
 
   if (id) {
-    const existing = await db.invoice.findUnique({ where: { id }, select: { status: true, amountPaid: true } });
+    const existing = await db.invoice.findUnique({ where: { id }, select: { status: true, amountPaid: true, seal: { select: { id: true } } } });
     if (!existing) return { message: "This invoice no longer exists." };
+    if (existing.seal) return { message: SEALED_LOCK_MESSAGE, values };
     if (!isEditable(existing)) return { message: "Invoices with payments, or void ones, can't be changed.", values };
     await db.$transaction(async (tx) => {
       await tx.invoiceItem.deleteMany({ where: { invoiceId: id } });
@@ -222,8 +224,9 @@ export async function recordPayment(invoiceId: string, _prev: FormState, formDat
 export async function deletePayment(paymentId: string): Promise<{ message?: string }> {
   const user = await authorizeAction("payment:delete");
   if (!user) return { message: FORBIDDEN_MESSAGE };
-  const p = await db.payment.findUnique({ where: { id: paymentId }, include: { invoice: true } });
+  const p = await db.payment.findUnique({ where: { id: paymentId }, include: { invoice: true, seal: { select: { id: true } } } });
   if (!p) return {};
+  if (p.seal) return { message: "This receipt is sealed. Remove the seal first, then cancel it." };
   const owner = await dealOwner(p.invoice.dealId);
   let reused = false;
   await db.$transaction(async (tx) => {
@@ -246,8 +249,9 @@ export async function deletePayment(paymentId: string): Promise<{ message?: stri
 export async function voidInvoice(id: string): Promise<{ message?: string }> {
   const user = await authorizeAction("invoice:void");
   if (!user) return { message: FORBIDDEN_MESSAGE };
-  const inv = await db.invoice.findUnique({ where: { id } });
+  const inv = await db.invoice.findUnique({ where: { id }, include: { seal: { select: { id: true } } } });
   if (!inv) return {};
+  if (inv.seal) return { message: "This invoice is sealed. Remove the seal first, then void it." };
   if (Number(inv.amountPaid) > 0) return { message: "This invoice has payments. Cancel them first." };
   await db.$transaction(async (tx) => {
     const updated = await tx.invoice.update({ where: { id }, data: { status: "VOID", voidedAt: new Date() } });

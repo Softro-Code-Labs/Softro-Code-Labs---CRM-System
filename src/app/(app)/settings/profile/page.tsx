@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { requireActiveUser } from "@/lib/auth";
-import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "@/lib/permissions";
+import { can, ROLE_DESCRIPTIONS, ROLE_LABELS } from "@/lib/permissions";
+import { signatureDataUrl } from "@/lib/signature-url";
+import { SignatureCard } from "./signature-card";
 import { formatDate } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -22,7 +24,8 @@ export const metadata: Metadata = { title: "My profile" };
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ recovery?: string }> }) {
   const me = await requireActiveUser();
-  const user = await db.user.findUniqueOrThrow({ where: { id: me.id } });
+  const user = await db.user.findUniqueOrThrow({ where: { id: me.id }, include: { signature: { select: { data: true } } } });
+  const canSeal = can(user.role, "document:seal");
   const { recovery } = await searchParams;
   const required = TWO_FACTOR_ROLES.includes(user.role) && (await twoFactorPolicy()).required;
 
@@ -36,6 +39,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <ProfileForm initial={{ name: user.name, jobTitle: user.jobTitle ?? "", phone: user.phone ?? "" }} />
         </CardBody>
       </Card>
+      {canSeal && (
+        <Card id="signature">
+          <CardHeader title="Signature" description="For sealing quotes, invoices and receipts. Only Admins and Managers can seal." />
+          <CardBody>
+            <SignatureCard initialUrl={signatureDataUrl(user.signature?.data)} signer={[user.name, user.jobTitle].filter(Boolean).join(", ")} />
+          </CardBody>
+        </Card>
+      )}
       <Card>
         <CardHeader title="Notifications" description={`Emails go to ${user.email}.`} />
         <CardBody>

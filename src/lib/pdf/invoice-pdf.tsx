@@ -1,5 +1,5 @@
 import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
-import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED } from "./shared";
+import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED, SealedSignaturePdf } from "./shared";
 import { balanceDue, type FullInvoice } from "@/lib/invoices";
 import { amountInWords } from "@/lib/amount-in-words";
 import type { getOrgSettings } from "@/lib/queries/org";
@@ -176,10 +176,14 @@ function InvoicePdf({ invoice: quote, org }: { invoice: FullInvoice; org: Org })
 
         <View style={[s.row, { justifyContent: "space-between", alignItems: "flex-end", marginTop: 30 }]} wrap={false}>
           <Text style={s.small}>Thank you for your business.</Text>
-          <View style={{ width: 200 }}>
-            <View style={s.signLine} />
-            <Text style={s.small}>Authorised signature, for {org.companyName}</Text>
-          </View>
+          {quote.seal ? (
+            <SealedSignaturePdf seal={quote.seal} registrationNo={org.registrationNo} width={230} caption={`For ${org.companyName}`} />
+          ) : (
+            <View style={{ width: 200 }}>
+              <View style={s.signLine} />
+              <Text style={s.small}>Authorised signature, for {org.companyName}</Text>
+            </View>
+          )}
         </View>
       </Page>
     </Document>

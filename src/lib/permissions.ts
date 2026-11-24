@@ -48,6 +48,8 @@ export const PERMISSIONS = {
   "invoice:void": ["ADMIN", "MANAGER"],
   "payment:record": ["ADMIN", "MANAGER", "SALES"],
   "payment:delete": ["ADMIN", "MANAGER"],
+  // Apply or remove the company seal (with your signature) on quotes, invoices and receipts.
+  "document:seal": ["ADMIN", "MANAGER"],
 
   "contract:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT", "VIEWER"],
   "contract:manage": ["ADMIN", "MANAGER", "SALES"],
