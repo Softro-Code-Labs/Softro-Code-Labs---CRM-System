@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { canSee, getOwnerOptions } from "@/lib/visibility";
 import { getCompanyOptions } from "@/lib/queries/companies";
 import { PageHeader } from "@/components/ui/page-header";
 import { LeadForm } from "../../lead-form";
@@ -13,8 +13,9 @@ export const metadata: Metadata = { title: "Edit lead" };
 export default async function EditLeadPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission("lead:update");
   const { id } = await params;
-  const [lead, owners, companies] = await Promise.all([db.lead.findUnique({ where: { id } }), getAssignableUsers(), getCompanyOptions()]);
-  if (!lead) notFound();
+  const [lead, companies] = await Promise.all([db.lead.findUnique({ where: { id } }), getCompanyOptions()]);
+  if (!lead || !(await canSee(user, "lead", id))) notFound();
+  const owners = await getOwnerOptions(user, lead.ownerId);
 
   return (
     <div className="mx-auto max-w-3xl">

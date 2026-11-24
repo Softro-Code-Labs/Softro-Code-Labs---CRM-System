@@ -5,6 +5,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { ServiceType } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { getDefaultPipeline } from "@/lib/queries/pipeline";
 import { cn, firstParam, formatDate, formatMoney, formatMoneyTotals, parsePage } from "@/lib/utils";
@@ -37,8 +38,9 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
   const q = firstParam(sp.q);
   const page = parsePage(sp.page);
 
-  const pipeline = await getDefaultPipeline();
+  const [pipeline, v] = await Promise.all([getDefaultPipeline(), getVisibility(user)]);
   const base: Prisma.DealWhereInput = {
+    AND: [v.deal],
     pipelineId: pipeline.id,
     ...(owner === "me" && { ownerId: user.id }),
     ...(service && { serviceType: service }),

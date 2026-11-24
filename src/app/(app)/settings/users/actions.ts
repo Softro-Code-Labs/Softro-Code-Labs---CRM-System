@@ -21,6 +21,15 @@ function refresh(id?: string) {
   if (id) revalidatePath(`/settings/users/${id}`);
 }
 
+/** Checks the chosen manager. Admins and Managers don't belong to a team. Returns an error message or the managerId to save. */
+async function checkManager(role: string, managerId: string | null, selfId?: string): Promise<{ error: string } | { managerId: string | null }> {
+  if (role === "ADMIN" || role === "MANAGER" || !managerId) return { managerId: null };
+  if (managerId === selfId) return { error: "Someone can't be their own manager." };
+  const m = await db.user.findUnique({ where: { id: managerId }, select: { role: true, isActive: true } });
+  if (!m || m.role !== "MANAGER" || !m.isActive) return { error: "Choose an active Manager." };
+  return { managerId };
+}
+
 export async function createUser(_prev: UserFormState, formData: FormData): Promise<UserFormState> {
   const admin = await authorizeAction("user:manage");
   if (!admin) return { message: FORBIDDEN_MESSAGE };
@@ -33,9 +42,12 @@ export async function createUser(_prev: UserFormState, formData: FormData): Prom
     return { errors: { email: ["Someone already uses this email"] }, values };
   }
 
+  const team = await checkManager(parsed.data.role, parsed.data.managerId);
+  if ("error" in team) return { errors: { managerId: [team.error] }, values };
+
   const tempPassword = generateTemporaryPassword();
   const user = await db.user.create({
-    data: { ...parsed.data, passwordHash: await hashPassword(tempPassword), mustChangePassword: true },
+    data: { ...parsed.data, managerId: team.managerId, passwordHash: await hashPassword(tempPassword), mustChangePassword: true },
   });
   await audit({ actorId: admin.id, action: "create", entity: "User", entityId: user.id, summary: `${user.name} (${user.role})` });
   refresh();
@@ -61,12 +73,19 @@ export async function updateUser(id: string, _prev: UserFormState, formData: For
     if (await isLastActiveAdmin(id)) return { errors: { role: ["There must always be at least one admin."] }, values };
   }
 
+  const team = await checkManager(parsed.data.role, parsed.data.managerId, id);
+  if ("error" in team) return { errors: { managerId: [team.error] }, values };
+
   const roleChanged = existing.role !== parsed.data.role;
-  await db.user.update({
-    where: { id },
-    // A role change signs them out so the new permissions apply straight away.
-    data: { ...parsed.data, ...(roleChanged && { sessionVersion: { increment: 1 } }) },
-  });
+  await db.$transaction([
+    db.user.update({
+      where: { id },
+      // A role change signs them out so the new permissions apply straight away.
+      data: { ...parsed.data, managerId: team.managerId, ...(roleChanged && { sessionVersion: { increment: 1 } }) },
+    }),
+    // Someone who stops being a Manager no longer has a team.
+    ...(existing.role === "MANAGER" && parsed.data.role !== "MANAGER" ? [db.user.updateMany({ where: { managerId: id }, data: { managerId: null } })] : []),
+  ]);
   await audit({
     actorId: admin.id,
     action: "update",

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { FileDown, Pencil } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, toDateInput } from "@/lib/utils";
 import { getOrgSettings } from "@/lib/queries/org";
@@ -29,7 +30,7 @@ export default async function InvoicePage({ params }: Props) {
   const user = await requirePermission("invoice:view");
   const { id } = await params;
   const [invoice, org] = await Promise.all([getInvoice(id), getOrgSettings()]);
-  if (!invoice) notFound();
+  if (!invoice || !(await canSee(user, "invoice", id))) notFound();
   const state = invoiceState(invoice);
   const balance = balanceDue(invoice);
   const sealed = Boolean(invoice.seal);

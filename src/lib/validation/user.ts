@@ -25,6 +25,7 @@ export const userSchema = z.object({
   role: z.enum(Role),
   jobTitle: optionalText(120),
   phone: optionalText(50),
+  managerId: optionalText(40), // their Manager (team); only for Sales, Support and Viewer
 });
 
 export const profileSchema = z.object({

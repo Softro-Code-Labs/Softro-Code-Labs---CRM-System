@@ -5,6 +5,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { QuoteStatus } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { isExpired } from "@/lib/quotes";
 import { cn, firstParam, formatDate, formatMoney, formatMoneyTotals, fullName, parsePage } from "@/lib/utils";
@@ -30,7 +31,9 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
   const status = (Object.values(QuoteStatus) as string[]).includes(statusParam) ? (statusParam as QuoteStatus) : undefined;
   const page = parsePage(sp.page);
 
+  const v = await getVisibility(user);
   const where: Prisma.QuoteWhereInput = {
+    AND: [v.quote],
     ...(status && { status }),
     ...(q && {
       OR: [
@@ -51,7 +54,7 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
       take: PAGE_SIZE,
       include: { company: { select: { name: true } }, contact: { select: { firstName: true, lastName: true } } },
     }),
-    db.quote.findMany({ where: { status: "SENT" }, select: { total: true, currency: true } }),
+    db.quote.findMany({ where: { AND: [v.quote], status: "SENT" }, select: { total: true, currency: true } }),
   ]);
 
   const tabHref = (value: string) => {

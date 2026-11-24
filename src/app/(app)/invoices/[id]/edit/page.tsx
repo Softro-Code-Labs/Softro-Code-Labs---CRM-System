@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { getInvoice, isEditable } from "@/lib/invoices";
 import { toDateInput } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -11,10 +12,10 @@ import { saveInvoice } from "../../actions";
 export const metadata: Metadata = { title: "Edit invoice" };
 
 export default async function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePermission("invoice:update");
+  const user = await requirePermission("invoice:update");
   const { id } = await params;
-  const [invoice, options] = await Promise.all([getInvoice(id), getEditorOptions()]);
-  if (!invoice) notFound();
+  const [invoice, options] = await Promise.all([getInvoice(id), getEditorOptions(user)]);
+  if (!invoice || !(await canSee(user, "invoice", id))) notFound();
   if (!isEditable(invoice)) redirect(`/invoices/${id}`);
 
   return (

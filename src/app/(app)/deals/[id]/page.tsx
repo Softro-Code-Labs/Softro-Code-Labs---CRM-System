@@ -5,6 +5,7 @@ import { Building2, KeyRound, Mail, Pencil, Phone, Plus, Target, User } from "lu
 import { checkState } from "@/lib/project-access";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
 import { DEAL_STATUS_TONE, QUOTE_STATUS_LABELS, QUOTE_STATUS_TONE, SERVICE_TYPE_LABELS } from "@/lib/crm-meta";
@@ -46,7 +47,7 @@ export default async function DealPage({ params }: Props) {
       invoices: { orderBy: { createdAt: "desc" }, select: invoiceCardSelect },
     },
   });
-  if (!deal) notFound();
+  if (!deal || !(await canSee(user, "deal", id))) notFound();
   const canEdit = can(user.role, "deal:update");
 
   const details: [string, React.ReactNode][] = [

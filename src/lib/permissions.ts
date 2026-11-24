@@ -91,9 +91,9 @@ export const ROLE_LABELS: Record<Role, string> = {
 };
 
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
-  ADMIN: "Everything, including team members and the audit log",
-  MANAGER: "Everything except team members; can delete records and edit the pipeline",
-  SALES: "Works leads and deals; adds companies, contacts and activities",
-  SUPPORT: "Handles support tickets; adds leads, contacts and activities; read-only on deals",
-  VIEWER: "Read-only access",
+  ADMIN: "Everything, including team members, the audit log and company-wide reports",
+  MANAGER: "Their own and their team's leads, deals and quotations; assigns leads in the team; can delete records and edit the pipeline",
+  SALES: "Only their own leads, deals and quotations; takes new web leads; adds companies, contacts and activities",
+  SUPPORT: "Handles support tickets; only their own leads, deals and quotations; read-only on deals",
+  VIEWER: "Read-only, and only records assigned to them",
 };

@@ -11,10 +11,10 @@ import { saveContract } from "../../actions";
 export const metadata: Metadata = { title: "Edit contract" };
 
 export default async function EditContractPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ renewed?: string }> }) {
-  await requirePermission("contract:manage");
+  const user = await requirePermission("contract:manage");
   const { id } = await params;
   const { renewed } = await searchParams;
-  const [c, options] = await Promise.all([getContract(id), getContractFormOptions()]);
+  const [c, options] = await Promise.all([getContract(id), getContractFormOptions(user)]);
   if (!c) notFound();
 
   return (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { getOrgSettings } from "@/lib/queries/org";
 import { toDateInput } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -11,12 +12,12 @@ import { saveQuote } from "../actions";
 export const metadata: Metadata = { title: "New quote" };
 
 export default async function NewQuotePage({ searchParams }: { searchParams: Promise<{ dealId?: string; companyId?: string }> }) {
-  await requirePermission("quote:create");
+  const user = await requirePermission("quote:create");
   const sp = await searchParams;
   const [org, options, deal] = await Promise.all([
     getOrgSettings(),
-    getEditorOptions(),
-    sp.dealId ? db.deal.findUnique({ where: { id: sp.dealId }, select: { id: true, title: true, currency: true, companyId: true, contactId: true, description: true } }) : null,
+    getEditorOptions(user),
+    sp.dealId ? db.deal.findFirst({ where: { AND: [{ id: sp.dealId }, (await getVisibility(user)).deal] }, select: { id: true, title: true, currency: true, companyId: true, contactId: true, description: true } }) : null,
   ]);
   const now = new Date();
   const companyId = deal?.companyId ?? options.companies.find((c) => c.id === sp.companyId)?.id ?? "";

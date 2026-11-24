@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { canSee, getOwnerOptions } from "@/lib/visibility";
 import { getCompanyOptions } from "@/lib/queries/companies";
 import { getDefaultPipeline } from "@/lib/queries/pipeline";
 import { PageHeader } from "@/components/ui/page-header";
@@ -12,15 +12,15 @@ import { convertLead } from "../../actions";
 export const metadata: Metadata = { title: "Convert lead" };
 
 export default async function ConvertLeadPage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePermission("lead:convert");
+  const user = await requirePermission("lead:convert");
   const { id } = await params;
   const [lead, owners, companies, pipeline] = await Promise.all([
     db.lead.findUnique({ where: { id } }),
-    getAssignableUsers(),
+    getOwnerOptions(user),
     getCompanyOptions(),
     getDefaultPipeline(),
   ]);
-  if (!lead) notFound();
+  if (!lead || !(await canSee(user, "lead", id))) notFound();
   if (lead.status === "CONVERTED") redirect(`/leads/${lead.id}`);
 
   // If the business name matches a company we already have, suggest linking it.

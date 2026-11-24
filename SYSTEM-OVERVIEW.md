@@ -22,14 +22,14 @@ It was built for how we actually work: clients reach us by **WhatsApp, the websi
 
 | Who | What they do |
 |---|---|
-| **Admin** | Everything, plus team members, security rules, integrations, system health and the audit log |
-| **Manager** | Runs sales and support: sees everything, edits the pipeline and price list, exports reports, deletes records |
-| **Sales** | Works leads and deals, sends quotes, sets up contracts |
-| **Support** | Handles support tickets, adds leads and contacts |
-| **Viewer** | Read-only: sees everything, changes nothing |
+| **Admin** | Everything, including every team's records and company-wide reports, plus team members, security rules, integrations, system health and the audit log |
+| **Manager** | Runs a sales team: sees their own and their team's leads, deals, quotes and numbers, assigns leads in the team, seals documents, edits the pipeline and price list, exports reports, deletes records |
+| **Sales** | Works their own leads and deals, takes new website leads from the shared board, sends quotes, sets up contracts. Sees only their own records and numbers |
+| **Support** | Handles support tickets, adds leads and contacts. Sees only their own leads, deals and quotes |
+| **Viewer** | Read-only: sees only records assigned to them, changes nothing |
 | **Clients** (indirectly) | Send enquiries through the website form, which arrive as leads |
 
-The rules for every role live in one file, `src/lib/permissions.ts`, and are checked again on every page and every save.
+What each role may **do** lives in `src/lib/permissions.ts`; whose records each person **sees** (own, team or all) lives in `src/lib/visibility.ts`. Both are checked again on every page, PDF, report and save.
 
 ---
 
@@ -37,9 +37,10 @@ The rules for every role live in one file, `src/lib/permissions.ts`, and are che
 
 | Part | What it does | The key rule |
 |---|---|---|
-| **Leads** | New enquiries from WhatsApp, the website, referrals, calls, Upwork/Fiverr… | Reply within **2 working days** (Mon–Fri, Sri Lanka time). Overdue ones turn red. |
+| **Leads** | New enquiries from WhatsApp, the website, referrals, calls, Upwork/Fiverr… | Reply within **2 working days** (Mon–Fri, Sri Lanka time). Overdue ones turn red. Website enquiries wait on a shared **New web leads** board until someone takes one. |
 | **Deals** | Real opportunities on a drag-and-drop board: Discovery call → Proposal & quote → Design approval → Won / Lost | Every stage has a win %, which feeds the forecast. Lost deals need a reason. |
-| **Quotes** | Line items from the price list, discounts, VAT, a branded PDF with an *Accepted by* block for the client | Numbered **Q-2026-0001**. Accepted quotes are locked; changes make a new version. |
+| **Quotes** | Line items from the price list, discounts, VAT, a branded PDF with an *Accepted by* block for the client | Numbered **Q-2026-0001**. Accepted quotes are locked; changes make a new version. No bank details on quotes (invoices only). |
+| **Company seal** | Admins and Managers stamp a quote, invoice or receipt with the company seal (with the BR number) and their own signature | A sealed document is locked until the seal is removed; the signature is copied in, so the PDF never changes. |
 | **Invoices** | From an accepted quote (advance %, full or balance), a contract period, or by hand. Payments with numbered receipts | **INV-2026-0001** and **RCT-2026-0001**. Advance + balance always add up to the quote. Never deleted: void instead. A *Follow up payment* task is due the day after the due date. |
 | **Companies & contacts** | Every client and the people we talk to, with a WhatsApp button | Winning a deal turns a prospect into a customer. |
 | **Activities** | Calls, WhatsApp chats, emails, meetings, tasks and notes on every record | Tasks have owners and due dates, and show on the dashboard and in calendars. |
@@ -157,7 +158,7 @@ flowchart TB
 ## Why the team can trust it
 
 - **Only the right people get in.** Passwords are hashed (bcrypt). Two-step sign-in with an authenticator app can be required for admins and managers. 5 wrong passwords lock an account for 15 minutes, and too many attempts from one network are paused.
-- **Each person sees and does only what their role allows**, checked on the server on every request, not just by hiding buttons.
+- **Each person sees and does only what their role allows**, checked on the server on every request, not just by hiding buttons. Salespeople never see each other's leads, deals, quotes or numbers; managers see only their own team.
 - **Every change has a name on it.** Sign-ins, edits, deletions and exports are in the audit log.
 - **Secrets stay secret.** Two-step setups are encrypted in the database, recovery codes are stored scrambled, calendar links are stored only as fingerprints, and webhook addresses are never shown in full again.
 - **Safe with outside input.** Emails escape anything a client typed, CSV exports can't run spreadsheet formulas, and team-chat links are limited to Slack, Google Chat, Discord and Teams.

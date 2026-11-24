@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { authorizeAction, FORBIDDEN_MESSAGE } from "@/lib/auth";
 import type { SealKind } from "@/lib/seal";
+import { canSee } from "@/lib/visibility";
 
 type Result = { message?: string };
 
@@ -30,7 +31,7 @@ export async function sealDocument(kind: SealKind, id: string): Promise<Result> 
   const user = await authorizeAction("document:seal");
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const doc = await lookup(kind, id);
-  if (!doc) return { message: "This document no longer exists." };
+  if (!doc || !(await canSee(user, kind === "receipt" ? "payment" : kind, id))) return { message: "This document no longer exists." };
   if (doc.blocked) return { message: doc.blocked };
   if (doc.sealId) return {};
 
@@ -64,7 +65,7 @@ export async function unsealDocument(kind: SealKind, id: string): Promise<Result
   const user = await authorizeAction("document:seal");
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const doc = await lookup(kind, id);
-  if (!doc) return { message: "This document no longer exists." };
+  if (!doc || !(await canSee(user, kind === "receipt" ? "payment" : kind, id))) return { message: "This document no longer exists." };
   if (!doc.sealId) return {};
   await db.documentSeal.deleteMany({ where: { id: doc.sealId } });
   await audit({ actorId: user.id, action: "update", entity: doc.entity, entityId: doc.entityId, summary: `Removed the seal from ${doc.label}` });

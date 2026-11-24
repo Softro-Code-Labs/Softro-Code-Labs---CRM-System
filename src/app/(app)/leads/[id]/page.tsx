@@ -23,6 +23,8 @@ import { WhatsAppButton } from "@/components/crm/whatsapp-button";
 import { deleteLead } from "../actions";
 import { LeadActions } from "./lead-actions";
 import { RecordTimeline } from "@/components/crm/record-timeline";
+import { TakeLeadButton } from "@/components/crm/take-lead-button";
+import { canSee } from "@/lib/visibility";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -43,7 +45,10 @@ export default async function LeadPage({ params }: Props) {
       convertedDeal: { select: { id: true, title: true } },
     },
   });
-  if (!lead) notFound();
+  if (!lead || !(await canSee(user, "lead", id))) notFound();
+  // A website lead nobody has taken yet: everyone can see it, but must take it before working on it.
+  const onBoard = !lead.ownerId && lead.source === "WEBSITE_FORM" && ["NEW", "CONTACTED", "QUALIFIED"].includes(lead.status);
+  const mayWork = !onBoard || user.role === "ADMIN";
 
   const firstName = lead.contactName?.split(/\s+/)[0];
   const greeting =
@@ -70,7 +75,8 @@ export default async function LeadPage({ params }: Props) {
         actions={
           <>
             {can(user.role, "lead:delete") && <ConfirmDelete action={deleteLead.bind(null, lead.id)} title="Delete this lead?" body="Its notes and tasks go with it. This can't be undone." />}
-            {can(user.role, "lead:update") && (
+            {onBoard && can(user.role, "lead:update") && <TakeLeadButton id={lead.id} />}
+            {can(user.role, "lead:update") && mayWork && (
               <LinkButton href={`/leads/${lead.id}/edit`} variant="secondary">
                 <Pencil className="size-4" aria-hidden /> Edit
               </LinkButton>
@@ -103,7 +109,13 @@ export default async function LeadPage({ params }: Props) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          {can(user.role, "lead:update") && lead.status !== "CONVERTED" && (
+          {onBoard && (
+            <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+              This website lead is on the <Link href="/leads/board" className="font-medium underline">New Leads board</Link>. Take it to start working on it;
+              after that only you, your manager and Admins can see it.
+            </div>
+          )}
+          {can(user.role, "lead:update") && mayWork && lead.status !== "CONVERTED" && (
             <Card>
               <CardHeader title="Next step" description="Reply, then qualify. Convert it to a deal once they want a proposal." />
               <CardBody>

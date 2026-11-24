@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Globe, Mail, MapPin, Pencil, Phone, Plus, Star, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, formatMoneyTotals, fullName, humanize } from "@/lib/utils";
 import { BILLING_CYCLE_SHORT, DEAL_STATUS_TONE, LEAD_STATUS_LABELS, LEAD_STATUS_TONE, TICKET_STATUS_LABELS, TICKET_STATUS_TONE } from "@/lib/crm-meta";
@@ -30,16 +31,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CompanyPage({ params }: Props) {
   const user = await requirePermission("company:view");
   const { id } = await params;
+  const v = await getVisibility(user);
 
   const company = await db.company.findUnique({
     where: { id },
     include: {
       owner: { select: { name: true } },
       deals: {
+        where: v.deal,
         orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
         select: { id: true, title: true, value: true, currency: true, status: true, stage: { select: { name: true } } },
       },
-      invoices: { where: { status: { not: "VOID" } }, orderBy: { createdAt: "desc" }, take: 10, select: invoiceCardSelect },
+      invoices: { where: { AND: [v.invoice], status: { not: "VOID" } }, orderBy: { createdAt: "desc" }, take: 10, select: invoiceCardSelect },
       contracts: {
         orderBy: [{ status: "asc" }, { endDate: "asc" }],
         select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true, amount: true, currency: true, billingCycle: true },
@@ -50,7 +53,7 @@ export default async function CompanyPage({ params }: Props) {
         select: { id: true, number: true, subject: true, status: true, priority: true, responseDueAt: true, firstResponseAt: true },
       },
       leads: {
-        where: { status: { not: "CONVERTED" } },
+        where: { AND: [v.lead], status: { not: "CONVERTED" } },
         orderBy: { createdAt: "desc" },
         select: { id: true, title: true, status: true, createdAt: true },
       },

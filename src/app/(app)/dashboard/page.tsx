@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AlertTriangle, Briefcase, Handshake, Target, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { balanceDue } from "@/lib/invoices";
 import { getDefaultPipeline } from "@/lib/queries/pipeline";
@@ -26,20 +27,22 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const now = new Date();
   const monthStart = startOfColomboMonth(now);
   const pipeline = await getDefaultPipeline();
+  // Sales see only their own numbers, Managers their team's, Admins the whole company.
+  const v = await getVisibility(user);
 
   const { end: endOfToday } = colomboDayBounds(now);
-  const waitingWhere = { status: { in: OPEN_LEAD_STATUSES }, respondedAt: null };
+  const waitingWhere = { AND: [v.lead], status: { in: OPEN_LEAD_STATUSES }, respondedAt: null };
   const myTasksWhere = { assignedToId: user.id, completedAt: null, OR: [{ dueAt: { lt: endOfToday } }, { dueAt: null }] };
   const in45 = new Date(now.getTime() + 45 * 86_400_000);
   const showMoney = can(user.role, "invoice:view");
   const [unpaidInvoices, receivedThisMonth] = showMoney
     ? await Promise.all([
         db.invoice.findMany({
-          where: { status: "ISSUED" },
+          where: { AND: [v.invoice], status: "ISSUED" },
           orderBy: [{ dueDate: "asc" }],
           select: { id: true, number: true, title: true, currency: true, total: true, amountPaid: true, dueDate: true, company: { select: { name: true } } },
         }),
-        db.payment.findMany({ where: { paidAt: { gte: monthStart } }, select: { amount: true, invoice: { select: { currency: true } } } }),
+        db.payment.findMany({ where: { invoice: v.invoice, paidAt: { gte: monthStart } }, select: { amount: true, invoice: { select: { currency: true } } } }),
       ])
     : [[], []];
   const startOfToday = colomboDayBounds(now).start;
@@ -71,12 +74,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       take: 6,
       select: { id: true, title: true, contactName: true, source: true, respondBy: true, respondedAt: true },
     }),
-    db.lead.count({ where: { status: { in: OPEN_LEAD_STATUSES } } }),
-    db.deal.findMany({ where: { status: "OPEN", pipelineId: pipeline.id }, select: { stageId: true, value: true, currency: true } }),
-    db.deal.findMany({ where: { status: "WON", closedAt: { gte: monthStart } }, select: { value: true, currency: true } }),
+    db.lead.count({ where: { AND: [v.lead], status: { in: OPEN_LEAD_STATUSES } } }),
+    db.deal.findMany({ where: { AND: [v.deal], status: "OPEN", pipelineId: pipeline.id }, select: { stageId: true, value: true, currency: true } }),
+    db.deal.findMany({ where: { AND: [v.deal], status: "WON", closedAt: { gte: monthStart } }, select: { value: true, currency: true } }),
     db.company.count({ where: { type: "CUSTOMER" } }),
     db.deal.findMany({
-      where: { status: "WON" },
+      where: { AND: [v.deal], status: "WON" },
       orderBy: { closedAt: "desc" },
       take: 5,
       select: { id: true, title: true, value: true, currency: true, closedAt: true, company: { select: { name: true } } },

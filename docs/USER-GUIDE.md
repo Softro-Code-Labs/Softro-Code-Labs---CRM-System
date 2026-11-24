@@ -48,6 +48,8 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 
 **Forgot your password?** Ask an admin to **reset** it. You'll get a new temporary password and must choose a new one when you sign in.
 
+**Check what you typed:** click the **eye** at the end of any password box to show the password, and again to hide it.
+
 **On a shared computer?** Always sign out when you're done.
 
 ---
@@ -68,9 +70,29 @@ Most lists have a **search box** (top right of the list), **filters** (dropdowns
 
 Each person has one role. Ask an admin if you need more access.
 
+### Whose records you see
+
+Leads, deals and quotations (and the invoices and receipts that go with them) follow one rule everywhere: lists, pages, PDFs, the dashboard and reports.
+
+| Role | Sees |
+|---|---|
+| **Sales, Support, Viewer** | Only records **they own or created**. Never another salesperson's. |
+| **Manager** | Their own records **and their team's** (the people an admin has put under them). Not other teams. |
+| **Admin** | **Everything**, including company-wide reports. |
+
+- **Your team:** an admin sets each person's **Manager (team)** under **Settings → Team members**.
+- **New website enquiries** are the exception: they wait on the shared **New web leads** board, which everyone sees, until someone takes one (see [section 5](#5-leads-new-enquiries)).
+- **Invoices and receipts** are visible to whoever can see their deal or quotation, and to the person who created them.
+- **Who you can make the owner:** Sales only themselves, a Manager themselves or someone in their team, an Admin anyone.
+- Companies, contacts, contracts, support tickets and project access are shared by the whole team as before.
+
+### What each role can do
+
 | You can… | Admin | Manager | Sales | Support | Viewer |
 |---|:-:|:-:|:-:|:-:|:-:|
-| See the dashboard, leads, deals, companies, contacts, contracts and tickets | ✅ | ✅ | ✅ | ✅ | ✅ |
+| See the dashboard, leads, deals, companies, contacts, contracts and tickets (leads and deals: see *Whose records you see*) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Take a lead from the **New web leads** board | ✅ | ✅ | ✅ | — | — |
+| Assign or reassign leads and deals | anyone | self and team | self only | — | — |
 | Add leads | ✅ | ✅ | ✅ | ✅ | — |
 | Edit leads, mark replied, qualify | ✅ | ✅ | ✅ | — | — |
 | Convert a lead to a deal | ✅ | ✅ | ✅ | — | — |
@@ -79,11 +101,12 @@ Each person has one role. Ask an admin if you need more access.
 | Delete sent quotes (anyone can delete their own drafts) | ✅ | ✅ | — | — | — |
 | Create invoices and record payments; download invoice and receipt PDFs | ✅ | ✅ | ✅ | — | view and download only |
 | Void an invoice, or cancel a payment recorded by mistake | ✅ | ✅ | — | — | — |
+| Apply or remove the **company seal** with your signature on quotes, invoices and receipts | ✅ | ✅ | — | — | — |
 | Add, renew, pause and cancel contracts | ✅ | ✅ | ✅ | view only | view only |
 | Delete contracts | ✅ | ✅ | — | — | — |
 | Create tickets, reply, change status and assignee | ✅ | ✅ | ✅ | ✅ | view only |
 | Delete tickets | ✅ | ✅ | — | — | — |
-| See reports | ✅ | ✅ | ✅ | ✅ | ✅ |
+| See reports (your own numbers; managers their team's; admins the whole company) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export reports to CSV | ✅ | ✅ | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
 | Add and edit contacts | ✅ | ✅ | ✅ | ✅ | — |
@@ -140,6 +163,16 @@ Our website promises a reply **within 2 working days**. The CRM tracks this for 
 | **Unqualified** | Not a fit (budget, timing, not something we do, no response). Always give a reason |
 | **Converted** | Turned into a deal. The lead is now read-only and links to its deal |
 
+### New web leads board
+
+Enquiries from the website form don't belong to anyone at first. They wait on **Leads → New web leads** (the button shows how many are waiting), which **everyone** can see.
+
+1. Open the board, read the enquiry and click **Take this lead**.
+2. The lead is now **yours**. From then on only you, your manager and admins can see it.
+3. If two people click at the same moment, the first one gets it and the other sees who took it.
+
+You must take a board lead before you can edit it, mark it replied or change its status. **Convert to deal** on a board lead takes it at the same time. Admins can work board leads without taking them, for example to assign one to someone.
+
 ### Tabs on the Leads page
 
 - **Open:** New, Contacted and Qualified leads. The default view.
@@ -171,7 +204,7 @@ On a lead's page:
 - **Mark as replied:** do this after your first reply. Stops the deadline.
 - **Qualified:** they have a real need and want to hear how we'd build it.
 - **Not a fit:** asks for a short reason, then marks it Unqualified. **Reopen lead** brings it back.
-- **Edit:** change any detail, the owner or the status.
+- **Edit:** change any detail, the owner or the status. Sales can only keep a lead themselves; a manager can give it to someone in their team; an admin to anyone.
 
 ### Convert a lead to a deal
 
@@ -330,6 +363,9 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 6. **Internal notes** are only for the team and are **never printed**.
 7. Click **Create quote**. It gets the next number (e.g. **Q-2026-0007**) and starts as a **Draft**.
 
+- **Terms:** leave a **blank line** between sections (Payment, Validity, How we work). Each section is kept together on the PDF: if it doesn't fit at the bottom of a page, the whole section moves to the next page instead of being split.
+- Quotes **don't print bank details**. Those go on invoices only, so don't write "bank details are on this quotation" in the terms.
+
 ### Send it
 
 - **View PDF** opens the quote in a new tab. **Download PDF** saves it (e.g. *Q-2026-0007 Lanka Spices.pdf*) so you can attach it to an email or send it on WhatsApp.
@@ -349,6 +385,19 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 - **Accepted and declined quotes are locked.** To change prices, click **New version**. It copies the quote as a new draft with a new number and today's date.
 - Every quote PDF ends with two signature blocks: one for us, and **Accepted by the client** (name, signature, company seal and date). Ask the client to sign and send it back before you start work. Keep the signed copy with the project files and attach it to the deal as a note.
 - Once a quote is accepted, invoice it from the quote's page (see [section 11](#11-invoices-and-receipts)).
+
+### Seal a quote, invoice or receipt (admins and managers)
+
+Admins and managers can stamp a document with the **company seal** and their **signature**. It prints in the *For Softro Code Labs* box with their name, job title and the date it was sealed.
+
+1. **Once:** add your signature under **My profile → Signature** (see [section 19](#19-your-profile-and-password)), and check your **job title** under *Your details*.
+2. Open the quote or invoice and click **Apply seal** above the document. For a receipt, click **Seal** next to the payment on its invoice.
+3. Download the PDF as usual: it now shows your signature, the seal and your name and title.
+
+- The seal shows the **company registration number** from **Settings → Company details** (or *OFFICIAL* if it's empty).
+- A **sealed document is locked**: it can't be edited, deleted, voided or cancelled. To change it, an admin or manager clicks **Remove seal**, makes the change and seals it again.
+- The name, title and signature are saved with the document when it's sealed, so later changes to your profile don't change documents already sealed.
+- Other roles see that a document is sealed and who sealed it, but can't seal or unseal. Every seal and removal is in the audit log.
 
 ### Tax and currency
 
@@ -379,9 +428,10 @@ The advance and balance invoices always add up to the quote total, VAT included.
 
 ### Send it
 
-- **Download PDF** and send it by email or WhatsApp. The PDF has our bank details and the amount in words (e.g. *Rupees Two Hundred Thirty-Six Thousand Only*).
+- **Download PDF** and send it by email or WhatsApp. The PDF has our bank details (only invoices show them, not quotes) and the amount in words (e.g. *Rupees Two Hundred Thirty-Six Thousand Only*).
 - If we're **VAT registered** (our VAT number is filled in under Settings), the PDF is titled **Tax Invoice** and shows our TIN and the client's. Put the client's VAT/TIN number in their **company** record (*Tax / BR number*) before invoicing a VAT-registered client.
-- You can **edit** an invoice until any money is received. If the client already has it, send the new PDF.
+- You can **edit** an invoice until any money is received, and as long as it isn't sealed. If the client already has it, send the new PDF.
+- To add the company seal and your signature, see [Seal a quote, invoice or receipt](#seal-a-quote-invoice-or-receipt-admins-and-managers).
 
 ### When the client pays
 
@@ -408,8 +458,8 @@ You can't record more than the balance. Receipts for cheques say *subject to rea
 
 ### Mistakes
 
-- **Wrong payment?** A manager or admin clicks **Cancel** next to it. If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
-- **Wrong invoice?** If nothing has been paid, a manager or admin can **Void** it, then create the right one. Invoices are never deleted, so the numbers stay in order for the accountant.
+- **Wrong payment?** A manager or admin clicks **Cancel** next to it (remove the receipt's seal first if it has one). If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
+- **Wrong invoice?** If nothing has been paid and it isn't sealed, a manager or admin can **Void** it, then create the right one. Invoices are never deleted, so the numbers stay in order for the accountant.
 - **Voided by mistake?** A manager or admin opens it and clicks **Restore invoice**. It's unpaid again with the same number. The CRM won't restore it if the quote has been invoiced again since, because that would bill the client twice: void the replacement first.
 - **Something the screens can't undo** (a wrong number, test invoices on the live CRM): admins use the ready-made scripts in [DATABASE-FIXES.md](DATABASE-FIXES.md).
 
@@ -547,10 +597,12 @@ Send the file by email or WhatsApp, and tell the client the **PDF password separ
 
 **Reports** shows how sales, leads, the team and support are doing. Use it in the weekly team meeting and at month end.
 
+What you see depends on your role: **Sales** see only their own numbers ("Just you"), **managers** their team's ("Your team"), and only **admins** see the whole company. Contract revenue in *Support and contracts* follows the same rule (contracts owned by you or your team).
+
 ### Choose what to look at
 
 - **Period:** last 12 months (the default), this or last month, quarter or year, or **Custom dates…** for any range.
-- **Whole team** or one person. Picking a person filters sales, leads and the tickets assigned to them.
+- **Everyone you can see** or one person. Picking a person filters sales, leads and the tickets assigned to them. Managers can pick anyone in their team; admins anyone.
 
 Money charts use **LKR**. Deals in other currencies (e.g. USD) are listed separately and never added to LKR.
 
@@ -568,7 +620,7 @@ Hover over (or tap) a column to see its exact value.
 
 ### Export to Excel or Google Sheets (admins and managers)
 
-Click **Export CSV** and choose **Deals**, **Leads**, **Support tickets** or **Team performance**. The file uses the same period and person you have selected. Open it in Excel or import it into Google Sheets. Every export is recorded in the audit log.
+Click **Export CSV** and choose **Deals**, **Leads**, **Support tickets** or **Team performance**. The file uses the same period and person you have selected, and only contains records you're allowed to see (a manager's export is their team's). Open it in Excel or import it into Google Sheets. Every export is recorded in the audit log.
 
 ### Keep the numbers honest
 
@@ -583,7 +635,7 @@ Reports are only as good as what's entered. Always mark deals **Won** or **Lost*
 Emails come from **Softro CRM** to your work address. You get one when:
 
 - someone else gives you a **lead**, **task**, **call**, **meeting** or **support ticket** (urgent tickets say *[Urgent]* in the subject)
-- a **new enquiry from the website** is assigned to you. Reply straight from the email: it goes to the client.
+- a **new enquiry from the website** arrives, if you're the person set to get website alerts. Reply straight from the email: it goes to the client. Then **take** the lead on the New web leads board so it's yours.
 
 You're never emailed about something you did yourself.
 
@@ -624,6 +676,8 @@ The calendar is read-only: tick tasks off in the CRM. The link is shown once and
 
 Click any card to go to the full list behind it.
 
+The leads, deals and money cards follow your role: **Sales** see their own, **managers** their team's, **admins** the whole company.
+
 ---
 
 ## 18. Enquiries from our website
@@ -633,7 +687,9 @@ The **Start your project** form on softrocodelabs.com sends each enquiry to **tw
 1. An **email** to our inbox, as before.
 2. A **new lead** in the CRM with source **Website form**, the service they picked, their language (from the English or Sinhala site) and their message. The reply-by deadline starts straight away.
 
-You don't need to type website enquiries in by hand. Just reply, then **log your reply** in the lead's Activity box (or click **Mark as replied**). If the same person also messages you on WhatsApp, update the existing lead instead of making a second one.
+The new lead has **no owner**: it waits on **Leads → New web leads**, where everyone can see it, and team chat gets a message. The first person to click **Take this lead** owns it. Take leads quickly so the 2-working-day promise is kept.
+
+You don't need to type website enquiries in by hand. Take the lead, reply, then **log your reply** in the lead's Activity box (or click **Mark as replied**). If the same person also messages you on WhatsApp, update the existing lead instead of making a second one.
 
 ---
 
@@ -645,6 +701,7 @@ Click **your name** at the top right to open **My profile**:
 - See your **role** and what it allows.
 - **Profile photo:** click **Add a photo** (or drag one onto the circle). It's cropped to a square and shown next to your name across the CRM. Use **Change photo** or **Remove** any time. Hidden details in the file, like where the photo was taken, are removed automatically.
 - **Change your password:** enter your current password, then the new one twice. This signs you out on **every other device** (handy if you used a shared computer).
+- **Signature (admins and managers):** used when you seal a quote, invoice or receipt. Click **Draw it** to sign with your mouse, finger or pen, or **Upload a photo** of your signature on plain white paper in dark ink: the paper background is removed automatically. Your **name and job title** from *Your details* print under it. Documents you've already sealed keep the signature they were sealed with.
 
 ### Appearance: dark or light
 
@@ -683,6 +740,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 
 - **Add team member:** enter their name, work email, job title and role. The CRM creates a **temporary password** and shows it **once**. Click **Copy sign-in message** and send it to them privately (e.g. on WhatsApp). They'll set their own password on first sign-in.
 - **Change role:** open the person, pick a new role and **Save changes**. They're signed out so the new permissions apply straight away.
+- **Manager (team):** for Sales, Support and Viewer, choose their manager. That manager then sees their leads, deals, quotations and numbers, and can assign leads to them. Admins and managers aren't in a team. If a manager changes to another role, their team members have no manager until you choose a new one.
 - **Reset password:** gives them a new temporary password and signs them out everywhere. Use it when someone forgets their password.
 - **Unlock sign-in:** shown when someone is locked out after too many wrong passwords.
 - **Remove photo:** takes down someone's profile photo if it isn't suitable. They can add a new one.
@@ -701,7 +759,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 
 ### Company details (admins)
 
-The details printed on every quote, invoice and receipt: company name, address, phone, email, website, **BR number** and **TIN/VAT number** (leave empty if not registered). It also holds the **quote defaults**: tax label and default rate, how many days quotes are valid for, **default terms**, **bank details** for advance payments, and a footer line. Under **Invoices**: how many days clients have to pay (sets each invoice's due date) and the **payment instructions** printed on invoices.
+The details printed on every quote, invoice and receipt: company name, address, phone, email, website, **BR number** and **TIN/VAT number** (leave empty if not registered). It also holds the **quote defaults**: tax label and default rate, how many days quotes are valid for, **default terms**, **bank details** (printed on invoices only, never on quotes), and a footer line. The **BR number** is also printed on the company seal. Under **Invoices**: how many days clients have to pay (sets each invoice's due date) and the **payment instructions** printed on invoices.
 
 > The default terms are only a starting point. Replace the [x] and [n] placeholders with Softro's real payment and revision terms before sending your first quote.
 
@@ -718,7 +776,7 @@ Your **catalogue** of standard services, e.g. *Business website (5 pages)*, LKR 
 
 - **Email (Resend):** needs `RESEND_API_KEY` and `EMAIL_FROM` set in Vercel. Use **Send me a test email** to check.
 - **Team chat:** create an *incoming webhook* for a channel in Slack, Google Chat, Discord or Teams, paste its address, choose what to post, then **Send a test message**. The address is never shown again in full. Paste a new one to change it, or **Disconnect**.
-- **Website enquiry form:** shows who new enquiries go to and when the last one arrived. If it says "isn't a CRM user", fix `WEBSITE_LEAD_OWNER_EMAIL`.
+- **Website enquiry form:** shows who gets the email alert for new enquiries (they wait unassigned on the New web leads board) and when the last one arrived. If it says "isn't a CRM user", fix `WEBSITE_LEAD_OWNER_EMAIL`.
 - **Morning summary:** needs `CRON_SECRET` in Vercel. Shows when it last ran. **Send today's summaries now** sends them by hand (only once a day).
 - **Accounting export:** accepted quotes, line by line with VAT, from **Reports → Export CSV → Accepted quotes**.
 

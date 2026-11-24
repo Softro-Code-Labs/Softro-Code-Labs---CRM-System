@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { getOwnerOptions } from "@/lib/visibility";
 import { getCompanyOptions } from "@/lib/queries/companies";
 import { getContactOptions } from "@/lib/queries/contacts";
 import { getDefaultPipeline } from "@/lib/queries/pipeline";
@@ -14,7 +14,7 @@ export default async function NewDealPage({ searchParams }: { searchParams: Prom
   const user = await requirePermission("deal:create");
   const sp = await searchParams;
   const [owners, companies, contacts, pipeline] = await Promise.all([
-    getAssignableUsers(),
+    getOwnerOptions(user),
     getCompanyOptions(),
     getContactOptions(),
     getDefaultPipeline(),

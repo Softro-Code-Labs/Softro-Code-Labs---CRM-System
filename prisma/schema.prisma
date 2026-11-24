@@ -160,6 +160,12 @@ model User {
   jobTitle           String?
   phone              String?
   lastLoginAt        DateTime?
+  // Team: a Sales (or Support/Viewer) user belongs to one Manager, who sees their leads, deals and quotes.
+  managerId          String?
+  manager            User?           @relation("Team", fields: [managerId], references: [id], onDelete: SetNull)
+  teamMembers        User[]          @relation("Team")
+  createdLeads       Lead[]          @relation("LeadCreator")
+  createdDeals       Deal[]          @relation("DealCreator")
   // Security
   mustChangePassword Boolean         @default(false) // set for new users and after an admin reset
   sessionVersion     Int             @default(0) // bump to sign the user out everywhere
@@ -202,6 +208,8 @@ model User {
   assignedTickets    Ticket[]        @relation("TicketAssignee")
   createdTickets     Ticket[]        @relation("TicketCreator")
   ticketComments     TicketComment[]
+
+  @@index([managerId])
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -297,6 +305,7 @@ model Lead {
   currency         String            @default("LKR")
   description      String?
   ownerId          String?
+  createdById      String? // who added it (website leads: nobody)
   companyId        String? // set when linked to an existing company
   convertedAt      DateTime?
   convertedDeal    Deal?             @relation("LeadConversion")
@@ -304,12 +313,14 @@ model Lead {
   updatedAt        DateTime          @updatedAt
 
   owner      User?      @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  createdBy  User?      @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
   company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
   activities Activity[]
   notes      Note[]
 
   @@index([status])
   @@index([ownerId])
+  @@index([createdById])
   @@index([respondBy])
 }
 
@@ -354,6 +365,7 @@ model Deal {
   companyId         String?
   contactId         String?
   ownerId           String?
+  createdById       String?
   leadId            String?      @unique
   expectedCloseDate DateTime?
   closedAt          DateTime?
@@ -367,6 +379,7 @@ model Deal {
   company    Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
   contact    Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
   owner      User?          @relation("DealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  createdBy  User?          @relation("DealCreator", fields: [createdById], references: [id], onDelete: SetNull)
   lead       Lead?          @relation("LeadConversion", fields: [leadId], references: [id], onDelete: SetNull)
   activities Activity[]
   notes      Note[]
@@ -378,6 +391,7 @@ model Deal {
   @@index([stageId])
   @@index([status])
   @@index([ownerId])
+  @@index([createdById])
   @@index([companyId])
 }
 
@@ -521,6 +535,7 @@ model Quote {
   @@index([status])
   @@index([dealId])
   @@index([companyId])
+  @@index([createdById])
   @@index([createdAt])
 }
 

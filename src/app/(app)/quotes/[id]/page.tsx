@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Briefcase, Download, Eye, Pencil } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
+import { canSee, getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { getQuote, isExpired } from "@/lib/quotes";
 import { getOrgSettings } from "@/lib/queries/org";
@@ -33,9 +34,9 @@ export default async function QuotePage({ params }: Props) {
   const user = await requirePermission("quote:view");
   const { id } = await params;
   const [quote, org] = await Promise.all([getQuote(id), getOrgSettings()]);
-  if (!quote) notFound();
+  if (!quote || !(await canSee(user, "quote", id))) notFound();
   const invoices = can(user.role, "invoice:view")
-    ? await db.invoice.findMany({ where: { quoteId: quote.id }, orderBy: { createdAt: "asc" }, select: { id: true, number: true, title: true, status: true, dueDate: true, total: true, amountPaid: true, subtotal: true, discountTotal: true, items: { select: { title: true }, take: 1 } } })
+    ? await db.invoice.findMany({ where: { quoteId: quote.id, AND: [(await getVisibility(user)).invoice] }, orderBy: { createdAt: "asc" }, select: { id: true, number: true, title: true, status: true, dueDate: true, total: true, amountPaid: true, subtotal: true, discountTotal: true, items: { select: { title: true }, take: 1 } } })
     : [];
   const quoteNet = Number(quote.subtotal) - Number(quote.discountTotal);
   const invoicedNet = invoices.filter((i) => i.status !== "VOID").reduce((sum, i) => sum + Number(i.subtotal) - Number(i.discountTotal), 0);

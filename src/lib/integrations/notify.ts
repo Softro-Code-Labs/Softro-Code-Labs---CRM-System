@@ -41,6 +41,9 @@ async function safely(label: string, ...jobs: Promise<unknown>[]) {
 export async function notifyNewWebsiteLead(leadId: string) {
   const lead = await db.lead.findUnique({ where: { id: leadId }, include: { owner: { select: recipientSelect } } });
   if (!lead) return;
+  // Website leads start unassigned on the New Leads board; WEBSITE_LEAD_OWNER_EMAIL gets an email alert.
+  const alertEmail = process.env.WEBSITE_LEAD_OWNER_EMAIL?.toLowerCase();
+  const recipient = lead.owner ?? (alertEmail ? await db.user.findUnique({ where: { email: alertEmail }, select: recipientSelect }) : null);
   const url = appUrl(`/leads/${lead.id}`);
   const who = [lead.contactName, lead.companyName].filter(Boolean).join(", ") || lead.email || "Someone";
   const details: [string, string][] = [
@@ -52,9 +55,9 @@ export async function notifyNewWebsiteLead(leadId: string) {
     ...(lead.respondBy ? [["Reply by", colomboWhen(lead.respondBy)] as [string, string]] : []),
   ];
   const jobs: Promise<unknown>[] = [
-    chat("leads", { title: `New website enquiry: ${lead.title}`, lines: [who, lead.serviceType ? SERVICE_TYPE_LABELS[lead.serviceType] : "", lead.owner ? `Assigned to ${lead.owner.name}` : "Not assigned yet"], url, linkLabel: "Open lead" }),
+    chat("leads", { title: `New website enquiry: ${lead.title}`, lines: [who, lead.serviceType ? SERVICE_TYPE_LABELS[lead.serviceType] : "", lead.owner ? `Assigned to ${lead.owner.name}` : "On the New Leads board: first to take it owns it"], url, linkLabel: "Open lead" }),
   ];
-  if (shouldEmail(lead.owner, null)) {
+  if (shouldEmail(recipient, null)) {
     const { html, text } = renderEmail({
       preheader: `${who} sent an enquiry through the website.`,
       title: `New enquiry: ${lead.title}`,
@@ -63,7 +66,7 @@ export async function notifyNewWebsiteLead(leadId: string) {
       sections: lead.description ? [{ heading: "Their message", items: [{ text: lead.description.slice(0, 1500) }] }] : undefined,
       button: { label: "Open lead", url },
     });
-    jobs.push(sendEmail({ to: lead.owner.email, subject: `New enquiry: ${lead.title}`, html, text, replyTo: lead.email ?? undefined }));
+    jobs.push(sendEmail({ to: recipient.email, subject: `New enquiry: ${lead.title}`, html, text, replyTo: lead.email ?? undefined }));
   }
   await safely("new website lead", ...jobs);
 }

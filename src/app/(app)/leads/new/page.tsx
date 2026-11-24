@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { getOwnerOptions } from "@/lib/visibility";
 import { getCompanyOptions } from "@/lib/queries/companies";
 import { PageHeader } from "@/components/ui/page-header";
 import { LeadForm } from "../lead-form";
@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "New lead" };
 
 export default async function NewLeadPage() {
   const user = await requirePermission("lead:create");
-  const [owners, companies] = await Promise.all([getAssignableUsers(), getCompanyOptions()]);
+  const [owners, companies] = await Promise.all([getOwnerOptions(user), getCompanyOptions()]);
 
   return (
     <div className="mx-auto max-w-3xl">

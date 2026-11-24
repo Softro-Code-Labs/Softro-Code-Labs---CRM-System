@@ -73,8 +73,6 @@ export async function POST(request: NextRequest) {
   const isEmail = input.contact.includes("@");
   const serviceType = toServiceType(input.service);
   const language = input.language === "si" || input.language === "SINHALA" ? "SINHALA" : "ENGLISH";
-  const ownerEmail = process.env.WEBSITE_LEAD_OWNER_EMAIL?.toLowerCase();
-  const owner = ownerEmail ? await db.user.findUnique({ where: { email: ownerEmail }, select: { id: true, isActive: true } }) : null;
 
   const serviceLabel = serviceType && serviceType !== "NOT_SURE" ? SERVICE_TYPE_LABELS[serviceType].replace(/\s*\(.*\)$/, "") : "Project";
   const now = new Date();
@@ -89,13 +87,14 @@ export async function POST(request: NextRequest) {
       serviceType,
       description: [input.message, input.page && `Sent from: ${input.page}`].filter(Boolean).join("\n\n") || null,
       currency: process.env.DEFAULT_CURRENCY ?? "LKR",
-      ownerId: owner?.isActive ? owner.id : null,
+      // No owner: it waits on the shared New Leads board until someone takes it.
+      ownerId: null,
       respondBy: addWorkingDays(now, REPLY_WITHIN_WORKING_DAYS),
     },
     select: { id: true, title: true },
   });
   await audit({ actorId: null, action: "create", entity: "Lead", entityId: lead.id, summary: `${lead.title} (website form)` });
-  // Email the owner and post to team chat after the response is sent, so the website form stays fast.
+  // Email the alert address and post to team chat after the response is sent, so the website form stays fast.
   after(() => notifyNewWebsiteLead(lead.id));
 
   return NextResponse.json({ ok: true, id: lead.id }, { status: 201 });
