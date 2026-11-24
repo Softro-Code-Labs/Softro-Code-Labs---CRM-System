@@ -234,8 +234,9 @@
  * Both are switched off for people who ask their device for less motion.
  */
 @utility skeleton {
-  background-color: var(--color-ink-100);
-  background-image: linear-gradient(90deg, transparent 0%, color-mix(in oklab, var(--color-ink-50) 70%, transparent) 50%, transparent 100%);
+  /* Mixed from a mid grey so the bars read on white cards and on dark ones alike. */
+  background-color: color-mix(in oklab, var(--color-ink-400) 22%, transparent);
+  background-image: linear-gradient(90deg, transparent 0%, color-mix(in oklab, var(--color-ink-400) 20%, transparent) 50%, transparent 100%);
   background-size: 200% 100%;
   background-repeat: no-repeat;
   animation: skeleton-shimmer 1.4s ease-in-out infinite;

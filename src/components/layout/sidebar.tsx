@@ -9,10 +9,12 @@ import { can } from "@/lib/permissions";
 import type { Role } from "@/generated/prisma/enums";
 import { SoftroCrmLogo } from "@/components/brand/logo";
 import { NAV_SECTIONS } from "./nav-items";
+import { usePageLoading } from "./navigation-progress";
 
-/** A small spinner on the item you just clicked, until its page arrives. */
-function PendingDot() {
-  const { pending } = useLinkStatus();
+/** A small spinner on the item you just clicked, until its page (not just its placeholders) has arrived. */
+function PendingDot({ active, pageLoading }: { active: boolean; pageLoading: boolean }) {
+  const { pending: linkPending } = useLinkStatus();
+  const pending = linkPending || (active && pageLoading);
   return (
     <span
       aria-hidden
@@ -27,9 +29,15 @@ function PendingDot() {
 export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; onClose: () => void }) {
   const pathname = usePathname();
   // Highlight the clicked item straight away, before its page has loaded.
-  // It's remembered with the page it was clicked on, so it lapses by itself once the address changes.
+  // Forgotten as soon as the address changes (including Back and Forward), so it can't stick.
   const [clicked, setClicked] = useState<{ href: string; from: string } | null>(null);
+  const [seenPath, setSeenPath] = useState(pathname);
+  if (seenPath !== pathname) {
+    setSeenPath(pathname);
+    setClicked(null);
+  }
   const pendingHref = clicked && clicked.from === pathname ? clicked.href : null;
+  const pageLoading = usePageLoading();
 
   return (
     <>
@@ -92,7 +100,7 @@ export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; on
                           >
                             {active && <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand-500" aria-hidden />}
                             {content}
-                            <PendingDot />
+                            <PendingDot active={active} pageLoading={pageLoading} />
                           </Link>
                         )}
                       </li>

@@ -4,7 +4,7 @@
  */
 export default function Loading() {
   return (
-    <div role="status" aria-label="Loading" className="space-y-6">
+    <div role="status" aria-label="Loading" data-page-loading className="space-y-6">
       <div className="space-y-2">
         <div className="skeleton rounded-md h-3 w-32" />
         <div className="skeleton rounded-md h-7 w-64" />

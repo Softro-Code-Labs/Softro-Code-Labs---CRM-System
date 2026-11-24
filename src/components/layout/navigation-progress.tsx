@@ -3,6 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+/** True while a page's loading placeholders (loading.tsx, marked `data-page-loading`) are on screen. */
+export function isPageLoading() {
+  return typeof document !== "undefined" && document.querySelector("[data-page-loading]") !== null;
+}
+
+/** Re-renders when loading placeholders appear or disappear. */
+export function usePageLoading() {
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const update = () => setLoading(isPageLoading());
+    const observer = new MutationObserver(update);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+  return loading;
+}
+
 /**
  * A thin crimson bar along the top of the page while the next page loads, so a click always
  * answers straight away. It starts on any click on an internal link and finishes when the
@@ -24,15 +41,29 @@ export function NavigationProgress() {
     trickle.current = null;
   };
 
-  // The address changed: the new page is on screen, so finish the bar and fade it out.
+  // The address changed. If the page's loading placeholders are showing, its data is still on the
+  // way: keep the bar going until they're replaced. Then finish the bar and fade it out.
   useEffect(() => {
-    clear();
     if (!running.current) return;
-    running.current = false;
-    setWidth(100);
-    timers.current.push(setTimeout(() => setVisible(false), 200));
-    timers.current.push(setTimeout(() => setWidth(0), 450));
-    return clear;
+    const finish = () => {
+      clear();
+      running.current = false;
+      setWidth(100);
+      timers.current.push(setTimeout(() => setVisible(false), 200));
+      timers.current.push(setTimeout(() => setWidth(0), 450));
+    };
+    if (!isPageLoading()) {
+      finish();
+      return clear;
+    }
+    const observer = new MutationObserver(() => {
+      if (!isPageLoading()) {
+        observer.disconnect();
+        finish();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [pathname, searchParams]);
 
   useEffect(() => {
