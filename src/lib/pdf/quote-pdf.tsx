@@ -163,6 +163,8 @@ function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
           </View>
         ) : null}
 
+        {/* Fills the rest of the page, so the signatures sit at the bottom of the last page. */}
+        <View style={{ flexGrow: 1 }} />
         <View style={[s.row, { gap: 28, marginTop: 30 }]} wrap={false}>
           <View style={{ flex: 1 }}>
             <Text style={s.label}>For {org.companyName}</Text>
