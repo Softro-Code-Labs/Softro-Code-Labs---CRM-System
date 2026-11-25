@@ -5,6 +5,8 @@ import { can } from "@/lib/permissions";
 import { getOrgSettings } from "@/lib/queries/org";
 import { renderHandoverPdf } from "@/lib/pdf/handover-pdf";
 import type { HandoverSnapshot } from "@/lib/project-access";
+import { sealSelect } from "@/lib/seal";
+import { canSee } from "@/lib/visibility";
 
 export const runtime = "nodejs";
 
@@ -15,11 +17,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!can(user.role, "access:view")) return new NextResponse("Forbidden", { status: 403 });
 
   const { id } = await params;
-  const [handover, org] = await Promise.all([db.handover.findUnique({ where: { id } }), getOrgSettings()]);
-  if (!handover) return new NextResponse("Not found", { status: 404 });
+  const [handover, org] = await Promise.all([db.handover.findUnique({ where: { id }, include: { seal: { select: sealSelect } } }), getOrgSettings()]);
+  if (!handover || !(await canSee(user, "handover", id))) return new NextResponse("Not found", { status: 404 });
   const snapshot = handover.snapshot as unknown as HandoverSnapshot;
 
-  const pdf = await renderHandoverPdf(snapshot, org);
+  const pdf = await renderHandoverPdf(snapshot, org, handover.seal);
   const filename = `${snapshot.number} Project Delivery Pack ${snapshot.project.client ?? snapshot.project.title}`.replace(/[^\w\s.-]/g, "").replace(/\s+/g, " ").trim() + ".pdf";
   return new NextResponse(new Uint8Array(pdf), {
     headers: {

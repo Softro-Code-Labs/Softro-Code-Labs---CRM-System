@@ -26,7 +26,7 @@ export const accessInclude = {
   },
   lastCheckedBy: { select: { name: true } },
   services: { orderBy: [{ position: "asc" }, { createdAt: "asc" }] },
-  handovers: { orderBy: { issuedAt: "desc" }, take: 1, include: { issuedBy: { select: { name: true } } } }, // one pack per project
+  handovers: { orderBy: { issuedAt: "desc" }, take: 1, include: { issuedBy: { select: { name: true } }, seal: { select: { signerName: true, sealedAt: true } } } }, // one pack per project
 } satisfies Prisma.ProjectAccessInclude;
 
 export type FullAccess = Prisma.ProjectAccessGetPayload<{ include: typeof accessInclude }>;

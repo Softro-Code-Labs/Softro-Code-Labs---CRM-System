@@ -117,7 +117,7 @@ Support and Viewer can't change owners. A website lead on the New web leads boar
 | Delete sent quotes (anyone can delete their own drafts) | ✅ | ✅ | — | — | — |
 | Create invoices and record payments; download invoice and receipt PDFs | ✅ | ✅ | ✅ | — | view and download only |
 | Void an invoice, or cancel a payment recorded by mistake | ✅ | ✅ | — | — | — |
-| Apply or remove the **company seal** with your signature on quotes, invoices and receipts | ✅ | ✅ | — | — | — |
+| Apply or remove the **company seal** with your signature on quotes, invoices, receipts and Project Delivery Packs | ✅ | ✅ | — | — | — |
 | Add, renew, pause and cancel contracts | ✅ | ✅ | ✅ | view only | view only |
 | Delete contracts | ✅ | ✅ | — | — | — |
 | Create tickets, reply, change status and assignee | ✅ | ✅ | ✅ | ✅ | view only |
@@ -404,16 +404,17 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 - Every quote PDF ends with two signature blocks: one for us, and **Accepted by the client** (name, signature, company seal and date). Ask the client to sign and send it back before you start work. Keep the signed copy with the project files and attach it to the deal as a note.
 - Once a quote is accepted, invoice it from the quote's page (see [section 11](#11-invoices-and-receipts)).
 
-### Seal a quote, invoice or receipt (admins and managers)
+### Seal a quote, invoice, receipt or delivery pack (admins and managers)
 
 Admins and managers can stamp a document with the **company seal** and their **signature**. It prints in the *For Softro Code Labs* box with their name, job title and the date it was sealed.
 
 1. **Once:** add your signature under **My profile → Signature** (see [section 19](#19-your-profile-and-password)), and check your **job title** under *Your details*.
-2. Open the quote or invoice and click **Apply seal** above the document. For a receipt, click **Seal** next to the payment on its invoice.
+2. Open the quote or invoice and click **Apply seal** above the document. For a receipt, click **Seal** next to the payment on its invoice. For a **Project Delivery Pack**, click **Apply seal** under the pack on the project's **Access** page: the seal prints on the pack and on its warranty and NDA pages.
 3. Download the PDF as usual: it now shows your signature, the seal and your name and title.
 
+- The signatures (and the seal) always sit at the **bottom of the last page**, on quotes, invoices, receipts and each page of a delivery pack.
 - The seal shows the **company registration number** from **Settings → Company details** (or *OFFICIAL* if it's empty).
-- A **sealed document is locked**: it can't be edited, deleted, voided or cancelled. To change it, an admin or manager clicks **Remove seal**, makes the change and seals it again.
+- A **sealed document is locked**: it can't be edited, deleted, voided or cancelled, and a sealed delivery pack can't be updated. To change it, an admin or manager clicks **Remove seal**, makes the change and seals it again.
 - The name, title and signature are saved with the document when it's sealed, so later changes to your profile don't change documents already sealed.
 - Other roles see that a document is sealed and who sealed it, but can't seal or unseal. Every seal and removal is in the audit log.
 
@@ -449,7 +450,7 @@ The advance and balance invoices always add up to the quote total, VAT included.
 - **Download PDF** and send it by email or WhatsApp. The PDF has our bank details (only invoices show them, not quotes) and the amount in words (e.g. *Rupees Two Hundred Thirty-Six Thousand Only*).
 - If we're **VAT registered** (our VAT number is filled in under Settings), the PDF is titled **Tax Invoice** and shows our TIN and the client's. Put the client's VAT/TIN number in their **company** record (*Tax / BR number*) before invoicing a VAT-registered client.
 - You can **edit** an invoice until any money is received, and as long as it isn't sealed. If the client already has it, send the new PDF.
-- To add the company seal and your signature, see [Seal a quote, invoice or receipt](#seal-a-quote-invoice-or-receipt-admins-and-managers).
+- To add the company seal and your signature, see [Seal a quote, invoice, receipt or delivery pack](#seal-a-quote-invoice-receipt-or-delivery-pack-admins-and-managers).
 
 ### When the client pays
 
@@ -731,7 +732,7 @@ Click **your name** at the top right to open **My profile**:
 - See your **role** and what it allows.
 - **Profile photo:** click **Add a photo** (or drag one onto the circle). It's cropped to a square and shown next to your name across the CRM. Use **Change photo** or **Remove** any time. Hidden details in the file, like where the photo was taken, are removed automatically.
 - **Change your password:** enter your current password, then the new one twice. This signs you out on **every other device** (handy if you used a shared computer).
-- **Signature (admins and managers):** used when you seal a quote, invoice or receipt. Click **Draw it** to sign with your mouse, finger or pen, or **Upload a photo** of your signature on plain white paper in dark ink: the paper background is removed automatically. Your **name and job title** from *Your details* print under it. Documents you've already sealed keep the signature they were sealed with.
+- **Signature (admins and managers):** used when you seal a quote, invoice, receipt or delivery pack. Click **Draw it** to sign with your mouse, finger or pen, or **Upload a photo** of your signature on plain white paper in dark ink: the paper background is removed automatically. Your **name and job title** from *Your details* print under it. Documents you've already sealed keep the signature they were sealed with.
 
 ### Appearance: dark or light
 

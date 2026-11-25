@@ -4,7 +4,8 @@ import type { HandoverSnapshot } from "@/lib/project-access";
 import { formatDate } from "@/lib/utils";
 import { parseDoc } from "@/lib/delivery-docs";
 import { ACCOUNT_OWNER_LABELS, SERVICE_CATEGORY_LABELS, SIGN_IN_LABELS, TWO_STEP_LABELS } from "@/lib/crm-meta";
-import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED } from "./shared";
+import type { SealInfo } from "@/lib/seal";
+import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED, SealedSignaturePdf } from "./shared";
 
 type Org = Awaited<ReturnType<typeof getOrgSettings>>;
 
@@ -32,7 +33,7 @@ const s = StyleSheet.create({
 
 const COLS = { service: { flex: 1.25, paddingRight: 8 }, login: { flex: 1.35, paddingRight: 8 }, owner: { width: 52 }, renews: { width: 66, textAlign: "right" as const } };
 
-function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
+function HandoverPdf({ h, org, seal }: { h: HandoverSnapshot; org: Org; seal: SealInfo | null }) {
   const orgLine = [org.phone, org.email, org.website?.replace(/^https?:\/\//, "")].filter(Boolean).join("  ·  ");
   const renewals = h.services.filter((x) => x.renewsAt).sort((a, b) => a.renewsAt!.localeCompare(b.renewsAt!));
 
@@ -165,26 +166,17 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
           </Text>
         </View>
 
-        <View style={s.sign} wrap={false}>
-          <View style={s.signBox}>
-            <Text style={s.small}>Delivered by: {org.companyName}</Text>
-            <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
-          </View>
-          <View style={s.signBox}>
-            <Text style={s.small}>Received by: {h.project.client ?? "Client"}</Text>
-            <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
-          </View>
-        </View>
+        <Signatures org={org} seal={seal} ours={`Delivered by: ${org.companyName}`} theirs={`Received by: ${h.project.client ?? "Client"}`} />
       </Page>
 
-      {h.documents?.warranty ? <AgreementPage h={h} org={org} title="Warranty" text={h.documents.warranty} /> : null}
-      {h.documents?.nda ? <AgreementPage h={h} org={org} title="Non-Disclosure Agreement" text={h.documents.nda} /> : null}
+      {h.documents?.warranty ? <AgreementPage h={h} org={org} seal={seal} title="Warranty" text={h.documents.warranty} /> : null}
+      {h.documents?.nda ? <AgreementPage h={h} org={org} seal={seal} title="Non-Disclosure Agreement" text={h.documents.nda} /> : null}
     </Document>
   );
 }
 
 /** A warranty or NDA page: same letterhead as the pack, the filled-in wording, and signatures for both sides. */
-function AgreementPage({ h, org, title, text }: { h: HandoverSnapshot; org: Org; title: string; text: string }) {
+function AgreementPage({ h, org, seal, title, text }: { h: HandoverSnapshot; org: Org; seal: SealInfo | null; title: string; text: string }) {
   const client = h.project.client ?? h.project.contact ?? "Client";
   return (
     <Page size="A4" style={s.page}>
@@ -228,20 +220,48 @@ function AgreementPage({ h, org, title, text }: { h: HandoverSnapshot; org: Org;
         ),
       )}
 
-      <View style={s.sign} wrap={false}>
-        <View style={s.signBox}>
-          <Text style={s.small}>For {org.companyName}</Text>
-          <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
-        </View>
-        <View style={s.signBox}>
-          <Text style={s.small}>For {client}</Text>
-          <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
-        </View>
-      </View>
+      <Signatures org={org} seal={seal} ours={`For ${org.companyName}`} theirs={`For ${client}`} />
     </Page>
   );
 }
 
-export function renderHandoverPdf(h: HandoverSnapshot, org: Org) {
-  return renderToBuffer(<HandoverPdf h={h} org={org} />);
+/**
+ * The two signature boxes, pushed to the bottom of the page. When the pack is sealed, our side
+ * carries the signer's signature and the company seal; the client's side stays blank to sign.
+ */
+function Signatures({ org, seal, ours, theirs }: { org: Org; seal: SealInfo | null; ours: string; theirs: string }) {
+  return (
+    <>
+      <View style={{ flexGrow: 1 }} />
+      {seal ? (
+        <View style={[s.row, { gap: 30, marginTop: 34 }]} wrap={false}>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.small, { marginBottom: 2 }]}>{ours}</Text>
+            <SealedSignaturePdf seal={seal} registrationNo={org.registrationNo} width={230} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.small, { marginBottom: 2 }]}>{theirs}</Text>
+            <View style={{ height: 58 }} />
+            <View style={{ borderBottomWidth: 0.75, borderBottomColor: MUTED, marginBottom: 4 }} />
+            <Text style={s.small}>Name, signature, date</Text>
+          </View>
+        </View>
+      ) : (
+        <View style={s.sign} wrap={false}>
+          <View style={s.signBox}>
+            <Text style={s.small}>{ours}</Text>
+            <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
+          </View>
+          <View style={s.signBox}>
+            <Text style={s.small}>{theirs}</Text>
+            <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
+          </View>
+        </View>
+      )}
+    </>
+  );
+}
+
+export function renderHandoverPdf(h: HandoverSnapshot, org: Org, seal: SealInfo | null = null) {
+  return renderToBuffer(<HandoverPdf h={h} org={org} seal={seal} />);
 }

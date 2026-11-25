@@ -15,6 +15,7 @@ import { formToObject, zodErrors, type FormState } from "@/lib/form";
 import { accessSchema, serviceSchema } from "@/lib/validation/access";
 import { ACCESS_CHECKLIST, type AccessChecklistKey } from "@/lib/crm-meta";
 import { nextNumber } from "@/lib/numbering";
+import { SEALED_LOCK_MESSAGE } from "@/lib/seal";
 import { accessInclude, buildHandoverSnapshot, deleteOpenTasks, syncReviewTask, syncServiceRenewalTask, type HandoverDocsChoice, type HandoverSnapshot } from "@/lib/project-access";
 
 type Result = { ok?: boolean; message?: string };
@@ -147,6 +148,7 @@ export async function createHandover(accessId: string, docs: HandoverDocsChoice 
   if (!access.services.length && !access.googleEmail) return { message: "Add the project's account or services first." };
 
   const latest = access.handovers[0];
+  if (latest?.seal) return { message: SEALED_LOCK_MESSAGE };
   const handover = await db.$transaction(async (tx) => {
     if (latest) {
       const version = ((latest.snapshot as unknown as HandoverSnapshot).version ?? 1) + 1;

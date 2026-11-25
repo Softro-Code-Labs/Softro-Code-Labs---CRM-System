@@ -745,16 +745,18 @@ model DocumentSeal {
   quoteId     String?  @unique
   invoiceId   String?  @unique
   paymentId   String?  @unique // a receipt
+  handoverId  String?  @unique // a Project Delivery Pack (and its warranty and NDA pages)
   sealedById  String?
   signerName  String
   signerTitle String?
   signature   Bytes // transparent PNG
   sealedAt    DateTime @default(now())
 
-  quote    Quote?   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  invoice  Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  payment  Payment? @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  sealedBy User?    @relation("DocumentSealer", fields: [sealedById], references: [id], onDelete: SetNull)
+  quote    Quote?    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  payment  Payment?  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  handover Handover? @relation(fields: [handoverId], references: [id], onDelete: Cascade)
+  sealedBy User?     @relation("DocumentSealer", fields: [sealedById], references: [id], onDelete: SetNull)
 }
 
 model UserAvatar {
@@ -873,6 +875,7 @@ model Handover {
 
   access   ProjectAccess @relation(fields: [accessId], references: [id], onDelete: Cascade)
   issuedBy User?         @relation("HandoverIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+  seal     DocumentSeal?
 
   @@index([accessId])
 }

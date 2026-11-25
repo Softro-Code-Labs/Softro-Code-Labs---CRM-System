@@ -96,7 +96,7 @@ export async function getVisibility(viewer: Viewer) {
 /** True when this person may open the lead / deal / quotation / invoice / receipt with this id. */
 export async function canSee(
   viewer: Viewer,
-  kind: "lead" | "deal" | "quote" | "invoice" | "payment" | "company" | "contact" | "contract" | "activity" | "access",
+  kind: "lead" | "deal" | "quote" | "invoice" | "payment" | "company" | "contact" | "contract" | "activity" | "access" | "handover",
   id: string,
 ) {
   const v = await getVisibility(viewer);
@@ -122,6 +122,8 @@ export async function canSee(
       return (await db.activity.count({ where: { AND: [{ id }, v.activity] } })) > 0;
     case "access":
       return (await db.projectAccess.count({ where: { AND: [{ id }, v.access] } })) > 0;
+    case "handover":
+      return (await db.handover.count({ where: { id, access: v.access } })) > 0;
   }
 }
 

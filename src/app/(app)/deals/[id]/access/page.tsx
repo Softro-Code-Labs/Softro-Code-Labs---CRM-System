@@ -22,6 +22,7 @@ import {
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
+import { SealControl } from "@/components/crm/seal-control";
 import {
   AccountForm,
   ArchivedBadge,
@@ -64,6 +65,8 @@ export default async function ProjectAccessPage({ params }: Props) {
   const check = access ? checkState(access) : null;
   const archived = access?.status === "ARCHIVED";
   const current = access?.handovers[0];
+  const canSeal = can(user.role, "document:seal");
+  const hasSignature = canSeal && Boolean((await db.user.findUnique({ where: { id: user.id }, select: { signatureUpdatedAt: true } }))?.signatureUpdatedAt);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -214,7 +217,18 @@ export default async function ProjectAccessPage({ params }: Props) {
                   </span>
                 </a>
               )}
-              {canEdit && (
+              {current && (current.seal || canSeal) && (
+                <div className="border-b border-ink-100 px-3 py-3">
+                  <SealControl
+                    kind="handover"
+                    id={current.id}
+                    sealed={current.seal ? { by: current.seal.signerName, on: formatDate(current.seal.sealedAt) } : null}
+                    canSeal={canSeal}
+                    hasSignature={hasSignature}
+                  />
+                </div>
+              )}
+              {canEdit && !current?.seal && (
                 <CardBody className="space-y-2">
                   <HandoverButton
                     accessId={access.id}

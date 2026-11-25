@@ -174,6 +174,8 @@ function InvoicePdf({ invoice: quote, org }: { invoice: FullInvoice; org: Org })
           ) : null}
         </View>
 
+        {/* Fills the rest of the page, so the signature sits at the bottom of the last page. */}
+        <View style={{ flexGrow: 1 }} />
         <View style={[s.row, { justifyContent: "space-between", alignItems: "flex-end", marginTop: 30 }]} wrap={false}>
           <Text style={s.small}>Thank you for your business.</Text>
           {quote.seal ? (
