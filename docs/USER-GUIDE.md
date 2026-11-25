@@ -72,7 +72,7 @@ Each person has one role. Ask an admin if you need more access.
 
 ### Whose records you see
 
-Leads, deals and quotations (and the invoices and receipts that go with them) follow one rule everywhere: lists, pages, PDFs, the dashboard and reports.
+One rule decides whose records you see, everywhere: lists, pages, PDFs, dropdowns, the dashboard, reports and exports. It covers **leads, deals, quotations, invoices and receipts, companies, contacts, contracts, activities and project access**.
 
 | Role | Sees |
 |---|---|
@@ -84,7 +84,22 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 - **New website enquiries** are the exception: they wait on the shared **New web leads** board, which everyone sees, until someone takes one (see [section 5](#5-leads-new-enquiries)).
 - **Invoices and receipts** are visible to whoever can see their deal or quotation, and to the person who created them.
 - **Who you can make the owner:** Sales only themselves, a Manager themselves or someone in their team, an Admin anyone.
-- Companies, contacts, contracts, support tickets and project access are shared by the whole team as before.
+- **Companies and contacts:** the ones you (or your team) own, plus any company or contact tied to a deal or lead you can see, so you can always open your client.
+- **Contracts:** the ones you (or your team) own, or that belong to a deal you can see. **Project access** goes with its deal.
+- **Activities and notes:** assigned to or added by you (or your team), or on a lead or deal you can see.
+- **Support tickets** are shared by the whole team, so anyone can help a client. Picking a company on a ticket lists every company.
+- **Someone else's record:** if you open a link to a record outside your team, the CRM says it can't be found. Saving, deleting or sealing it is refused too.
+
+### Changing who owns a record
+
+| Record | Where | Admin | Manager | Sales |
+|---|---|---|---|---|
+| Lead, deal | Its page → **Edit** → **Owner** | anyone | themselves or their team | only themselves |
+| Company, contact, contract | Its page → **Edit** → **Owner** | anyone | themselves or their team | only themselves |
+| Quotation | Follows its deal | | | |
+| All of one person's open work | **My team** → the person → **Hand over their work** | anyone | within their team | — |
+
+Support and Viewer can't change owners. A website lead on the New web leads board is first **taken**; only an admin can give one straight to someone.
 
 ### What each role can do
 
@@ -93,6 +108,7 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 | See the dashboard, leads, deals, companies, contacts, contracts and tickets (leads and deals: see *Whose records you see*) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Take a lead from the **New web leads** board | ✅ | ✅ | ✅ | — | — |
 | Assign or reassign leads and deals | anyone | self and team | self only | — | — |
+| **My team**: see team members' profiles and open work, hand a member's work to someone else | every team | own team | — | — | — |
 | Add leads | ✅ | ✅ | ✅ | ✅ | — |
 | Edit leads, mark replied, qualify | ✅ | ✅ | ✅ | — | — |
 | Convert a lead to a deal | ✅ | ✅ | ✅ | — | — |
@@ -101,7 +117,7 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 | Delete sent quotes (anyone can delete their own drafts) | ✅ | ✅ | — | — | — |
 | Create invoices and record payments; download invoice and receipt PDFs | ✅ | ✅ | ✅ | — | view and download only |
 | Void an invoice, or cancel a payment recorded by mistake | ✅ | ✅ | — | — | — |
-| Apply or remove the **company seal** with your signature on quotes, invoices and receipts | ✅ | ✅ | — | — | — |
+| Apply or remove the **company seal** with your signature on quotes, invoices, receipts and Project Delivery Packs | ✅ | ✅ | — | — | — |
 | Add, renew, pause and cancel contracts | ✅ | ✅ | ✅ | view only | view only |
 | Delete contracts | ✅ | ✅ | — | — | — |
 | Create tickets, reply, change status and assignee | ✅ | ✅ | ✅ | ✅ | view only |
@@ -115,6 +131,8 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 | Delete leads, deals, companies or contacts | ✅ | ✅ | — | — | — |
 | Edit the sales pipeline stages, and the services & prices list | ✅ | ✅ | — | — | — |
 | Edit company details used on quotes and invoices | ✅ | — | — | — | — |
+| Edit the warranty and NDA wording and periods | ✅ | — | — | — | — |
+| Add the warranty and NDA to a Project Delivery Pack | ✅ | ✅ | ✅ | ✅ | — |
 | Add team members, change roles, reset passwords and two-step sign-in | ✅ | — | — | — | — |
 | See the audit log | ✅ | — | — | — | — |
 | See and update project access (accounts, services, delivery pack, login sheet) | ✅ | ✅ | ✅ | ✅ | — |
@@ -386,16 +404,17 @@ A **quote** (quotation) is the price we send a client for a project: line items,
 - Every quote PDF ends with two signature blocks: one for us, and **Accepted by the client** (name, signature, company seal and date). Ask the client to sign and send it back before you start work. Keep the signed copy with the project files and attach it to the deal as a note.
 - Once a quote is accepted, invoice it from the quote's page (see [section 11](#11-invoices-and-receipts)).
 
-### Seal a quote, invoice or receipt (admins and managers)
+### Seal a quote, invoice, receipt or delivery pack (admins and managers)
 
 Admins and managers can stamp a document with the **company seal** and their **signature**. It prints in the *For Softro Code Labs* box with their name, job title and the date it was sealed.
 
 1. **Once:** add your signature under **My profile → Signature** (see [section 19](#19-your-profile-and-password)), and check your **job title** under *Your details*.
-2. Open the quote or invoice and click **Apply seal** above the document. For a receipt, click **Seal** next to the payment on its invoice.
+2. Open the quote or invoice and click **Apply seal** above the document. For a receipt, click **Seal** next to the payment on its invoice. For a **Project Delivery Pack**, click **Apply seal** under the pack on the project's **Access** page: the seal prints on the pack and on its warranty and NDA pages.
 3. Download the PDF as usual: it now shows your signature, the seal and your name and title.
 
+- The signatures (and the seal) always sit at the **bottom of the last page**, on quotes, invoices, receipts and each page of a delivery pack.
 - The seal shows the **company registration number** from **Settings → Company details** (or *OFFICIAL* if it's empty).
-- A **sealed document is locked**: it can't be edited, deleted, voided or cancelled. To change it, an admin or manager clicks **Remove seal**, makes the change and seals it again.
+- A **sealed document is locked**: it can't be edited, deleted, voided or cancelled, and a sealed delivery pack can't be updated. To change it, an admin or manager clicks **Remove seal**, makes the change and seals it again.
 - The name, title and signature are saved with the document when it's sealed, so later changes to your profile don't change documents already sealed.
 - Other roles see that a document is sealed and who sealed it, but can't seal or unseal. Every seal and removal is in the audit log.
 
@@ -431,7 +450,7 @@ The advance and balance invoices always add up to the quote total, VAT included.
 - **Download PDF** and send it by email or WhatsApp. The PDF has our bank details (only invoices show them, not quotes) and the amount in words (e.g. *Rupees Two Hundred Thirty-Six Thousand Only*).
 - If we're **VAT registered** (our VAT number is filled in under Settings), the PDF is titled **Tax Invoice** and shows our TIN and the client's. Put the client's VAT/TIN number in their **company** record (*Tax / BR number*) before invoicing a VAT-registered client.
 - You can **edit** an invoice until any money is received, and as long as it isn't sealed. If the client already has it, send the new PDF.
-- To add the company seal and your signature, see [Seal a quote, invoice or receipt](#seal-a-quote-invoice-or-receipt-admins-and-managers).
+- To add the company seal and your signature, see [Seal a quote, invoice, receipt or delivery pack](#seal-a-quote-invoice-receipt-or-delivery-pack-admins-and-managers).
 
 ### When the client pays
 
@@ -580,6 +599,8 @@ Work through the **close-out checklist**: logins saved, backup codes saved, sett
 
 **1. Project Delivery Pack** (no passwords). **Create Project Delivery Pack** makes a numbered document (e.g. **DP-2026-0001**) with the project Gmail, every service, who owns each one, renewal dates, support details and a sign-off section. It's saved, so you can download it again exactly as it was sent. Email it freely.
 
+Before you click it, tick **Add warranty** and/or **Add NDA** if you want them in the pack. Each becomes an extra page with the client's name, the project, the dates (e.g. *free bug fixes until 25 Mar 2027*, *warranty until 25 Nov 2027*) and signature lines for both sides. The wording comes from **Settings → Warranty & NDA**. When you update a pack, the boxes remember what the current version had.
+
 **2. Login sheet** (the passwords). At the bottom of the Project access page:
 
 1. Type the **Gmail password** and, if you're handing them over, the unused **backup codes**.
@@ -676,6 +697,16 @@ The calendar is read-only: tick tasks off in the CRM. The link is shown once and
 
 Click any card to go to the full list behind it.
 
+### My team (managers and admins)
+
+**My team** in the sidebar lists the people you manage, with their open leads, open deals (and their value), quotes with clients, overdue tasks and when they last signed in. Admins see everyone in a Sales, Support or Viewer role, with their manager (the page is called **Teams**).
+
+Click a person to see their profile (job title, email, phone, WhatsApp) and everything they have open: leads, deals, quotes in progress and tasks, each linking to the record.
+
+**Hand over their work:** when someone goes on leave or leaves, pick who should take over and click **Hand over work**. Their open leads, open deals and unfinished tasks move to that person in one go; won deals, quotes and history stay with them. Managers can only hand work to themselves or someone in their team. It's recorded in the audit log.
+
+Who is in a team is set by an admin (**Settings → Team members → Manager (team)**). Managers can't change accounts, roles or passwords.
+
 The leads, deals and money cards follow your role: **Sales** see their own, **managers** their team's, **admins** the whole company.
 
 ---
@@ -701,7 +732,7 @@ Click **your name** at the top right to open **My profile**:
 - See your **role** and what it allows.
 - **Profile photo:** click **Add a photo** (or drag one onto the circle). It's cropped to a square and shown next to your name across the CRM. Use **Change photo** or **Remove** any time. Hidden details in the file, like where the photo was taken, are removed automatically.
 - **Change your password:** enter your current password, then the new one twice. This signs you out on **every other device** (handy if you used a shared computer).
-- **Signature (admins and managers):** used when you seal a quote, invoice or receipt. Click **Draw it** to sign with your mouse, finger or pen, or **Upload a photo** of your signature on plain white paper in dark ink: the paper background is removed automatically. Your **name and job title** from *Your details* print under it. Documents you've already sealed keep the signature they were sealed with.
+- **Signature (admins and managers):** used when you seal a quote, invoice, receipt or delivery pack. Click **Draw it** to sign with your mouse, finger or pen, or **Upload a photo** of your signature on plain white paper in dark ink: the paper background is removed automatically. Your **name and job title** from *Your details* print under it. Documents you've already sealed keep the signature they were sealed with.
 
 ### Appearance: dark or light
 
@@ -734,13 +765,28 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 
 ## 20. Settings (admins and managers)
 
-**Settings** appears in the sidebar for admins and managers.
+**Settings** appears in the sidebar for admins and managers. It only lists the pages your role can open, and each page checks again, so typing its address doesn't get round it (you're sent to the Dashboard with an "access denied" message).
+
+| Settings page | Admin | Manager | Sales, Support, Viewer |
+|---|:-:|:-:|:-:|
+| Team members | ✅ | — | — |
+| Sales pipeline | ✅ | ✅ | — |
+| Company details | ✅ | — | — |
+| Warranty & NDA | ✅ | — | — |
+| Services & prices | ✅ | ✅ | — |
+| Integrations | ✅ | — | — |
+| Security | ✅ | — | — |
+| System health | ✅ | — | — |
+| Audit log | ✅ | — | — |
+| My profile | ✅ | ✅ | ✅ (click your name at the top right) |
+
+Who can open what is set in one place in the code (`src/lib/permissions.ts`); ask the developer to change it.
 
 ### Team members (admins)
 
 - **Add team member:** enter their name, work email, job title and role. The CRM creates a **temporary password** and shows it **once**. Click **Copy sign-in message** and send it to them privately (e.g. on WhatsApp). They'll set their own password on first sign-in.
 - **Change role:** open the person, pick a new role and **Save changes**. They're signed out so the new permissions apply straight away.
-- **Manager (team):** for Sales, Support and Viewer, choose their manager. That manager then sees their leads, deals, quotations and numbers, and can assign leads to them. Admins and managers aren't in a team. If a manager changes to another role, their team members have no manager until you choose a new one.
+- **Manager (team):** for Sales, Support and Viewer, choose their manager (the choice is hidden for admins and managers, who aren't in a team). That manager then sees their leads, deals, quotations and numbers, and can assign leads to them. Admins and managers aren't in a team. If a manager changes to another role, their team members have no manager until you choose a new one.
 - **Reset password:** gives them a new temporary password and signs them out everywhere. Use it when someone forgets their password.
 - **Unlock sign-in:** shown when someone is locked out after too many wrong passwords.
 - **Remove photo:** takes down someone's profile photo if it isn't suitable. They can add a new one.
@@ -762,6 +808,17 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 The details printed on every quote, invoice and receipt: company name, address, phone, email, website, **BR number** and **TIN/VAT number** (leave empty if not registered). It also holds the **quote defaults**: tax label and default rate, how many days quotes are valid for, **default terms**, **bank details** (printed on invoices only, never on quotes), and a footer line. The **BR number** is also printed on the company seal. Under **Invoices**: how many days clients have to pay (sets each invoice's due date) and the **payment instructions** printed on invoices.
 
 > The default terms are only a starting point. Replace the [x] and [n] placeholders with Softro's real payment and revision terms before sending your first quote.
+
+### Warranty & NDA (admins)
+
+The wording of the **warranty** and the **non-disclosure agreement** that can be added to a Project Delivery Pack, and two periods counted from the delivery date:
+
+- **Free bug fixes:** 4 months unless changed.
+- **Warranty:** 12 months unless changed.
+
+Both documents start with ready-made wording you can edit. **Starting text** puts the original back. Simple rules: a blank line starts a new paragraph, `## ` starts a heading, `- ` starts a bullet point. Fields in braces are filled in for each project: `{company}`, `{client}`, `{project}`, `{deliveryDate}`, `{supportMonths}`, `{supportUntil}`, `{warrantyMonths}`, `{warrantyUntil}`.
+
+Changes apply to packs made or updated after you save; packs already given to clients keep their wording. **Have a lawyer read both documents once** before you use them.
 
 ### Services & prices (admins and managers)
 

@@ -117,6 +117,8 @@ function ReceiptPdf({ p, org }: { p: FullReceipt; org: Org }) {
         </View>
         {p.method === "CHEQUE" ? <Text style={[s.small, { marginTop: 8 }]}>Payments by cheque are subject to realisation.</Text> : null}
 
+        {/* Fills the rest of the page, so the signature sits at the bottom of the last page. */}
+        <View style={{ flexGrow: 1 }} />
         <View style={[s.row, { justifyContent: "flex-end", marginTop: 44 }]} wrap={false}>
           {p.seal ? (
             <SealedSignaturePdf seal={p.seal} registrationNo={org.registrationNo} width={230} caption={`For ${org.companyName}`} />

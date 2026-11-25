@@ -17,7 +17,7 @@ export default async function ConvertLeadPage({ params }: { params: Promise<{ id
   const [lead, owners, companies, pipeline] = await Promise.all([
     db.lead.findUnique({ where: { id } }),
     getOwnerOptions(user),
-    getCompanyOptions(),
+    getCompanyOptions(user),
     getDefaultPipeline(),
   ]);
   if (!lead || !(await canSee(user, "lead", id))) notFound();

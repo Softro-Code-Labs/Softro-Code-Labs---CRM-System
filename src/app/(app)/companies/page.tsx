@@ -5,6 +5,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { CompanyType } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { firstParam, formatDate, humanize, parsePage } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -31,7 +32,9 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Se
   const type = (Object.values(CompanyType) as string[]).includes(typeParam) ? (typeParam as CompanyType) : undefined;
   const page = parsePage(sp.page);
 
+  const v = await getVisibility(user);
   const where: Prisma.CompanyWhereInput = {
+    AND: [v.company],
     ...(type && { type }),
     ...(q && {
       OR: [

@@ -586,6 +586,11 @@ model OrgSettings {
   invoiceTerms        String? // printed on invoices, e.g. how to pay
   bankDetails         String?
   quoteFooter         String?
+  // Delivery documents (Settings → Warranty & NDA, admins only). Empty wording uses the built-in starting text.
+  supportMonths       Int       @default(4) // free bug fixes after delivery
+  warrantyMonths      Int       @default(12) // warranty against defects in the delivered work
+  warrantyTerms       String?
+  ndaTerms            String?
   // Team chat (Slack, Google Chat, Discord or Teams incoming webhook)
   chatWebhookUrl      String?
   chatNotifyLeads     Boolean   @default(true) // new website leads
@@ -740,16 +745,18 @@ model DocumentSeal {
   quoteId     String?  @unique
   invoiceId   String?  @unique
   paymentId   String?  @unique // a receipt
+  handoverId  String?  @unique // a Project Delivery Pack (and its warranty and NDA pages)
   sealedById  String?
   signerName  String
   signerTitle String?
   signature   Bytes // transparent PNG
   sealedAt    DateTime @default(now())
 
-  quote    Quote?   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  invoice  Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  payment  Payment? @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  sealedBy User?    @relation("DocumentSealer", fields: [sealedById], references: [id], onDelete: SetNull)
+  quote    Quote?    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  payment  Payment?  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  handover Handover? @relation(fields: [handoverId], references: [id], onDelete: Cascade)
+  sealedBy User?     @relation("DocumentSealer", fields: [sealedById], references: [id], onDelete: SetNull)
 }
 
 model UserAvatar {
@@ -868,6 +875,7 @@ model Handover {
 
   access   ProjectAccess @relation(fields: [accessId], references: [id], onDelete: Cascade)
   issuedBy User?         @relation("HandoverIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+  seal     DocumentSeal?
 
   @@index([accessId])
 }

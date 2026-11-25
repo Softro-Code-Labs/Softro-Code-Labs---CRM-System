@@ -9,7 +9,7 @@ Ready-made SQL for mistakes the CRM screens can't undo: renumbering a document, 
 | Payment recorded by mistake | Invoice → Payments → **Cancel** (if it was the latest receipt, its number is reused) |
 | Quote with wrong prices | Quote → **New version**, or **Delete** if it's a draft |
 | Wrong contact, deal or company | Its page → **Edit** or **Delete** |
-| Sealed quote, invoice or receipt needs a change | An admin or manager clicks **Remove seal**, makes the change, then seals it again |
+| Sealed quote, invoice, receipt or delivery pack needs a change | An admin or manager clicks **Remove seal**, makes the change, then seals it again |
 | Website lead taken by the wrong person | An admin opens the lead → **Edit** → changes the owner (or the person's manager reassigns it in their team) |
 | Someone in the wrong team | Settings → Team members → the person → **Manager (team)** |
 

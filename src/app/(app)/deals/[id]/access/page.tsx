@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, toDateInput } from "@/lib/utils";
 import { checkState, getAccessForDeal, type HandoverSnapshot } from "@/lib/project-access";
@@ -21,6 +22,7 @@ import {
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
+import { SealControl } from "@/components/crm/seal-control";
 import {
   AccountForm,
   ArchivedBadge,
@@ -58,11 +60,13 @@ export default async function ProjectAccessPage({ params }: Props) {
     }),
     getAccessForDeal(id),
   ]);
-  if (!deal) notFound();
+  if (!deal || !(await canSee(user, "deal", id))) notFound();
   const canEdit = can(user.role, "access:manage");
   const check = access ? checkState(access) : null;
   const archived = access?.status === "ARCHIVED";
   const current = access?.handovers[0];
+  const canSeal = can(user.role, "document:seal");
+  const hasSignature = canSeal && Boolean((await db.user.findUnique({ where: { id: user.id }, select: { signatureUpdatedAt: true } }))?.signatureUpdatedAt);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -213,9 +217,28 @@ export default async function ProjectAccessPage({ params }: Props) {
                   </span>
                 </a>
               )}
-              {canEdit && (
+              {current && (current.seal || canSeal) && (
+                <div className="border-b border-ink-100 px-3 py-3">
+                  <SealControl
+                    kind="handover"
+                    id={current.id}
+                    sealed={current.seal ? { by: current.seal.signerName, on: formatDate(current.seal.sealedAt) } : null}
+                    canSeal={canSeal}
+                    hasSignature={hasSignature}
+                  />
+                </div>
+              )}
+              {canEdit && !current?.seal && (
                 <CardBody className="space-y-2">
-                  <HandoverButton accessId={access.id} exists={Boolean(current)} />
+                  <HandoverButton
+                    accessId={access.id}
+                    exists={Boolean(current)}
+                    had={{
+                      warranty: Boolean((current?.snapshot as unknown as HandoverSnapshot | undefined)?.documents?.warranty),
+                      nda: Boolean((current?.snapshot as unknown as HandoverSnapshot | undefined)?.documents?.nda),
+                    }}
+                  />
+                  <p className="text-xs text-ink-500">The warranty and NDA use the wording an admin sets under Settings → Warranty &amp; NDA, filled in with this project&apos;s details.</p>
                   {current && <p className="text-xs text-ink-500">Updates the same pack with today&apos;s services. The number stays the same; the version goes up.</p>}
                 </CardBody>
               )}

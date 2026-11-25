@@ -8,7 +8,7 @@ import { ConfirmAction } from "@/components/ui/confirm-action";
 import { sealDocument, unsealDocument } from "@/app/(app)/seal-actions";
 import type { SealKind } from "@/lib/seal";
 
-const NOUN: Record<SealKind, string> = { quote: "quote", invoice: "invoice", receipt: "receipt" };
+const NOUN: Record<SealKind, string> = { quote: "quote", invoice: "invoice", receipt: "receipt", handover: "delivery pack" };
 
 /**
  * Apply or remove the company seal. Admins and Managers see the buttons; everyone else only
@@ -87,7 +87,10 @@ export function SealControl({
             {canSeal ? "." : "; only an Admin or Manager can remove the seal."}
           </span>
         ) : hasSignature ? (
-          <span>Add the company seal and your signature to this {noun}. It&apos;s locked from changes until the seal is removed.</span>
+          <span>
+            Add the company seal and your signature to this {noun}
+            {kind === "handover" ? " (and its warranty and NDA pages)" : ""}. It&apos;s locked from changes until the seal is removed.
+          </span>
         ) : (
           <span>
             To seal this {noun}, first{" "}

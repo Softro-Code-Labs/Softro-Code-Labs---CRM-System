@@ -12,6 +12,7 @@ import {
   Settings,
   Target,
   Users,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -51,7 +52,10 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
   },
   {
     title: "Insights",
-    items: [{ label: "Reports", href: "/reports", icon: BarChart3, permission: "report:view" }],
+    items: [
+      { label: "Reports", href: "/reports", icon: BarChart3, permission: "report:view" },
+      { label: "My team", href: "/team", icon: UsersRound, permission: "team:view" },
+    ],
   },
   {
     title: "Admin",

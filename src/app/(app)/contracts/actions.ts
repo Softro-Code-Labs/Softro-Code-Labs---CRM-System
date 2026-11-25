@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { authorizeAction, FORBIDDEN_MESSAGE } from "@/lib/auth";
+import { canSee, mayAssignOwner } from "@/lib/visibility";
+
+const NOT_YOURS = "You can't see this contract. It belongs to someone outside your team.";
 import { nextNumber } from "@/lib/numbering";
 import { nextPeriod, syncRenewalTask } from "@/lib/contracts";
 import { contractSchema, type ContractInput } from "@/lib/validation/contract";
@@ -42,7 +45,14 @@ export async function saveContract(id: string | null, _prev: FormState, formData
   const linkErrors = await checkLinks(parsed.data);
   if (linkErrors) return { errors: linkErrors, values, message: Object.values(linkErrors)[0]?.[0] };
 
-  const data = { ...parsed.data, startDate: parsed.data.startDate!, ownerId: parsed.data.ownerId ?? user.id };
+  const existing = id ? await db.contract.findUnique({ where: { id }, select: { ownerId: true } }) : null;
+  if (id && !existing) return { message: "This contract no longer exists.", values };
+  if (id && !(await canSee(user, "contract", id))) return { message: NOT_YOURS, values };
+  const ownerId = parsed.data.ownerId ?? user.id;
+  if (ownerId !== existing?.ownerId && !(await mayAssignOwner(user, ownerId))) {
+    return { errors: { ownerId: ["You can only make yourself the owner, or for managers someone in your team."] }, values };
+  }
+  const data = { ...parsed.data, startDate: parsed.data.startDate!, ownerId };
 
   const contract = await db.$transaction(async (tx) => {
     const saved = id
@@ -62,6 +72,7 @@ export async function setContractStatus(id: string, status: Exclude<ContractStat
 
   const existing = await db.contract.findUnique({ where: { id } });
   if (!existing) return { message: "This contract no longer exists." };
+  if (!(await canSee(user, "contract", id))) return { message: NOT_YOURS };
   if (existing.status === "ENDED") return { message: "This contract has ended. Renew it or create a new one." };
 
   const contract = await db.$transaction(async (tx) => {
@@ -81,6 +92,7 @@ export async function renewContract(id: string) {
 
   const old = await db.contract.findUnique({ where: { id }, include: { renewedTo: { select: { id: true } } } });
   if (!old) return { message: "This contract no longer exists." };
+  if (!(await canSee(user, "contract", id))) return { message: NOT_YOURS };
   if (old.renewedTo) return { message: "This contract was already renewed." };
   if (!old.endDate) return { message: "Open-ended contracts don't need renewing. Add an end date first." };
 
@@ -128,6 +140,7 @@ export async function deleteContract(id: string) {
 
   const contract = await db.contract.findUnique({ where: { id } });
   if (!contract) return { message: "This contract no longer exists." };
+  if (!(await canSee(user, "contract", id))) return { message: NOT_YOURS };
   await db.$transaction(async (tx) => {
     if (contract.renewalTaskId) await tx.activity.deleteMany({ where: { id: contract.renewalTaskId, completedAt: null } });
     await tx.contract.delete({ where: { id } });

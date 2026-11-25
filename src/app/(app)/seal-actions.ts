@@ -9,6 +9,8 @@ import { canSee } from "@/lib/visibility";
 
 type Result = { message?: string };
 
+const seeKind = (kind: SealKind) => (kind === "receipt" ? "payment" : kind);
+
 /** Finds the document, says whether it can be sealed, and where its pages live. */
 async function lookup(kind: SealKind, id: string) {
   if (kind === "quote") {
@@ -21,6 +23,11 @@ async function lookup(kind: SealKind, id: string) {
     if (!inv) return null;
     return { label: `invoice ${inv.number}`, entity: "Invoice", entityId: id, sealId: inv.seal?.id, blocked: inv.status === "VOID" ? "Void invoices can't be sealed." : null, paths: [`/invoices/${id}`] };
   }
+  if (kind === "handover") {
+    const h = await db.handover.findUnique({ where: { id }, select: { number: true, access: { select: { dealId: true } }, seal: { select: { id: true } } } });
+    if (!h) return null;
+    return { label: `Project Delivery Pack ${h.number}`, entity: "ProjectAccess", entityId: h.access.dealId, sealId: h.seal?.id, blocked: null, paths: [`/deals/${h.access.dealId}/access`] };
+  }
   const p = await db.payment.findUnique({ where: { id }, select: { receiptNumber: true, invoiceId: true, invoice: { select: { number: true } }, seal: { select: { id: true } } } });
   if (!p) return null;
   return { label: `receipt ${p.receiptNumber}`, entity: "Invoice", entityId: p.invoiceId, sealId: p.seal?.id, blocked: null, paths: [`/invoices/${p.invoiceId}`] };
@@ -31,7 +38,7 @@ export async function sealDocument(kind: SealKind, id: string): Promise<Result> 
   const user = await authorizeAction("document:seal");
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const doc = await lookup(kind, id);
-  if (!doc || !(await canSee(user, kind === "receipt" ? "payment" : kind, id))) return { message: "This document no longer exists." };
+  if (!doc || !(await canSee(user, seeKind(kind), id))) return { message: "This document no longer exists." };
   if (doc.blocked) return { message: doc.blocked };
   if (doc.sealId) return {};
 
@@ -44,7 +51,7 @@ export async function sealDocument(kind: SealKind, id: string): Promise<Result> 
   try {
     await db.documentSeal.create({
       data: {
-        ...(kind === "quote" ? { quoteId: id } : kind === "invoice" ? { invoiceId: id } : { paymentId: id }),
+        ...(kind === "quote" ? { quoteId: id } : kind === "invoice" ? { invoiceId: id } : kind === "handover" ? { handoverId: id } : { paymentId: id }),
         sealedById: user.id,
         signerName: me.name,
         signerTitle: me.jobTitle,
@@ -65,7 +72,7 @@ export async function unsealDocument(kind: SealKind, id: string): Promise<Result
   const user = await authorizeAction("document:seal");
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const doc = await lookup(kind, id);
-  if (!doc || !(await canSee(user, kind === "receipt" ? "payment" : kind, id))) return { message: "This document no longer exists." };
+  if (!doc || !(await canSee(user, seeKind(kind), id))) return { message: "This document no longer exists." };
   if (!doc.sealId) return {};
   await db.documentSeal.deleteMany({ where: { id: doc.sealId } });
   await audit({ actorId: user.id, action: "update", entity: doc.entity, entityId: doc.entityId, summary: `Removed the seal from ${doc.label}` });

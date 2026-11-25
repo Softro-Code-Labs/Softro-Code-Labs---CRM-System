@@ -4,6 +4,7 @@ import { Plus, Star, Users } from "lucide-react";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { firstParam, formatDate, fullName, parsePage } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -25,7 +26,8 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
 
   // Split "Nimal Perera" into words so first + last name searches work.
   const words = q.split(/\s+/).filter(Boolean).slice(0, 4);
-  const where: Prisma.ContactWhereInput = words.length
+  const v = await getVisibility(user);
+  const search: Prisma.ContactWhereInput = words.length
     ? {
         AND: words.map((word) => ({
           OR: [
@@ -40,6 +42,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
         })),
       }
     : {};
+  const where: Prisma.ContactWhereInput = { AND: [v.contact, search] };
 
   const [total, contacts] = await Promise.all([
     db.contact.count({ where }),

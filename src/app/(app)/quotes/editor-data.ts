@@ -12,8 +12,8 @@ export async function getEditorOptions(viewer: { id: string; role: Role }) {
   const v = await getVisibility(viewer);
   const [products, companies, contacts, deals] = await Promise.all([
     db.product.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
-    getCompanyOptions(),
-    getContactOptions(),
+    getCompanyOptions(viewer),
+    getContactOptions(viewer),
     db.deal.findMany({
       where: v.deal,
       orderBy: [{ status: "asc" }, { updatedAt: "desc" }],

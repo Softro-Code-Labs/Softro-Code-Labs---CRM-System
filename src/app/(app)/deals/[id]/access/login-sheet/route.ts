@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { audit } from "@/lib/audit";
 import { getAccessForDeal } from "@/lib/project-access";
@@ -78,6 +79,7 @@ export async function POST(
     request.formData(),
   ]);
   if (!access) return fail("Save the project account first.", 404);
+  if (!(await canSee(user, "deal", id))) return fail("You don't have access to this.", 403);
 
   const fields = Object.fromEntries(
     [...form.entries()].map(([k, v]) => [k, typeof v === "string" ? v : ""]),

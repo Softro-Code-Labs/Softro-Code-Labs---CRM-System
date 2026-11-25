@@ -1,6 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 
-export type SealKind = "quote" | "invoice" | "receipt";
+export type SealKind = "quote" | "invoice" | "receipt" | "handover";
 
 /** What documents load about their seal. */
 export const sealSelect = {

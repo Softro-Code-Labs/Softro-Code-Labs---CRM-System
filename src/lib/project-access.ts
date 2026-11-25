@@ -1,9 +1,11 @@
 import "server-only";
+import { getOrgSettings } from "@/lib/queries/org";
+import { addMonths, DEFAULT_NDA, DEFAULT_WARRANTY, fillDoc } from "@/lib/delivery-docs";
 import type { Prisma } from "@/generated/prisma/client";
 import type { AccountOwner, ServiceCategory, SignInMethod, TwoStepMethod } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { ACCESS_CHECK_EVERY_DAYS } from "@/lib/crm-meta";
-import { fullName } from "@/lib/utils";
+import { formatDate, fullName } from "@/lib/utils";
 
 const DAY = 86_400_000;
 const RENEWAL_NOTICE_DAYS = 30;
@@ -24,7 +26,7 @@ export const accessInclude = {
   },
   lastCheckedBy: { select: { name: true } },
   services: { orderBy: [{ position: "asc" }, { createdAt: "asc" }] },
-  handovers: { orderBy: { issuedAt: "desc" }, take: 1, include: { issuedBy: { select: { name: true } } } }, // one pack per project
+  handovers: { orderBy: { issuedAt: "desc" }, take: 1, include: { issuedBy: { select: { name: true } }, seal: { select: { signerName: true, sealedAt: true } } } }, // one pack per project
 } satisfies Prisma.ProjectAccessInclude;
 
 export type FullAccess = Prisma.ProjectAccessGetPayload<{ include: typeof accessInclude }>;
@@ -129,9 +131,19 @@ export type HandoverSnapshot = {
   services: { name: string; category: ServiceCategory; url: string | null; loginEmail: string | null; signIn: SignInMethod; owner: AccountOwner; renewsAt: string | null }[];
   settingsLocation: string | null;
   support: { number: string; title: string; responseTimeHours: number | null; endDate: string | null }[];
+  /** Warranty and NDA added to this pack, with the project's details already filled in. Older packs don't have them. */
+  documents?: { warranty?: string; nda?: string; supportUntil?: string; warrantyUntil?: string };
 };
 
-export async function buildHandoverSnapshot(access: FullAccess, number: string, issuedBy: string | null, now = new Date()): Promise<HandoverSnapshot> {
+export type HandoverDocsChoice = { warranty: boolean; nda: boolean };
+
+export async function buildHandoverSnapshot(
+  access: FullAccess,
+  number: string,
+  issuedBy: string | null,
+  docs: HandoverDocsChoice = { warranty: false, nda: false },
+  now = new Date(),
+): Promise<HandoverSnapshot> {
   const contracts = access.deal.companyId
     ? await db.contract.findMany({
         where: { companyId: access.deal.companyId, status: "ACTIVE" },
@@ -156,5 +168,27 @@ export async function buildHandoverSnapshot(access: FullAccess, number: string, 
     })),
     settingsLocation: access.envLocation,
     support: contracts.map((c) => ({ ...c, endDate: c.endDate?.toISOString() ?? null })),
+    documents: docs.warranty || docs.nda ? await buildDocuments(access, docs, now) : undefined,
+  };
+}
+
+/** Fills in the admin's warranty and NDA wording for this project. */
+async function buildDocuments(access: FullAccess, docs: HandoverDocsChoice, now: Date): Promise<NonNullable<HandoverSnapshot["documents"]>> {
+  const org = await getOrgSettings();
+  const supportUntil = addMonths(now, org.supportMonths);
+  const warrantyUntil = addMonths(now, org.warrantyMonths);
+  const vars = {
+    company: org.companyName,
+    client: access.deal.company?.name ?? (access.deal.contact ? fullName(access.deal.contact) : "the client"),
+    project: access.deal.title,
+    deliveryDate: formatDate(now),
+    supportMonths: String(org.supportMonths),
+    supportUntil: formatDate(supportUntil),
+    warrantyMonths: String(org.warrantyMonths),
+    warrantyUntil: formatDate(warrantyUntil),
+  };
+  return {
+    ...(docs.warranty && { warranty: fillDoc(org.warrantyTerms ?? DEFAULT_WARRANTY, vars), supportUntil: supportUntil.toISOString(), warrantyUntil: warrantyUntil.toISOString() }),
+    ...(docs.nda && { nda: fillDoc(org.ndaTerms ?? DEFAULT_NDA, vars) }),
   };
 }

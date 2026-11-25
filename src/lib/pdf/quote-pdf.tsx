@@ -146,17 +146,25 @@ function QuotePdf({ quote, org }: { quote: FullQuote; org: Org }) {
 
         {/* Bank details are deliberately left off quotes: they go on invoices only. */}
         {terms.length ? (
-          <View style={{ marginTop: 22, borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 12 }}>
-            <Text style={s.label} minPresenceAhead={60}>Terms</Text>
+          // Terms always start on their own page, so prices and terms read as two clear parts.
+          <View break>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", borderBottomWidth: 1, borderBottomColor: LINE, paddingBottom: 10, marginBottom: 14 }}>
+              <Text style={{ fontSize: 15, fontWeight: 600 }}>Terms and conditions</Text>
+              <Text style={[s.small, { textAlign: "right" }]}>
+                {quote.number} · {quote.title}
+              </Text>
+            </View>
             {/* Each paragraph (a block separated by a blank line) stays whole: it moves to the next page rather than splitting. */}
             {terms.map((para, i) => (
-              <Text key={i} style={{ fontSize: 8.5, color: MUTED, marginTop: i ? 7 : 0 }} wrap={false}>
+              <Text key={i} style={{ fontSize: 9, color: MUTED, marginTop: i ? 9 : 0, lineHeight: 1.5 }} wrap={false}>
                 {para}
               </Text>
             ))}
           </View>
         ) : null}
 
+        {/* Fills the rest of the page, so the signatures sit at the bottom of the last page. */}
+        <View style={{ flexGrow: 1 }} />
         <View style={[s.row, { gap: 28, marginTop: 30 }]} wrap={false}>
           <View style={{ flex: 1 }}>
             <Text style={s.label}>For {org.companyName}</Text>
