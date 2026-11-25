@@ -561,15 +561,28 @@ export function Checklist({
 export function HandoverButton({
   accessId,
   exists,
+  had,
 }: {
   accessId: string;
   exists: boolean;
+  /** Whether the current pack already includes them, so an update keeps the same choice by default. */
+  had?: { warranty: boolean; nda: boolean };
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [warranty, setWarranty] = useState(had?.warranty ?? false);
+  const [nda, setNda] = useState(had?.nda ?? false);
   return (
     <span className="flex flex-wrap items-center gap-3">
+      <label className="flex items-center gap-1.5 text-sm text-ink-700">
+        <input type="checkbox" checked={warranty} onChange={(e) => setWarranty(e.target.checked)} className="size-4 accent-brand-600" />
+        Add warranty
+      </label>
+      <label className="flex items-center gap-1.5 text-sm text-ink-700">
+        <input type="checkbox" checked={nda} onChange={(e) => setNda(e.target.checked)} className="size-4 accent-brand-600" />
+        Add NDA
+      </label>
       <Button
         type="button"
         size="sm"
@@ -577,7 +590,7 @@ export function HandoverButton({
         disabled={pending}
         onClick={() =>
           start(async () => {
-            const r = await createHandover(accessId);
+            const r = await createHandover(accessId, { warranty, nda });
             if (r.id) {
               window.open(`/handovers/${r.id}/pdf`, "_blank", "noopener");
               router.refresh();

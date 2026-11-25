@@ -216,7 +216,15 @@ export default async function ProjectAccessPage({ params }: Props) {
               )}
               {canEdit && (
                 <CardBody className="space-y-2">
-                  <HandoverButton accessId={access.id} exists={Boolean(current)} />
+                  <HandoverButton
+                    accessId={access.id}
+                    exists={Boolean(current)}
+                    had={{
+                      warranty: Boolean((current?.snapshot as unknown as HandoverSnapshot | undefined)?.documents?.warranty),
+                      nda: Boolean((current?.snapshot as unknown as HandoverSnapshot | undefined)?.documents?.nda),
+                    }}
+                  />
+                  <p className="text-xs text-ink-500">The warranty and NDA use the wording an admin sets under Settings → Warranty &amp; NDA, filled in with this project&apos;s details.</p>
                   {current && <p className="text-xs text-ink-500">Updates the same pack with today&apos;s services. The number stays the same; the version goes up.</p>}
                 </CardBody>
               )}

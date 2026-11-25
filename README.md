@@ -58,6 +58,8 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change quote maths (discounts, VAT) | `src/lib/quote-math.ts` |
 | Change reply deadlines and working days | `src/lib/working-days.ts`, ticket times in `src/lib/tickets.ts` |
 | Change report figures | `src/lib/reports.ts`, CSV exports in `src/app/(app)/reports/export/route.ts` |
+| Change My team (team list, member page, hand over work) | `src/app/(app)/team/`, workload counts in `src/lib/team.ts` |
+| Change the warranty and NDA (starting wording, fields, periods) | `src/lib/delivery-docs.ts`; admins edit them in `src/app/(app)/settings/documents/`; printed as extra pages by `src/lib/pdf/handover-pdf.tsx` |
 | Change project access (accounts register, checklist, delivery pack, login sheet) | `src/app/(app)/deals/[id]/access/`, `src/lib/project-access.ts`, `src/lib/pdf/handover-pdf.tsx`, `src/lib/pdf/login-sheet-pdf.tsx`, secret detection in `src/lib/security/secret-guard.ts` |
 | Change emails, team chat messages, the morning summary or the calendar feed | `src/lib/integrations/` |
 | Change profile photos (size, formats) | `src/lib/avatar.ts`, upload in `src/app/(app)/settings/profile/avatar-*.tsx`, served by `src/app/avatars/` |

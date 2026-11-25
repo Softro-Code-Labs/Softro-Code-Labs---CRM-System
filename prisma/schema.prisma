@@ -586,6 +586,11 @@ model OrgSettings {
   invoiceTerms        String? // printed on invoices, e.g. how to pay
   bankDetails         String?
   quoteFooter         String?
+  // Delivery documents (Settings → Warranty & NDA, admins only). Empty wording uses the built-in starting text.
+  supportMonths       Int       @default(4) // free bug fixes after delivery
+  warrantyMonths      Int       @default(12) // warranty against defects in the delivered work
+  warrantyTerms       String?
+  ndaTerms            String?
   // Team chat (Slack, Google Chat, Discord or Teams incoming webhook)
   chatWebhookUrl      String?
   chatNotifyLeads     Boolean   @default(true) // new website leads

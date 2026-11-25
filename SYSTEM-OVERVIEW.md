@@ -46,7 +46,8 @@ What each role may **do** lives in `src/lib/permissions.ts`; whose records each 
 | **Activities** | Calls, WhatsApp chats, emails, meetings, tasks and notes on every record | Tasks have owners and due dates, and show on the dashboard and in calendars. |
 | **Contracts** | Maintenance, hosting, support retainers and subscriptions | Numbered **C-…**. A renewal task appears before the end date; one click renews. |
 | **Support** | Client problems as tickets, with replies and internal notes | Numbered **T-…**. First reply due by priority (4 h urgent → 72 h low) or the contract's promise. |
-| **Project access** | Each project's Google account, the services made with it, who owns them, renewals, a **Project Delivery Pack** PDF for the client, and a password-locked **login sheet** | **No secrets stored**: passwords stay in Google Password Manager; the login sheet is made from passwords typed in at that moment and never saved. A 6-monthly sign-in check keeps each project Gmail alive. |
+| **Project access** | Each project's Google account, the services made with it, who owns them, renewals, a **Project Delivery Pack** PDF for the client (optionally with a **warranty** and an **NDA**, worded by admins), and a password-locked **login sheet** | **No secrets stored**: passwords stay in Google Password Manager; the login sheet is made from passwords typed in at that moment and never saved. A 6-monthly sign-in check keeps each project Gmail alive. |
+| **My team** | Managers see each team member's profile and open leads, deals, quotes and tasks, and can hand one person's open work to someone else | Managers only see and move work within their own team; admins see every team. |
 | **Reports** | Revenue, win rate, forecast, lead sources, team and support performance | Pick any period or person, and export to CSV. |
 | **Settings** | Team, pipeline, company details, price list, integrations, security, system health, audit log | Most are admin-only. |
 

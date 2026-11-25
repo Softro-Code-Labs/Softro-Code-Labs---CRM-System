@@ -2,6 +2,7 @@ import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-p
 import type { getOrgSettings } from "@/lib/queries/org";
 import type { HandoverSnapshot } from "@/lib/project-access";
 import { formatDate } from "@/lib/utils";
+import { parseDoc } from "@/lib/delivery-docs";
 import { ACCOUNT_OWNER_LABELS, SERVICE_CATEGORY_LABELS, SIGN_IN_LABELS, TWO_STEP_LABELS } from "@/lib/crm-meta";
 import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED } from "./shared";
 
@@ -175,7 +176,69 @@ function HandoverPdf({ h, org }: { h: HandoverSnapshot; org: Org }) {
           </View>
         </View>
       </Page>
+
+      {h.documents?.warranty ? <AgreementPage h={h} org={org} title="Warranty" text={h.documents.warranty} /> : null}
+      {h.documents?.nda ? <AgreementPage h={h} org={org} title="Non-Disclosure Agreement" text={h.documents.nda} /> : null}
     </Document>
+  );
+}
+
+/** A warranty or NDA page: same letterhead as the pack, the filled-in wording, and signatures for both sides. */
+function AgreementPage({ h, org, title, text }: { h: HandoverSnapshot; org: Org; title: string; text: string }) {
+  const client = h.project.client ?? h.project.contact ?? "Client";
+  return (
+    <Page size="A4" style={s.page}>
+      <View style={s.footerLine} fixed />
+      <Text style={s.footerLeft} fixed>
+        {org.companyName} · {title}
+      </Text>
+      <Text style={s.footerRight} fixed>
+        {h.number}
+      </Text>
+
+      <View style={s.header}>
+        <View style={[s.row, { gap: 10, flex: 1, paddingRight: 20 }]}>
+          <Mark />
+          <View style={{ flex: 1 }}>
+            <Text style={s.orgName}>{org.companyName}</Text>
+            {org.address ? <Text style={s.small}>{org.address}</Text> : null}
+          </View>
+        </View>
+        <View>
+          <Text style={s.title}>{title}</Text>
+          <Text style={s.number}>{h.number}</Text>
+          <Text style={[s.small, { textAlign: "right", marginTop: 4 }]}>{h.project.title}</Text>
+        </View>
+      </View>
+
+      {parseDoc(text).map((b, i) =>
+        b.kind === "h" ? (
+          <Text key={i} style={s.h2} minPresenceAhead={40}>
+            {b.text}
+          </Text>
+        ) : b.kind === "li" ? (
+          <View key={i} style={[s.row, { marginTop: 2, paddingLeft: 4 }]} wrap={false}>
+            <Text style={[s.p, { width: 10 }]}>•</Text>
+            <Text style={[s.p, { flex: 1 }]}>{b.text}</Text>
+          </View>
+        ) : (
+          <Text key={i} style={[s.p, { marginTop: 6 }]}>
+            {b.text}
+          </Text>
+        ),
+      )}
+
+      <View style={s.sign} wrap={false}>
+        <View style={s.signBox}>
+          <Text style={s.small}>For {org.companyName}</Text>
+          <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
+        </View>
+        <View style={s.signBox}>
+          <Text style={s.small}>For {client}</Text>
+          <Text style={[s.small, { marginTop: 14 }]}>Name, signature, date</Text>
+        </View>
+      </View>
+    </Page>
   );
 }
 

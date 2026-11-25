@@ -72,7 +72,7 @@ Each person has one role. Ask an admin if you need more access.
 
 ### Whose records you see
 
-Leads, deals and quotations (and the invoices and receipts that go with them) follow one rule everywhere: lists, pages, PDFs, the dashboard and reports.
+One rule decides whose records you see, everywhere: lists, pages, PDFs, dropdowns, the dashboard, reports and exports. It covers **leads, deals, quotations, invoices and receipts, companies, contacts, contracts, activities and project access**.
 
 | Role | Sees |
 |---|---|
@@ -84,8 +84,22 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 - **New website enquiries** are the exception: they wait on the shared **New web leads** board, which everyone sees, until someone takes one (see [section 5](#5-leads-new-enquiries)).
 - **Invoices and receipts** are visible to whoever can see their deal or quotation, and to the person who created them.
 - **Who you can make the owner:** Sales only themselves, a Manager themselves or someone in their team, an Admin anyone.
-- **Companies, contacts, contracts, activities and project access** follow the same rule. You see the ones you (or, for managers, your team) own, plus any company or contact tied to a deal or lead you can see, so you can always open your client. A project's access register goes with its deal. Lists, dropdowns and the dashboard only show what you can see.
+- **Companies and contacts:** the ones you (or your team) own, plus any company or contact tied to a deal or lead you can see, so you can always open your client.
+- **Contracts:** the ones you (or your team) own, or that belong to a deal you can see. **Project access** goes with its deal.
+- **Activities and notes:** assigned to or added by you (or your team), or on a lead or deal you can see.
 - **Support tickets** are shared by the whole team, so anyone can help a client. Picking a company on a ticket lists every company.
+- **Someone else's record:** if you open a link to a record outside your team, the CRM says it can't be found. Saving, deleting or sealing it is refused too.
+
+### Changing who owns a record
+
+| Record | Where | Admin | Manager | Sales |
+|---|---|---|---|---|
+| Lead, deal | Its page → **Edit** → **Owner** | anyone | themselves or their team | only themselves |
+| Company, contact, contract | Its page → **Edit** → **Owner** | anyone | themselves or their team | only themselves |
+| Quotation | Follows its deal | | | |
+| All of one person's open work | **My team** → the person → **Hand over their work** | anyone | within their team | — |
+
+Support and Viewer can't change owners. A website lead on the New web leads board is first **taken**; only an admin can give one straight to someone.
 
 ### What each role can do
 
@@ -117,6 +131,8 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 | Delete leads, deals, companies or contacts | ✅ | ✅ | — | — | — |
 | Edit the sales pipeline stages, and the services & prices list | ✅ | ✅ | — | — | — |
 | Edit company details used on quotes and invoices | ✅ | — | — | — | — |
+| Edit the warranty and NDA wording and periods | ✅ | — | — | — | — |
+| Add the warranty and NDA to a Project Delivery Pack | ✅ | ✅ | ✅ | ✅ | — |
 | Add team members, change roles, reset passwords and two-step sign-in | ✅ | — | — | — | — |
 | See the audit log | ✅ | — | — | — | — |
 | See and update project access (accounts, services, delivery pack, login sheet) | ✅ | ✅ | ✅ | ✅ | — |
@@ -582,6 +598,8 @@ Work through the **close-out checklist**: logins saved, backup codes saved, sett
 
 **1. Project Delivery Pack** (no passwords). **Create Project Delivery Pack** makes a numbered document (e.g. **DP-2026-0001**) with the project Gmail, every service, who owns each one, renewal dates, support details and a sign-off section. It's saved, so you can download it again exactly as it was sent. Email it freely.
 
+Before you click it, tick **Add warranty** and/or **Add NDA** if you want them in the pack. Each becomes an extra page with the client's name, the project, the dates (e.g. *free bug fixes until 25 Mar 2027*, *warranty until 25 Nov 2027*) and signature lines for both sides. The wording comes from **Settings → Warranty & NDA**. When you update a pack, the boxes remember what the current version had.
+
 **2. Login sheet** (the passwords). At the bottom of the Project access page:
 
 1. Type the **Gmail password** and, if you're handing them over, the unused **backup codes**.
@@ -753,6 +771,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 | Team members | ✅ | — | — |
 | Sales pipeline | ✅ | ✅ | — |
 | Company details | ✅ | — | — |
+| Warranty & NDA | ✅ | — | — |
 | Services & prices | ✅ | ✅ | — |
 | Integrations | ✅ | — | — |
 | Security | ✅ | — | — |
@@ -788,6 +807,17 @@ Who can open what is set in one place in the code (`src/lib/permissions.ts`); as
 The details printed on every quote, invoice and receipt: company name, address, phone, email, website, **BR number** and **TIN/VAT number** (leave empty if not registered). It also holds the **quote defaults**: tax label and default rate, how many days quotes are valid for, **default terms**, **bank details** (printed on invoices only, never on quotes), and a footer line. The **BR number** is also printed on the company seal. Under **Invoices**: how many days clients have to pay (sets each invoice's due date) and the **payment instructions** printed on invoices.
 
 > The default terms are only a starting point. Replace the [x] and [n] placeholders with Softro's real payment and revision terms before sending your first quote.
+
+### Warranty & NDA (admins)
+
+The wording of the **warranty** and the **non-disclosure agreement** that can be added to a Project Delivery Pack, and two periods counted from the delivery date:
+
+- **Free bug fixes:** 4 months unless changed.
+- **Warranty:** 12 months unless changed.
+
+Both documents start with ready-made wording you can edit. **Starting text** puts the original back. Simple rules: a blank line starts a new paragraph, `## ` starts a heading, `- ` starts a bullet point. Fields in braces are filled in for each project: `{company}`, `{client}`, `{project}`, `{deliveryDate}`, `{supportMonths}`, `{supportUntil}`, `{warrantyMonths}`, `{warrantyUntil}`.
+
+Changes apply to packs made or updated after you save; packs already given to clients keep their wording. **Have a lawyer read both documents once** before you use them.
 
 ### Services & prices (admins and managers)
 

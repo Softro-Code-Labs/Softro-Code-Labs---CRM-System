@@ -15,7 +15,7 @@ import { formToObject, zodErrors, type FormState } from "@/lib/form";
 import { accessSchema, serviceSchema } from "@/lib/validation/access";
 import { ACCESS_CHECKLIST, type AccessChecklistKey } from "@/lib/crm-meta";
 import { nextNumber } from "@/lib/numbering";
-import { accessInclude, buildHandoverSnapshot, deleteOpenTasks, syncReviewTask, syncServiceRenewalTask, type HandoverSnapshot } from "@/lib/project-access";
+import { accessInclude, buildHandoverSnapshot, deleteOpenTasks, syncReviewTask, syncServiceRenewalTask, type HandoverDocsChoice, type HandoverSnapshot } from "@/lib/project-access";
 
 type Result = { ok?: boolean; message?: string };
 
@@ -139,7 +139,7 @@ export async function setArchived(accessId: string, archived: boolean): Promise<
  * One Project Delivery Pack per project. The first time it gets a number; after that, "Update" refreshes
  * the same pack with today's services and bumps its version, keeping the number the client already has.
  */
-export async function createHandover(accessId: string): Promise<{ id?: string; message?: string }> {
+export async function createHandover(accessId: string, docs: HandoverDocsChoice = { warranty: false, nda: false }): Promise<{ id?: string; message?: string }> {
   const user = await authorizeAction("access:manage");
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const access = await db.projectAccess.findUnique({ where: { id: accessId }, include: accessInclude });
@@ -150,11 +150,11 @@ export async function createHandover(accessId: string): Promise<{ id?: string; m
   const handover = await db.$transaction(async (tx) => {
     if (latest) {
       const version = ((latest.snapshot as unknown as HandoverSnapshot).version ?? 1) + 1;
-      const snapshot = { ...(await buildHandoverSnapshot(access, latest.number, user.name)), version };
+      const snapshot = { ...(await buildHandoverSnapshot(access, latest.number, user.name, docs)), version };
       return tx.handover.update({ where: { id: latest.id }, data: { issuedAt: new Date(), issuedById: user.id, snapshot } });
     }
     const number = await nextNumber(tx, "DP");
-    const snapshot = { ...(await buildHandoverSnapshot(access, number, user.name)), version: 1 };
+    const snapshot = { ...(await buildHandoverSnapshot(access, number, user.name, docs)), version: 1 };
     return tx.handover.create({ data: { number, accessId, issuedById: user.id, snapshot } });
   });
   const v = (handover.snapshot as unknown as HandoverSnapshot).version ?? 1;
@@ -163,7 +163,7 @@ export async function createHandover(accessId: string): Promise<{ id?: string; m
     action: latest ? "update" : "create",
     entity: "ProjectAccess",
     entityId: access.dealId,
-    summary: `Project Delivery Pack ${handover.number}${v > 1 ? ` updated to version ${v}` : ""}: ${access.deal.title}`,
+    summary: `Project Delivery Pack ${handover.number}${v > 1 ? ` updated to version ${v}` : ""}: ${access.deal.title}${docs.warranty || docs.nda ? ` (with ${[docs.warranty && "warranty", docs.nda && "NDA"].filter(Boolean).join(" and ")})` : ""}`,
   });
   refresh(access.dealId);
   return { id: handover.id };
