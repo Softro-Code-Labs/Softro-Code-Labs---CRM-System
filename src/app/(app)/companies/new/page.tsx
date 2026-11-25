@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { getOwnerOptions } from "@/lib/visibility";
 import { PageHeader } from "@/components/ui/page-header";
 import { CompanyForm } from "../company-form";
 import { createCompany } from "../actions";
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "New company" };
 
 export default async function NewCompanyPage() {
   const user = await requirePermission("company:create");
-  const owners = await getAssignableUsers();
+  const owners = await getOwnerOptions(user);
 
   return (
     <div className="mx-auto max-w-3xl">

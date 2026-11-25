@@ -45,7 +45,7 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change a screen (list, detail, form) | `src/app/(app)/<area>/` (`leads`, `deals`, `quotes`, `contracts`, `support`, `reports`, `settings`…) |
 | Change what happens when someone saves | `actions.ts` next to that screen (server actions) |
 | Change who can do what | `src/lib/permissions.ts` (one map for every role) |
-| Change who **sees** which leads, deals, quotes and invoices (own / team / all), the New web leads board, or who can be made owner | `src/lib/visibility.ts`; teams are `User.managerId`, set in `src/app/(app)/settings/users/` |
+| Change who **sees** which leads, deals, quotes, invoices, companies, contacts, contracts, activities and project access (own / team / all), the New web leads board, or who can be made owner | `src/lib/visibility.ts`; teams are `User.managerId`, set in `src/app/(app)/settings/users/` |
 | Change form rules and error messages | `src/lib/validation/` |
 | Change labels, colours of statuses, dropdown options | `src/lib/crm-meta.ts` |
 | Change the sidebar | `src/components/layout/nav-items.ts` |
@@ -200,7 +200,7 @@ Check the data, then make that branch the main one in Neon, or copy back only wh
 ## Good to know
 
 - **Every page and every action re-checks the user.** `src/proxy.ts` only redirects signed-out visitors; real permission checks happen in `src/lib/auth.ts` on each request. A deactivated person loses access immediately.
-- **Two layers of access.** `permissions.ts` says *what* a role may do; `visibility.ts` says *whose records* they see: Sales (and Support, Viewer) their own, a Manager their own and their team's, Admins everything. Website leads nobody has taken are visible to all on the New web leads board.
+- **Two layers of access.** `permissions.ts` says *what* a role may do; `visibility.ts` says *whose records* they see: Sales (and Support, Viewer) their own, a Manager their own and their team's, Admins everything. This covers leads, deals, quotes, invoices, companies, contacts, contracts, activities and project access (a company or contact tied to a deal you can see is visible too). Website leads nobody has taken are visible to all on the New web leads board; support tickets stay shared.
 - **Sealed documents are frozen.** A quote, invoice or receipt with a `DocumentSeal` can't be edited, deleted, voided or cancelled until an Admin or Manager removes the seal. The signer's name, title and signature are copied into the seal, so the PDF never changes afterwards.
 - **Money is never added across currencies.** Totals show per currency (LKR, USD…). Report charts use `DEFAULT_CURRENCY` only and list other currencies separately.
 - **Times are Sri Lanka time** (UTC+05:30) everywhere: reply deadlines, reports, the morning summary. Weekends are skipped; public and poya holidays are not counted yet.

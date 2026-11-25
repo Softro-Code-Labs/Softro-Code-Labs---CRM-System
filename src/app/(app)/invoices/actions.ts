@@ -156,6 +156,7 @@ export async function invoiceFromContract(contractId: string): Promise<{ message
   if (!user) return { message: FORBIDDEN_MESSAGE };
   const [contract, org] = await Promise.all([db.contract.findUnique({ where: { id: contractId } }), getOrgSettings()]);
   if (!contract) return { message: "This contract no longer exists." };
+  if (!(await canSee(user, "contract", contractId))) return { message: "You can't see this contract. It belongs to someone outside your team." };
   if (Number(contract.amount) <= 0) return { message: "Set the contract's amount first." };
   const today = colomboDayBounds(new Date()).start;
   const { totals, items } = linesFromContract(contract, Number(org.defaultTaxRate));

@@ -4,6 +4,7 @@ import { KeyRound } from "lucide-react";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { cn, firstParam, formatDate } from "@/lib/utils";
 import { checkState } from "@/lib/project-access";
 import { PageHeader } from "@/components/ui/page-header";
@@ -23,13 +24,15 @@ const TABS = [
 type Tab = (typeof TABS)[number]["value"];
 
 export default async function AccessListPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  await requirePermission("access:view");
+  const user = await requirePermission("access:view");
+  const v = await getVisibility(user);
   const sp = await searchParams;
   const tabParam = firstParam(sp.tab);
   const tab: Tab = (TABS.map((t) => t.value) as string[]).includes(tabParam) ? (tabParam as Tab) : "active";
   const q = firstParam(sp.q);
 
   const where: Prisma.ProjectAccessWhereInput = {
+    AND: [v.access],
     ...(tab === "active" && { status: "ACTIVE" }),
     ...(tab === "archived" && { status: "ARCHIVED" }),
     ...(q && {

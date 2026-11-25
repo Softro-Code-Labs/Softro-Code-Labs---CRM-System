@@ -10,6 +10,8 @@ import { OPEN_LEAD_STATUSES } from "@/lib/crm-meta";
  *   Admin   – everything.
  *   Manager – their own records and their team's (users whose manager they are).
  *   Others  – (Sales, Support, Viewer) only records they own or created.
+ * Companies, contacts, contracts, activities and project access follow the same rule: your own,
+ * plus anything tied to a lead or deal you can see, so you can always open the client of your deal.
  * Website leads nobody has taken yet sit on the shared New Leads board, which everyone sees.
  *
  * Every list, page, count, report and action that reads these records goes through here.
@@ -45,6 +47,11 @@ export async function getVisibility(viewer: Viewer) {
       deal: {} as Prisma.DealWhereInput,
       quote: {} as Prisma.QuoteWhereInput,
       invoice: {} as Prisma.InvoiceWhereInput,
+      company: {} as Prisma.CompanyWhereInput,
+      contact: {} as Prisma.ContactWhereInput,
+      contract: {} as Prisma.ContractWhereInput,
+      activity: {} as Prisma.ActivityWhereInput,
+      access: {} as Prisma.ProjectAccessWhereInput,
       /** For reports: records owned by these people (all owners for Admin). */
       owner: {} as { ownerId?: { in: string[] } },
     };
@@ -52,20 +59,46 @@ export async function getVisibility(viewer: Viewer) {
   const mine = { in: ids };
   const deal: Prisma.DealWhereInput = { OR: [{ ownerId: mine }, { createdById: mine }] };
   const quote: Prisma.QuoteWhereInput = { OR: [{ createdById: mine }, { deal: { ownerId: mine } }] };
+  const lead: Prisma.LeadWhereInput = { OR: [{ ownerId: mine }, { createdById: mine }, BOARD_LEAD_WHERE] };
+  // A client is yours if you own it, or you work one of its deals, leads, contracts or support tickets.
+  const company: Prisma.CompanyWhereInput = {
+    OR: [
+      { ownerId: mine },
+      { deals: { some: deal } },
+      { leads: { some: { OR: [{ ownerId: mine }, { createdById: mine }] } } },
+      { contracts: { some: { ownerId: mine } } },
+      { tickets: { some: { assignedToId: mine } } },
+    ],
+  };
+  const contact: Prisma.ContactWhereInput = {
+    OR: [{ ownerId: mine }, { deals: { some: deal } }, { company: { ownerId: mine } }, { tickets: { some: { assignedToId: mine } } }],
+  };
+  const contract: Prisma.ContractWhereInput = { OR: [{ ownerId: mine }, { deal }] };
   return {
     all: false as const,
     ids,
-    lead: { OR: [{ ownerId: mine }, { createdById: mine }, BOARD_LEAD_WHERE] } as Prisma.LeadWhereInput,
+    lead,
     deal,
     quote,
-    // An invoice is visible to whoever can see its deal or quotation, or who made it.
-    invoice: { OR: [{ createdById: mine }, { deal: { ownerId: mine } }, { quote: { createdById: mine } }] } as Prisma.InvoiceWhereInput,
+    // An invoice is visible to whoever can see its deal, quotation or contract, or who made it.
+    invoice: { OR: [{ createdById: mine }, { deal: { ownerId: mine } }, { quote: { createdById: mine } }, { contract: { ownerId: mine } }] } as Prisma.InvoiceWhereInput,
+    company,
+    contact,
+    contract,
+    // Activities: assigned to or added by you or your team, or on a lead or deal you can see.
+    activity: { OR: [{ assignedToId: mine }, { createdById: mine }, { lead }, { deal }] } as Prisma.ActivityWhereInput,
+    // A project's access register belongs with its deal.
+    access: { deal } as Prisma.ProjectAccessWhereInput,
     owner: { ownerId: mine },
   };
 }
 
 /** True when this person may open the lead / deal / quotation / invoice / receipt with this id. */
-export async function canSee(viewer: Viewer, kind: "lead" | "deal" | "quote" | "invoice" | "payment", id: string) {
+export async function canSee(
+  viewer: Viewer,
+  kind: "lead" | "deal" | "quote" | "invoice" | "payment" | "company" | "contact" | "contract" | "activity" | "access",
+  id: string,
+) {
   const v = await getVisibility(viewer);
   if (v.all) return true;
   switch (kind) {
@@ -79,6 +112,16 @@ export async function canSee(viewer: Viewer, kind: "lead" | "deal" | "quote" | "
       return (await db.invoice.count({ where: { AND: [{ id }, v.invoice] } })) > 0;
     case "payment":
       return (await db.payment.count({ where: { id, invoice: v.invoice } })) > 0;
+    case "company":
+      return (await db.company.count({ where: { AND: [{ id }, v.company] } })) > 0;
+    case "contact":
+      return (await db.contact.count({ where: { AND: [{ id }, v.contact] } })) > 0;
+    case "contract":
+      return (await db.contract.count({ where: { AND: [{ id }, v.contract] } })) > 0;
+    case "activity":
+      return (await db.activity.count({ where: { AND: [{ id }, v.activity] } })) > 0;
+    case "access":
+      return (await db.projectAccess.count({ where: { AND: [{ id }, v.access] } })) > 0;
   }
 }
 

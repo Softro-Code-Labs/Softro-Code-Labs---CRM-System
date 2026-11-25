@@ -18,8 +18,8 @@ export default async function EditDealPage({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const [deal, companies, contacts, pipeline] = await Promise.all([
     db.deal.findUnique({ where: { id } }),
-    getCompanyOptions(),
-    getContactOptions(),
+    getCompanyOptions(user),
+    getContactOptions(user),
     getDefaultPipeline(),
   ]);
   if (!deal || !(await canSee(user, "deal", id))) notFound();

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Globe, Mail, MapPin, Pencil, Phone, Plus, Star, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
-import { getVisibility } from "@/lib/visibility";
+import { canSee, getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, formatMoneyTotals, fullName, humanize } from "@/lib/utils";
 import { BILLING_CYCLE_SHORT, DEAL_STATUS_TONE, LEAD_STATUS_LABELS, LEAD_STATUS_TONE, TICKET_STATUS_LABELS, TICKET_STATUS_TONE } from "@/lib/crm-meta";
@@ -44,6 +44,7 @@ export default async function CompanyPage({ params }: Props) {
       },
       invoices: { where: { AND: [v.invoice], status: { not: "VOID" } }, orderBy: { createdAt: "desc" }, take: 10, select: invoiceCardSelect },
       contracts: {
+        where: v.contract,
         orderBy: [{ status: "asc" }, { endDate: "asc" }],
         select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true, amount: true, currency: true, billingCycle: true },
       },
@@ -63,7 +64,7 @@ export default async function CompanyPage({ params }: Props) {
       },
     },
   });
-  if (!company) notFound();
+  if (!company || !(await canSee(user, "company", id))) notFound();
 
   const details: { label: string; value: React.ReactNode }[] = [
     { label: "Industry", value: company.industry },

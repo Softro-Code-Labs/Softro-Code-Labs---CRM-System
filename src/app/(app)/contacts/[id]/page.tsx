@@ -6,7 +6,7 @@ import { DEAL_STATUS_TONE, LANGUAGE_LABELS } from "@/lib/crm-meta";
 import { WhatsAppButton } from "@/components/crm/whatsapp-button";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
-import { getVisibility } from "@/lib/visibility";
+import { canSee, getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -42,7 +42,7 @@ export default async function ContactPage({ params }: Props) {
       },
     },
   });
-  if (!contact) notFound();
+  if (!contact || !(await canSee(user, "contact", id))) notFound();
   const name = fullName(contact);
 
   const reach = [

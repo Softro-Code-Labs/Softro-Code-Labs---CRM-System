@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "New lead" };
 
 export default async function NewLeadPage() {
   const user = await requirePermission("lead:create");
-  const [owners, companies] = await Promise.all([getOwnerOptions(user), getCompanyOptions()]);
+  const [owners, companies] = await Promise.all([getOwnerOptions(user), getCompanyOptions(user)]);
 
   return (
     <div className="mx-auto max-w-3xl">

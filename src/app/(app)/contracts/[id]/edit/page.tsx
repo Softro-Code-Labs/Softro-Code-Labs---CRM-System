@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { getContract } from "@/lib/contracts";
 import { toDateInput } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -15,7 +16,7 @@ export default async function EditContractPage({ params, searchParams }: { param
   const { id } = await params;
   const { renewed } = await searchParams;
   const [c, options] = await Promise.all([getContract(id), getContractFormOptions(user)]);
-  if (!c) notFound();
+  if (!c || !(await canSee(user, "contract", id))) notFound();
 
   return (
     <div className="mx-auto max-w-3xl">

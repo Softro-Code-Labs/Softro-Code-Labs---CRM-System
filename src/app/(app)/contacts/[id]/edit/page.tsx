@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { canSee, getOwnerOptions } from "@/lib/visibility";
 import { getCompanyOptions } from "@/lib/queries/companies";
 import { fullName } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,12 +14,12 @@ export const metadata: Metadata = { title: "Edit contact" };
 export default async function EditContactPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission("contact:update");
   const { id } = await params;
-  const [contact, owners, companies] = await Promise.all([
+  const [contact, companies] = await Promise.all([
     db.contact.findUnique({ where: { id } }),
-    getAssignableUsers(),
-    getCompanyOptions(),
+    getCompanyOptions(user),
   ]);
-  if (!contact) notFound();
+  if (!contact || !(await canSee(user, "contact", id))) notFound();
+  const owners = await getOwnerOptions(user, contact.ownerId);
   const name = fullName(contact);
 
   return (

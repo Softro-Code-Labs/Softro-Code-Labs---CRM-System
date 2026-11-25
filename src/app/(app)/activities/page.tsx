@@ -5,6 +5,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { ActivityType } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { activitySelect } from "@/lib/activities";
 import { colomboDayBounds } from "@/lib/working-days";
 import { ACTIVITY_TYPE_LABELS, ACTIVITY_TYPE_OPTIONS, PRIORITY_LABELS } from "@/lib/crm-meta";
@@ -38,7 +39,9 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
 
   const now = new Date();
   const { start, end } = colomboDayBounds(now);
+  const v = await getVisibility(user);
   const base: Prisma.ActivityWhereInput = {
+    AND: [v.activity],
     ...(who === "me" && { assignedToId: user.id }),
     ...(type && { type }),
   };

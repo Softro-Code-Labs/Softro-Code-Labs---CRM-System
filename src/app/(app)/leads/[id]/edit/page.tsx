@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Edit lead" };
 export default async function EditLeadPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission("lead:update");
   const { id } = await params;
-  const [lead, companies] = await Promise.all([db.lead.findUnique({ where: { id } }), getCompanyOptions()]);
+  const [lead, companies] = await Promise.all([db.lead.findUnique({ where: { id } }), getCompanyOptions(user)]);
   if (!lead || !(await canSee(user, "lead", id))) notFound();
   const owners = await getOwnerOptions(user, lead.ownerId);
 

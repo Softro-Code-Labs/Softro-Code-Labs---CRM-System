@@ -84,7 +84,8 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 - **New website enquiries** are the exception: they wait on the shared **New web leads** board, which everyone sees, until someone takes one (see [section 5](#5-leads-new-enquiries)).
 - **Invoices and receipts** are visible to whoever can see their deal or quotation, and to the person who created them.
 - **Who you can make the owner:** Sales only themselves, a Manager themselves or someone in their team, an Admin anyone.
-- Companies, contacts, contracts, support tickets and project access are shared by the whole team as before.
+- **Companies, contacts, contracts, activities and project access** follow the same rule. You see the ones you (or, for managers, your team) own, plus any company or contact tied to a deal or lead you can see, so you can always open your client. A project's access register goes with its deal. Lists, dropdowns and the dashboard only show what you can see.
+- **Support tickets** are shared by the whole team, so anyone can help a client. Picking a company on a ticket lists every company.
 
 ### What each role can do
 

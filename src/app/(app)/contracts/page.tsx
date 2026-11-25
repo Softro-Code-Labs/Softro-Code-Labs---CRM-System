@@ -4,6 +4,7 @@ import { FileSignature, Plus } from "lucide-react";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { getVisibility } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { monthlyValue } from "@/lib/contracts";
 import { cn, firstParam, formatDate, formatMoney, formatMoneyTotals } from "@/lib/utils";
@@ -36,7 +37,9 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
   const search: Prisma.ContractWhereInput = q
     ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { number: { contains: q, mode: "insensitive" } }, { company: { name: { contains: q, mode: "insensitive" } } }] }
     : {};
+  const v = await getVisibility(user);
   const where: Prisma.ContractWhereInput = {
+    AND: [v.contract],
     ...search,
     ...(tab === "active" && { status: { in: ["ACTIVE", "PAUSED"] } }),
     ...(tab === "renew" && { status: "ACTIVE", endDate: { not: null, lte: in90 } }),
@@ -50,7 +53,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
       take: 300,
       include: { company: { select: { name: true } } },
     }),
-    db.contract.findMany({ where: { status: "ACTIVE" }, select: { amount: true, currency: true, billingCycle: true, endDate: true, renewalNoticeDays: true } }),
+    db.contract.findMany({ where: { AND: [v.contract], status: "ACTIVE" }, select: { amount: true, currency: true, billingCycle: true, endDate: true, renewalNoticeDays: true } }),
   ]);
   // Only show contracts that are inside their reminder window on the "Renewing soon" tab.
   const rows = tab === "renew" ? contracts.filter((c) => c.endDate && c.endDate.getTime() - c.renewalNoticeDays * 86_400_000 <= now.getTime()) : contracts;

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { formatDate, toDateInput } from "@/lib/utils";
 import { checkState, getAccessForDeal, type HandoverSnapshot } from "@/lib/project-access";
@@ -58,7 +59,7 @@ export default async function ProjectAccessPage({ params }: Props) {
     }),
     getAccessForDeal(id),
   ]);
-  if (!deal) notFound();
+  if (!deal || !(await canSee(user, "deal", id))) notFound();
   const canEdit = can(user.role, "access:manage");
   const check = access ? checkState(access) : null;
   const archived = access?.status === "ARCHIVED";

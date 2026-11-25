@@ -49,7 +49,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const overdueInvoices = unpaidInvoices.filter((i) => i.dueDate && i.dueDate < startOfToday);
   const [renewals, ticketCounts] = await Promise.all([
     db.contract.findMany({
-      where: { status: "ACTIVE", endDate: { not: null, lte: in45 } },
+      where: { AND: [v.contract], status: "ACTIVE", endDate: { not: null, lte: in45 } },
       orderBy: { endDate: "asc" },
       take: 6,
       select: { id: true, number: true, title: true, status: true, endDate: true, renewalNoticeDays: true, company: { select: { name: true } } },
@@ -77,7 +77,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     db.lead.count({ where: { AND: [v.lead], status: { in: OPEN_LEAD_STATUSES } } }),
     db.deal.findMany({ where: { AND: [v.deal], status: "OPEN", pipelineId: pipeline.id }, select: { stageId: true, value: true, currency: true } }),
     db.deal.findMany({ where: { AND: [v.deal], status: "WON", closedAt: { gte: monthStart } }, select: { value: true, currency: true } }),
-    db.company.count({ where: { type: "CUSTOMER" } }),
+    db.company.count({ where: { AND: [v.company], type: "CUSTOMER" } }),
     db.deal.findMany({
       where: { AND: [v.deal], status: "WON" },
       orderBy: { closedAt: "desc" },

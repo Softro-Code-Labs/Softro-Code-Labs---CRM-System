@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Briefcase, Building2, LifeBuoy, Pencil, Plus, User } from "lucide-react";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
+import { canSee } from "@/lib/visibility";
 import { can } from "@/lib/permissions";
 import { getContract, monthlyValue } from "@/lib/contracts";
 import { formatDate, formatMoney, fullName } from "@/lib/utils";
@@ -35,7 +36,7 @@ export default async function ContractPage({ params }: Props) {
     db.ticket.findMany({ where: { contractId: id }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, number: true, subject: true, status: true, createdAt: true } }),
     can(user.role, "invoice:view") ? db.invoice.findMany({ where: { contractId: id }, orderBy: { createdAt: "desc" }, take: 24, select: invoiceCardSelect }) : [],
   ]);
-  if (!c) notFound();
+  if (!c || !(await canSee(user, "contract", id))) notFound();
   const canManage = can(user.role, "contract:manage");
   const monthly = monthlyValue(c.amount, c.billingCycle);
 

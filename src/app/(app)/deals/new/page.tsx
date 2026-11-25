@@ -15,8 +15,8 @@ export default async function NewDealPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const [owners, companies, contacts, pipeline] = await Promise.all([
     getOwnerOptions(user),
-    getCompanyOptions(),
-    getContactOptions(),
+    getCompanyOptions(user),
+    getContactOptions(user),
     getDefaultPipeline(),
   ]);
   const contact = contacts.find((c) => c.id === sp.contactId);

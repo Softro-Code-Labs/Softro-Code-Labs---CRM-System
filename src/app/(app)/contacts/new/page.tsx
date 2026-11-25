@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requirePermission } from "@/lib/auth";
-import { getAssignableUsers } from "@/lib/queries/users";
+import { getOwnerOptions } from "@/lib/visibility";
 import { getCompanyOptions } from "@/lib/queries/companies";
 import { PageHeader } from "@/components/ui/page-header";
 import { ContactForm } from "../contact-form";
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "New contact" };
 export default async function NewContactPage({ searchParams }: { searchParams: Promise<{ companyId?: string }> }) {
   const user = await requirePermission("contact:create");
   const { companyId } = await searchParams;
-  const [owners, companies] = await Promise.all([getAssignableUsers(), getCompanyOptions()]);
+  const [owners, companies] = await Promise.all([getOwnerOptions(user), getCompanyOptions(user)]);
   const preselected = companies.find((c) => c.id === companyId);
 
   return (
