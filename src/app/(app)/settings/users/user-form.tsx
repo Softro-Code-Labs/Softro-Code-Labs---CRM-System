@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { Role } from "@/generated/prisma/enums";
 import { SelectField, TextField } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -28,6 +28,9 @@ export function UserForm({
   const [state, formAction] = useActionState(action, initialFormState as UserFormState);
   const v = (k: keyof Values) => state.values?.[k] ?? initial[k] ?? "";
   const e = state.errors ?? {};
+  // Admins and Managers aren't in a team, so the manager choice only shows for the other roles.
+  const [role, setRole] = useState<string>(v("role"));
+  const inTeam = role !== "ADMIN" && role !== "MANAGER";
 
   if (state.tempPassword) {
     return (
@@ -59,21 +62,24 @@ export function UserForm({
               name="role"
               options={(Object.keys(ROLE_LABELS) as Role[]).map((r) => ({ value: r, label: `${ROLE_LABELS[r]}: ${ROLE_DESCRIPTIONS[r]}` }))}
               defaultValue={v("role")}
+              onChange={(ev) => setRole(ev.target.value)}
               error={e.role}
             />
             <p className="mt-1.5 text-xs text-ink-500">The full permissions table is in the user guide (docs/USER-GUIDE.md), section 3.</p>
           </div>
-          <div className="sm:col-span-2">
-            <SelectField
-              label="Manager (team)"
-              name="managerId"
-              placeholder="No manager"
-              options={managers.map((m) => ({ value: m.id, label: m.name }))}
-              defaultValue={v("managerId")}
-              error={e.managerId}
-              hint="For Sales, Support and Viewer. Their manager sees their leads, deals and quotations. Admins and Managers aren't in a team."
-            />
-          </div>
+          {inTeam && (
+            <div className="sm:col-span-2">
+              <SelectField
+                label="Manager (team)"
+                name="managerId"
+                placeholder="No manager"
+                options={managers.map((m) => ({ value: m.id, label: m.name }))}
+                defaultValue={v("managerId")}
+                error={e.managerId}
+                hint="For Sales, Support and Viewer. Their manager sees their leads, deals and quotations. Admins and Managers aren't in a team."
+              />
+            </div>
+          )}
         </div>
       </Card>
       <div className="flex justify-end gap-3">

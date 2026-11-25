@@ -67,6 +67,8 @@ export const PERMISSIONS = {
   "report:export": ["ADMIN", "MANAGER"],
 
   "settings:view": ["ADMIN", "MANAGER"],
+  // My team: a Manager sees their team's profiles and open work, and can hand a member's work to someone else in the team.
+  "team:view": ["ADMIN", "MANAGER"],
   "user:manage": ["ADMIN"],
   "pipeline:manage": ["ADMIN", "MANAGER"],
   "audit:view": ["ADMIN"],

@@ -93,6 +93,7 @@ Leads, deals and quotations (and the invoices and receipts that go with them) fo
 | See the dashboard, leads, deals, companies, contacts, contracts and tickets (leads and deals: see *Whose records you see*) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Take a lead from the **New web leads** board | ✅ | ✅ | ✅ | — | — |
 | Assign or reassign leads and deals | anyone | self and team | self only | — | — |
+| **My team**: see team members' profiles and open work, hand a member's work to someone else | every team | own team | — | — | — |
 | Add leads | ✅ | ✅ | ✅ | ✅ | — |
 | Edit leads, mark replied, qualify | ✅ | ✅ | ✅ | — | — |
 | Convert a lead to a deal | ✅ | ✅ | ✅ | — | — |
@@ -676,6 +677,16 @@ The calendar is read-only: tick tasks off in the CRM. The link is shown once and
 
 Click any card to go to the full list behind it.
 
+### My team (managers and admins)
+
+**My team** in the sidebar lists the people you manage, with their open leads, open deals (and their value), quotes with clients, overdue tasks and when they last signed in. Admins see everyone in a Sales, Support or Viewer role, with their manager (the page is called **Teams**).
+
+Click a person to see their profile (job title, email, phone, WhatsApp) and everything they have open: leads, deals, quotes in progress and tasks, each linking to the record.
+
+**Hand over their work:** when someone goes on leave or leaves, pick who should take over and click **Hand over work**. Their open leads, open deals and unfinished tasks move to that person in one go; won deals, quotes and history stay with them. Managers can only hand work to themselves or someone in their team. It's recorded in the audit log.
+
+Who is in a team is set by an admin (**Settings → Team members → Manager (team)**). Managers can't change accounts, roles or passwords.
+
 The leads, deals and money cards follow your role: **Sales** see their own, **managers** their team's, **admins** the whole company.
 
 ---
@@ -734,13 +745,27 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 
 ## 20. Settings (admins and managers)
 
-**Settings** appears in the sidebar for admins and managers.
+**Settings** appears in the sidebar for admins and managers. It only lists the pages your role can open, and each page checks again, so typing its address doesn't get round it (you're sent to the Dashboard with an "access denied" message).
+
+| Settings page | Admin | Manager | Sales, Support, Viewer |
+|---|:-:|:-:|:-:|
+| Team members | ✅ | — | — |
+| Sales pipeline | ✅ | ✅ | — |
+| Company details | ✅ | — | — |
+| Services & prices | ✅ | ✅ | — |
+| Integrations | ✅ | — | — |
+| Security | ✅ | — | — |
+| System health | ✅ | — | — |
+| Audit log | ✅ | — | — |
+| My profile | ✅ | ✅ | ✅ (click your name at the top right) |
+
+Who can open what is set in one place in the code (`src/lib/permissions.ts`); ask the developer to change it.
 
 ### Team members (admins)
 
 - **Add team member:** enter their name, work email, job title and role. The CRM creates a **temporary password** and shows it **once**. Click **Copy sign-in message** and send it to them privately (e.g. on WhatsApp). They'll set their own password on first sign-in.
 - **Change role:** open the person, pick a new role and **Save changes**. They're signed out so the new permissions apply straight away.
-- **Manager (team):** for Sales, Support and Viewer, choose their manager. That manager then sees their leads, deals, quotations and numbers, and can assign leads to them. Admins and managers aren't in a team. If a manager changes to another role, their team members have no manager until you choose a new one.
+- **Manager (team):** for Sales, Support and Viewer, choose their manager (the choice is hidden for admins and managers, who aren't in a team). That manager then sees their leads, deals, quotations and numbers, and can assign leads to them. Admins and managers aren't in a team. If a manager changes to another role, their team members have no manager until you choose a new one.
 - **Reset password:** gives them a new temporary password and signs them out everywhere. Use it when someone forgets their password.
 - **Unlock sign-in:** shown when someone is locked out after too many wrong passwords.
 - **Remove photo:** takes down someone's profile photo if it isn't suitable. They can add a new one.
