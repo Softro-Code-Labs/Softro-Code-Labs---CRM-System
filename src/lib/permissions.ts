@@ -63,9 +63,8 @@ export const PERMISSIONS = {
   "access:manage": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
   "access:delete": ["ADMIN", "MANAGER"],
 
-  // Finance: income, expenses, profit and an income tax estimate. Commission rates are org:manage (Admin).
+  // Finance: money received, VAT and commission, with an export for the accountant. Commission rates are org:manage (Admin).
   "finance:view": ["ADMIN", "MANAGER"],
-  "expense:manage": ["ADMIN", "MANAGER"],
   // Everyone who sells sees the commission they earned; Managers also their team's, Admins everyone's.
   "commission:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
   "commission:pay": ["ADMIN"],

@@ -7,7 +7,6 @@ Ready-made SQL for mistakes the CRM screens can't undo: renumbering a document, 
 | Wrong amount or details on an unpaid invoice | Invoice → **Edit** |
 | Invoice made by mistake | Invoice → **Void invoice** (and **Restore invoice** to undo) |
 | Payment recorded by mistake | Invoice → Payments → **Cancel** (if it was the latest receipt, its number is reused). Its commission goes too; if that commission is marked paid, an admin first clicks **Undo** on the Commissions page |
-| Expense entered wrongly | Expenses → pencil to correct it, or the bin to delete it |
 | Quote with wrong prices | Quote → **New version**, or **Delete** if it's a draft |
 | Wrong contact, deal or company | Its page → **Edit** or **Delete** |
 | Sealed quote, invoice, receipt or delivery pack needs a change | An admin or manager clicks **Remove seal**, makes the change, then seals it again |

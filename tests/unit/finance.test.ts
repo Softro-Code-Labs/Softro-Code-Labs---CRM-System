@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commissionSplits, estimateTax, financeMonths, resolveFinancePeriod, splitPayment, taxYearOf } from "@/lib/finance-math";
+import { commissionSplits, financeMonths, resolveFinancePeriod, splitPayment, taxYearOf } from "@/lib/finance-math";
 
 const rates = { sales: 16, manager: 4, leader: 20 };
 
@@ -39,22 +39,6 @@ describe("payments: income and VAT", () => {
   it("uses the rupees credited for foreign currency, and needs them", () => {
     expect(splitPayment({ amount: 1_000, amountLkr: 300_000, currency: "USD", invoiceTotal: 1_000, invoiceTax: 0 })).toEqual({ received: 300_000, vat: 0, net: 300_000, foreign: true });
     expect(splitPayment({ amount: 1_000, amountLkr: null, currency: "USD", invoiceTotal: 1_000, invoiceTax: 0 })).toBeNull();
-  });
-});
-
-describe("profit and tax estimate", () => {
-  it("taxes local profit at 30% and export profit at 15%, sharing costs in proportion", () => {
-    // Income 6M (4M local, 2M export), costs 2.5M → profit 3.5M; export share 1/3.
-    const t = estimateTax({ localIncome: 4_000_000, exportIncome: 2_000_000, expenses: 2_000_000, commissions: 500_000, rate: 30, exportRate: 15 });
-    expect(t.profit).toBe(3_500_000);
-    expect(t.exportProfit).toBe(1_166_666.67);
-    expect(t.localProfit).toBe(2_333_333.33);
-    expect(t.tax).toBe(875_000);
-    expect(t.effectiveRate).toBe(25);
-  });
-
-  it("is zero on a loss", () => {
-    expect(estimateTax({ localIncome: 100, exportIncome: 0, expenses: 500, commissions: 0, rate: 30, exportRate: 15 })).toMatchObject({ profit: -400, tax: 0 });
   });
 });
 

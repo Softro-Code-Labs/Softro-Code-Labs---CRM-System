@@ -15,7 +15,6 @@ import {
   Target,
   Users,
   UsersRound,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -56,8 +55,7 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
   {
     title: "Finance",
     items: [
-      { label: "Income & tax", href: "/finance", icon: Landmark, permission: "finance:view" },
-      { label: "Expenses", href: "/expenses", icon: Wallet, permission: "expense:manage" },
+      { label: "Income", href: "/finance", icon: Landmark, permission: "finance:view" },
       { label: "Commissions", href: "/commissions", icon: BadgePercent, permission: "commission:view" },
     ],
   },

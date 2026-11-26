@@ -1,5 +1,5 @@
 /**
- * Pure maths for the Income & tax page and sales commissions. No database, so it's unit-tested.
+ * Pure maths for the Income page and sales commissions. No database, so it's unit-tested.
  * Sri Lanka's tax year (year of assessment) runs 1 April – 31 March, and dates are in Colombo time.
  */
 
@@ -127,21 +127,4 @@ export function commissionSplits(
   const rows: { userId: string; role: "SELLER" | "MANAGER"; percent: number }[] = [{ userId: owner.id, role: "SELLER", percent: leads ? rates.leader : rates.sales }];
   if (!leads && owner.managerId && owner.managerId !== owner.id) rows.push({ userId: owner.managerId, role: "MANAGER", percent: rates.manager });
   return rows.filter((r) => r.percent > 0).map((r) => ({ ...r, amount: round2((base * r.percent) / 100) }));
-}
-
-// ─── Profit and tax estimate ──────────────────────────────────────────────────
-
-/**
- * Profit and an estimate of company income tax. Expenses and commissions are shared between local and
- * export income in proportion to each, then each part is taxed at its own rate. A loss means no tax.
- */
-export function estimateTax(t: { localIncome: number; exportIncome: number; expenses: number; commissions: number; rate: number; exportRate: number }) {
-  const income = t.localIncome + t.exportIncome;
-  const costs = t.expenses + t.commissions;
-  const profit = round2(income - costs);
-  if (profit <= 0 || income <= 0) return { profit, localProfit: 0, exportProfit: 0, tax: 0, effectiveRate: 0 };
-  const exportProfit = round2((profit * t.exportIncome) / income);
-  const localProfit = round2(profit - exportProfit);
-  const tax = round2((localProfit * t.rate) / 100 + (exportProfit * t.exportRate) / 100);
-  return { profit, localProfit, exportProfit, tax, effectiveRate: Math.round((tax / profit) * 1000) / 10 };
 }

@@ -5,7 +5,7 @@ import { can } from "@/lib/permissions";
 import { audit } from "@/lib/audit";
 import { fullName, toDateInput } from "@/lib/utils";
 import { toCsv } from "@/lib/reports";
-import { EXPENSE_CATEGORY_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/crm-meta";
+import { PAYMENT_METHOD_LABELS } from "@/lib/crm-meta";
 import { resolveFinancePeriod, splitPayment } from "@/lib/finance-math";
 import { paymentsIn } from "@/lib/finance";
 
@@ -16,8 +16,8 @@ const money = (v: number | null) => (v == null ? "" : v.toFixed(2));
 
 /**
  * GET /finance/export?period=…|from=…&to=…
- * One CSV for the accountant: every payment received, expense paid and commission earned in the period,
- * as signed rupee amounts (income +, costs −) so a column total is the profit.
+ * One CSV for the accountant: every payment received and commission earned in the period, in rupees
+ * (income +, commission −). Expenses and payroll are in the accountant's own books.
  */
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
@@ -27,9 +27,8 @@ export async function GET(request: NextRequest) {
   const period = resolveFinancePeriod({ period: sp.get("period") ?? undefined, from: sp.get("from") ?? undefined, to: sp.get("to") ?? undefined });
   const range = { gte: period.from, lt: period.to };
 
-  const [payments, expenses, commissions] = await Promise.all([
+  const [payments, commissions] = await Promise.all([
     paymentsIn(period),
-    db.expense.findMany({ where: { date: range }, orderBy: { date: "asc" } }),
     db.commission.findMany({
       where: { payment: { paidAt: range } },
       include: { user: { select: { name: true } }, payment: { select: { paidAt: true, receiptNumber: true, invoice: { select: { number: true } } } } },
@@ -56,9 +55,6 @@ export async function GET(request: NextRequest) {
       split ? (p.reference ?? "") : "No rupee amount recorded",
     ]);
   }
-  for (const e of expenses) {
-    rows.push([toDateInput(e.date), "Expense", EXPENSE_CATEGORY_LABELS[e.category], e.reference ?? "", e.supplier ?? "", e.description, "", "LKR", n(e.amount).toFixed(2), money(-n(e.amount)), "", [e.notes, e.receiptName ? "Receipt in CRM" : "No receipt"].filter(Boolean).join(" · ")]);
-  }
   for (const c of commissions) {
     rows.push([
       toDateInput(c.payment.paidAt),
@@ -77,8 +73,8 @@ export async function GET(request: NextRequest) {
   }
   rows.sort((a, b) => a[0].localeCompare(b[0]));
 
-  const csv = toCsv(["Date", "Type", "Category", "Reference", "Client, supplier or person", "Description", "Method", "Currency", "Amount (original)", "LKR (without VAT; costs negative)", "VAT LKR", "Notes"], rows);
-  await audit({ actorId: user.id, action: "export", entity: "Report", summary: `Exported income, expenses and commission (${period.label})`, meta: { type: "finance", from: period.from.toISOString(), to: period.to.toISOString() } });
-  const filename = `softro-income-expenses-${toDateInput(period.from)}-to-${toDateInput(new Date(period.to.getTime() - 86_400_000))}.csv`;
+  const csv = toCsv(["Date", "Type", "Category", "Reference", "Client, supplier or person", "Description", "Method", "Currency", "Amount (original)", "LKR (without VAT; commission negative)", "VAT LKR", "Notes"], rows);
+  await audit({ actorId: user.id, action: "export", entity: "Report", summary: `Exported income and commission (${period.label})`, meta: { type: "finance", from: period.from.toISOString(), to: period.to.toISOString() } });
+  const filename = `softro-income-${toDateInput(period.from)}-to-${toDateInput(new Date(period.to.getTime() - 86_400_000))}.csv`;
   return new NextResponse(csv, { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${filename}"`, "Cache-Control": "private, no-store" } });
 }

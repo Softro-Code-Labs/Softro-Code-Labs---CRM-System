@@ -1,11 +1,11 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { estimateTax, financeMonthKey, financeMonths, splitPayment, type FinancePeriod } from "@/lib/finance-math";
+import { financeMonthKey, financeMonths, splitPayment, type FinancePeriod } from "@/lib/finance-math";
 
 const n = (v: { toString(): string } | null | undefined) => (v == null ? 0 : Number(v.toString()));
 const round2 = (v: number) => Math.round(v * 100) / 100;
 
-/** Payments received in the period, with their invoice, for the Income & tax page and the accountant export. */
+/** Payments received in the period, with their invoice, for the Income page and the accountant export. */
 export function paymentsIn(period: FinancePeriod) {
   return db.payment.findMany({
     where: { paidAt: { gte: period.from, lt: period.to } },
@@ -18,18 +18,13 @@ export function paymentsIn(period: FinancePeriod) {
 }
 
 /**
- * Everything on the Income & tax page, in rupees. Income is cash received (payments by the date they
- * arrived), without VAT, which belongs to the government. Expenses by the date paid. Commission by the
- * date the client paid, since that's when it was earned.
+ * Everything on the Income page, in rupees. Income is cash received (payments by the date they arrived),
+ * without VAT, which belongs to the government. Commission by the date the client paid.
+ * Expenses, profit and tax are the accountant's: they need the full books.
  */
-export async function financeSummary(period: FinancePeriod, rates: { incomeTaxPercent: { toString(): string }; exportIncomeTaxPercent: { toString(): string } }) {
-  const [payments, expenses, byCategory] = await Promise.all([
-    paymentsIn(period),
-    db.expense.findMany({ where: { date: { gte: period.from, lt: period.to } }, select: { date: true, amount: true } }),
-    db.expense.groupBy({ by: ["category"], where: { date: { gte: period.from, lt: period.to } }, _sum: { amount: true } }),
-  ]);
-
-  const months = financeMonths(period).map((m) => ({ ...m, income: 0, expenses: 0, commissions: 0, profit: 0 }));
+export async function incomeSummary(period: FinancePeriod) {
+  const payments = await paymentsIn(period);
+  const months = financeMonths(period).map((m) => ({ ...m, local: 0, export: 0, vat: 0, commissions: 0 }));
   const month = (d: Date) => months.find((m) => m.key === financeMonthKey(d));
   let localIncome = 0;
   let exportIncome = 0;
@@ -50,28 +45,21 @@ export async function financeSummary(period: FinancePeriod, rates: { incomeTaxPe
     if (split.foreign) exportIncome += split.net;
     else localIncome += split.net;
     vat += split.vat;
-    if (m) m.income += split.net;
+    if (m) {
+      if (split.foreign) m.export += split.net;
+      else m.local += split.net;
+      m.vat += split.vat;
+    }
   }
-  let expenseTotal = 0;
-  for (const e of expenses) {
-    expenseTotal += n(e.amount);
-    const m = month(e.date);
-    if (m) m.expenses += n(e.amount);
-  }
-  for (const m of months) m.profit = round2(m.income - m.expenses - m.commissions);
 
-  const estimate = estimateTax({ localIncome, exportIncome, expenses: expenseTotal, commissions, rate: n(rates.incomeTaxPercent), exportRate: n(rates.exportIncomeTaxPercent) });
   return {
     localIncome: round2(localIncome),
     exportIncome: round2(exportIncome),
     income: round2(localIncome + exportIncome),
     vat: round2(vat),
-    expenses: round2(expenseTotal),
     commissions: round2(commissions),
-    byCategory: byCategory.map((r) => ({ category: r.category, total: n(r._sum.amount) })).sort((a, b) => b.total - a.total),
     months,
     paymentCount: payments.length,
     missingLkr,
-    ...estimate,
   };
 }

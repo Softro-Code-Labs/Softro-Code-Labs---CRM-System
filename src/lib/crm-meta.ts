@@ -1,4 +1,4 @@
-import type { AccountOwner, CommissionRole, ExpenseCategory, PaymentMethod, ServiceCategory, SignInMethod, TwoStepMethod } from "@/generated/prisma/enums";
+import type { AccountOwner, CommissionRole, PaymentMethod, ServiceCategory, SignInMethod, TwoStepMethod } from "@/generated/prisma/enums";
 import type { DealStatus, LeadSource, LeadStatus, PreferredLanguage, ServiceType } from "@/generated/prisma/enums";
 import type { BadgeTone } from "@/components/ui/badge";
 
@@ -249,24 +249,6 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   OTHER: "Other",
 };
 export const PAYMENT_METHOD_OPTIONS = options(PAYMENT_METHOD_LABELS);
-
-export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
-  SALARIES: "Salaries and staff costs",
-  RENT: "Rent",
-  UTILITIES: "Electricity and water",
-  INTERNET_PHONE: "Internet and phone",
-  SOFTWARE: "Software and subscriptions",
-  HOSTING: "Hosting, domains and cloud",
-  EQUIPMENT: "Computers and equipment",
-  MARKETING: "Marketing and advertising",
-  TRAVEL: "Travel and transport",
-  PROFESSIONAL_FEES: "Accountant, legal and professional fees",
-  BANK_CHARGES: "Bank charges",
-  GOVERNMENT_FEES: "Government fees and licences",
-  OFFICE: "Office supplies",
-  OTHER: "Other",
-};
-export const EXPENSE_CATEGORY_OPTIONS = options(EXPENSE_CATEGORY_LABELS);
 
 export const COMMISSION_ROLE_LABELS: Record<CommissionRole, string> = {
   SELLER: "Sale",

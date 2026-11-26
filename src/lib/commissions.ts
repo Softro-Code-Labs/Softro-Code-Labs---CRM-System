@@ -2,6 +2,12 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { commissionSplits, splitPayment } from "@/lib/finance-math";
 
+/** Payments on project invoices that have no commission yet: recorded before commission existed, or when it couldn't be worked out. */
+export const PAYMENTS_WITHOUT_COMMISSION = {
+  commissions: { none: {} },
+  invoice: { dealId: { not: null }, contractId: null, deal: { ownerId: { not: null } } },
+} satisfies Prisma.PaymentWhereInput;
+
 const n = (v: { toString(): string } | number | null | undefined) => (v == null ? 0 : Number(v.toString()));
 
 export function commissionRates(org: { commissionSalesPercent: { toString(): string }; commissionManagerPercent: { toString(): string }; commissionLeaderPercent: { toString(): string } }) {
@@ -26,7 +32,7 @@ export async function recordCommissions(
   if (!split) return null;
   const org = await tx.orgSettings.upsert({ where: { id: "default" }, update: {}, create: { id: "default" } });
   const rows = commissionSplits(split.net, owner, commissionRates(org));
-  if (rows.length) await tx.commission.createMany({ data: rows.map((r) => ({ paymentId: payment.id, userId: r.userId, role: r.role, percent: r.percent, base: split.net, amount: r.amount })) });
+  if (rows.length) await tx.commission.createMany({ data: rows.map((r) => ({ paymentId: payment.id, userId: r.userId, role: r.role, percent: r.percent, base: split.net, amount: r.amount })), skipDuplicates: true });
   if (owner.role !== "ADMIN" && owner.role !== "MANAGER" && !owner.managerId) return `${owner.name} has no manager, so no manager's commission was added.`;
   return null;
 }

@@ -20,7 +20,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 12. [Contracts: maintenance, hosting and support](#12-contracts-maintenance-hosting-and-support)
 13. [Support tickets](#13-support-tickets)
 14. [Project access and delivery](#14-project-access-and-delivery)
-15. [Reports](#15-reports) (and [income, expenses and commission](#income-expenses-and-commission))
+15. [Reports](#15-reports) (and [income and commission](#income-and-commission))
 16. [Emails, team chat and your calendar](#16-emails-team-chat-and-your-calendar)
 17. [The dashboard](#17-the-dashboard)
 18. [Enquiries from our website](#18-enquiries-from-our-website)
@@ -124,7 +124,7 @@ Support and Viewer can't change owners. A website lead on the New web leads boar
 | Delete tickets | ✅ | ✅ | — | — | — |
 | See reports (your own numbers; managers their team's; admins the whole company) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export reports to CSV | ✅ | ✅ | — | — | — |
-| **Income & tax** and **Expenses** (add, edit, delete, receipts, export for the accountant) | ✅ | ✅ | — | — | — |
+| **Income** page and the export for the accountant | ✅ | ✅ | — | — | — |
 | See commission earned | everyone | self and team | own | own | — |
 | Mark commission paid; change commission and tax rates | ✅ | — | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
@@ -463,7 +463,7 @@ The advance and balance invoices always add up to the quote total, VAT included.
 
 You can't record more than the balance. Receipts for cheques say *subject to realisation*.
 
-- **Invoice in another currency** (e.g. USD)? Also enter **Rupees credited (LKR)**: what the bank actually put in the account. The income tax estimate and commission use it.
+- **Invoice in another currency** (e.g. USD)? Also enter **Rupees credited (LKR)**: what the bank actually put in the account. The Income page and commission use it.
 - **Commission** is added automatically for a deal's invoice (see [Commissions](#commissions)). If the deal owner has no manager, the message after saving says so.
 
 ### Chasing payment
@@ -653,29 +653,19 @@ Click **Export CSV** and choose **Deals**, **Leads**, **Support tickets** or **T
 
 Reports are only as good as what's entered. Always mark deals **Won** or **Lost** (with a reason), keep **close dates** and **values** current, set the **service** on each deal, and log replies to leads and tickets.
 
-### Income, expenses and commission
+### Income and commission
 
-The **Finance** part of the sidebar keeps track of the money for income tax. The CRM gives you the figures and a file for the accountant; payslips, EPF/ETF and the tax return itself stay with the accountant.
+The **Finance** part of the sidebar shows the money clients paid and the commission earned on it, with a file for the accountant. Expenses, payroll, EPF/ETF, profit and the tax return stay with the accountant: they need the full books.
 
 **Pick the period:** each page opens on **this tax year** (1 April to 31 March). You can also choose **last tax year**, any of the **four quarters** (Apr–Jun, Jul–Sep, Oct–Dec, Jan–Mar), this or last month, or **Custom dates…** for any range.
 
-#### Income & tax (admins and managers)
+#### Income (admins and managers)
 
-- **Income** is the money clients actually paid in the period (by the date received), **without VAT**: VAT belongs to the government and is shown separately. Income from clients abroad paid in foreign currency is shown apart, because it's taxed at a lower rate.
-- **Profit** = income − **expenses** − **sales commission**.
-- **Estimated income tax:** the profit is shared between local and export income in proportion, then taxed at the rates in Settings (30% and 15% to start with). A loss means no tax.
-- **By month** shows income, costs and profit for each month, handy for the quarterly payments.
-- **Export for accountant** downloads one CSV: every payment, expense and commission in the period, in rupees, with VAT and references.
-
-> It's a planning figure, not the tax return. Your accountant works out the real amount (capital allowances, tax already paid, and so on). Set money aside for it each quarter.
-
-#### Expenses (admins and managers)
-
-1. Open **Expenses** and fill in **Add an expense**: date paid, category, amount in rupees, what it was for, who you paid, and the bill or bank reference.
-2. Attach the **bill or receipt** (a photo from your phone or a PDF). Big photos are shrunk automatically. Keep the proof: the tax office can ask for it.
-3. Use the pencil to correct an entry, or delete it. Rows without a receipt say *no receipt*.
-
-Salaries go in as one line a month (*Salaries and staff costs*). Don't enter sales commission here: the CRM adds it itself. For a foreign purchase (e.g. a USD subscription), enter the rupees that left the bank.
+- **Income** is the money clients actually paid in the period (by the date received), **without VAT**.
+- Income from clients **abroad**, paid in foreign currency, is shown apart, because it's usually taxed at a lower rate.
+- **VAT collected** is shown separately: it belongs to the government.
+- **Sales commission** earned on those payments, and a **By month** table with totals.
+- **Export for accountant** downloads one CSV: every payment and commission in the period, in rupees, with VAT and references. Send it to the accountant each quarter and at year end.
 
 #### Commissions
 
@@ -691,7 +681,8 @@ Commission is earned **when the client pays**, on the amount **without VAT**, in
 - **Who sees what:** sales people see their own commission, managers their team's, admins everyone's.
 - **Admins** click **Mark paid** once the money has been paid to the person (or **Mark all unpaid as paid** at month end), and **Undo** for a mistake.
 - If a sales person has no manager, the page warns the admin: set their manager in **Settings → Team members**, or the 4% isn't added.
-- Admins change the percentages in **Settings → Commission & tax**. New rates apply to payments recorded afterwards; commission already earned keeps its rate.
+- **Payments recorded before commission was switched on** have none. Admins click **Add missing commission** on the Commissions page once: it adds commission for those payments at today's rates. Running it again adds nothing.
+- Admins change the percentages in **Settings → Commission**. New rates apply to payments recorded afterwards; commission already earned keeps its rate.
 
 ---
 
@@ -819,7 +810,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 | Sales pipeline | ✅ | ✅ | — |
 | Company details | ✅ | — | — |
 | Warranty & NDA | ✅ | — | — |
-| Commission & tax | ✅ | — | — |
+| Commission | ✅ | — | — |
 | Services & prices | ✅ | ✅ | — |
 | Integrations | ✅ | — | — |
 | Security | ✅ | — | — |

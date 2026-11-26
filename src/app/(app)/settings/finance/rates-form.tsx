@@ -8,7 +8,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { initialFormState } from "@/lib/form";
 import { saveFinanceRates } from "./actions";
 
-type Values = { commissionSalesPercent: string; commissionManagerPercent: string; commissionLeaderPercent: string; incomeTaxPercent: string; exportIncomeTaxPercent: string };
+type Values = { commissionSalesPercent: string; commissionManagerPercent: string; commissionLeaderPercent: string };
 
 export function RatesForm({ initial }: { initial: Values }) {
   const [state, action] = useActionState(saveFinanceRates, initialFormState);
@@ -29,14 +29,6 @@ export function RatesForm({ initial }: { initial: Values }) {
           {field("commissionSalesPercent", "Sales person", "When the deal owner is not a Manager or Admin.")}
           {field("commissionManagerPercent", "Their manager", "On top, for the sales person's manager (My team).")}
           {field("commissionLeaderPercent", "Manager or Admin sale", "When the deal owner is a Manager or Admin.")}
-        </CardBody>
-      </Card>
-
-      <Card>
-        <CardHeader title="Income tax estimate (%)" description="Used on the Income & tax page. Check the rates with your accountant each tax year." />
-        <CardBody className="grid gap-5 sm:grid-cols-2">
-          {field("incomeTaxPercent", "Company income tax", "Standard rate for a private limited company.")}
-          {field("exportIncomeTaxPercent", "Export of services", "Clients abroad paying in foreign currency through a bank.")}
         </CardBody>
       </Card>
 

@@ -58,7 +58,7 @@ Sign in with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `.env` (`admin
 | Change quote maths (discounts, VAT) | `src/lib/quote-math.ts` |
 | Change reply deadlines and working days | `src/lib/working-days.ts`, ticket times in `src/lib/tickets.ts` |
 | Change report figures | `src/lib/reports.ts`, CSV exports in `src/app/(app)/reports/export/route.ts` |
-| Change commission, the tax estimate or tax-year periods | Maths in `src/lib/finance-math.ts` (unit-tested), commission on payments in `src/lib/commissions.ts`, page figures in `src/lib/finance.ts`, accountant CSV in `src/app/(app)/finance/export/route.ts`; rates in Settings → Commission & tax |
+| Change commission, the Income page or tax-year periods | Maths in `src/lib/finance-math.ts` (unit-tested), commission on payments in `src/lib/commissions.ts`, page figures in `src/lib/finance.ts`, accountant CSV in `src/app/(app)/finance/export/route.ts`; rates in Settings → Commission |
 | Change My team (team list, member page, hand over work) | `src/app/(app)/team/`, workload counts in `src/lib/team.ts` |
 | Change the warranty and NDA (starting wording, fields, periods) | `src/lib/delivery-docs.ts`; admins edit them in `src/app/(app)/settings/documents/`; printed as extra pages by `src/lib/pdf/handover-pdf.tsx` |
 | Change project access (accounts register, checklist, delivery pack, login sheet) | `src/app/(app)/deals/[id]/access/`, `src/lib/project-access.ts`, `src/lib/pdf/handover-pdf.tsx`, `src/lib/pdf/login-sheet-pdf.tsx`, secret detection in `src/lib/security/secret-guard.ts` |

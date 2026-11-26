@@ -194,7 +194,6 @@ model User {
   paymentsRecorded   Payment[]       @relation("PaymentRecorder")
   commissions        Commission[]    @relation("CommissionEarner")
   commissionsPaid    Commission[]    @relation("CommissionPayer")
-  expensesRecorded   Expense[]       @relation("ExpenseRecorder")
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
@@ -606,9 +605,6 @@ model OrgSettings {
   commissionSalesPercent   Decimal   @default(16) @db.Decimal(5, 2) // deal owner who is not a Manager or Admin
   commissionManagerPercent Decimal   @default(4) @db.Decimal(5, 2) // that person's manager
   commissionLeaderPercent  Decimal   @default(20) @db.Decimal(5, 2) // deal owner who is a Manager or Admin
-  // Income tax estimate on the Income & tax page. The accountant confirms the real figure.
-  incomeTaxPercent         Decimal   @default(30) @db.Decimal(5, 2) // standard company rate
-  exportIncomeTaxPercent   Decimal   @default(15) @db.Decimal(5, 2) // services paid for from abroad, in foreign currency
   updatedAt                DateTime  @updatedAt
 }
 
@@ -996,9 +992,8 @@ model Payment {
   @@index([paidAt])
 }
 
-// ─── Finance: commissions and expenses ───────────────────────────────────────
-// Income comes from payments. Commissions and expenses are what the company spends, so
-// income − expenses − commissions = profit on the Income & tax page. Payroll stays with the accountant.
+// ─── Finance: sales commission ───────────────────────────────────────
+// Income comes from payments; commission is earned on them. Expenses, payroll and tax stay with the accountant.
 
 enum CommissionRole {
   SELLER // the deal owner
@@ -1025,50 +1020,4 @@ model Commission {
   @@unique([paymentId, userId, role])
   @@index([userId])
   @@index([paidAt])
-}
-
-enum ExpenseCategory {
-  SALARIES
-  RENT
-  UTILITIES
-  INTERNET_PHONE
-  SOFTWARE
-  HOSTING
-  EQUIPMENT
-  MARKETING
-  TRAVEL
-  PROFESSIONAL_FEES
-  BANK_CHARGES
-  GOVERNMENT_FEES
-  OFFICE
-  OTHER
-}
-
-/// A business expense, in LKR (for foreign purchases, the rupees that left the bank).
-model Expense {
-  id          String          @id @default(cuid())
-  date        DateTime
-  category    ExpenseCategory
-  description String
-  supplier    String?
-  amount      Decimal         @db.Decimal(14, 2)
-  reference   String? // bill or bank reference
-  notes       String?
-  receiptName String? // the uploaded bill or receipt; the file itself is in ExpenseReceipt
-  receiptType String?
-  createdById String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  createdBy User?           @relation("ExpenseRecorder", fields: [createdById], references: [id], onDelete: SetNull)
-  receipt   ExpenseReceipt?
-
-  @@index([date])
-  @@index([category])
-}
-
-model ExpenseReceipt {
-  expenseId String  @id
-  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  data      Bytes
 }
