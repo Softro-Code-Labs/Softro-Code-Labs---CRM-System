@@ -83,6 +83,7 @@ One rule decides whose records you see, everywhere: lists, pages, PDFs, dropdown
 - **Your team:** an admin sets each person's **Manager (team)** under **Settings → Team members**.
 - **New website enquiries** are the exception: they wait on the shared **New web leads** board, which everyone sees, until someone takes one (see [section 5](#5-leads-new-enquiries)).
 - **Invoices and receipts** are visible to whoever can see their deal or quotation, and to the person who created them.
+- **Income and commission** follow the invoices: Sales see the money paid on their own deals and their own commission, a Manager their team's, an Admin the whole company's.
 - **Who you can make the owner:** Sales only themselves, a Manager themselves or someone in their team, an Admin anyone.
 - **Companies and contacts:** the ones you (or your team) own, plus any company or contact tied to a deal or lead you can see, so you can always open your client.
 - **Contracts:** the ones you (or your team) own, or that belong to a deal you can see. **Project access** goes with its deal.
@@ -124,7 +125,8 @@ Support and Viewer can't change owners. A website lead on the New web leads boar
 | Delete tickets | ✅ | ✅ | — | — | — |
 | See reports (your own numbers; managers their team's; admins the whole company) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export reports to CSV | ✅ | ✅ | — | — | — |
-| **Income** page and the export for the accountant | ✅ | ✅ | — | — | — |
+| **Income** page and its PDF and CSV exports (own sales; managers their team's; admins everything) | ✅ | ✅ | ✅ | — | — |
+| Export the Income report as a **sealed PDF** (needs your signature) | ✅ | ✅ | — | — | — |
 | See commission earned | everyone | self and team | own | own | — |
 | Mark commission paid; change commission and tax rates | ✅ | — | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
@@ -659,13 +661,23 @@ The **Finance** part of the sidebar shows the money clients paid and the commiss
 
 **Pick the period:** each page opens on **this tax year** (1 April to 31 March). You can also choose **last tax year**, any of the **four quarters** (Apr–Jun, Jul–Sep, Oct–Dec, Jan–Mar), this or last month, or **Custom dates…** for any range.
 
-#### Income (admins and managers)
+#### Income (sales people, managers and admins)
 
 - **Income** is the money clients actually paid in the period (by the date received), **without VAT**.
 - Income from clients **abroad**, paid in foreign currency, is shown apart, because it's usually taxed at a lower rate.
 - **VAT collected** is shown separately: it belongs to the government.
 - **Sales commission** earned on those payments, and a **By month** table with totals.
-- **Export for accountant** downloads one CSV: every payment and commission in the period, in rupees, with VAT and references. Send it to the accountant each quarter and at year end.
+- **Whose money you see:** sales people see payments on their own deals, managers see theirs and their team's, and admins see the whole company. Managers and admins can also pick **one person** from the list.
+
+**Export for accountant** has three choices, all for the period (and person) you picked:
+
+| Choice | What you get |
+|---|---|
+| **PDF report** | A branded report: totals, by month, every payment received, and commission by person, with a *Prepared by* line to sign |
+| **PDF with company seal** | The same report with the company seal and your signature at the bottom of the last page. Admins and managers only, once they've added a signature under **My profile** |
+| **CSV (Excel)** | Every payment and commission line, in rupees, for spreadsheets |
+
+Send the sealed PDF and the CSV to the accountant each quarter and at year end. Every export is recorded in the audit log.
 
 #### Commissions
 

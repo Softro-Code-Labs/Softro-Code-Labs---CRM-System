@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileDown } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
+import { can } from "@/lib/permissions";
+import { db } from "@/lib/db";
 import { firstParam, formatMoney, toDateInput } from "@/lib/utils";
 import { financePeriodOptions, resolveFinancePeriod } from "@/lib/finance-math";
-import { incomeSummary } from "@/lib/finance";
+import { financeScope, incomeSummary } from "@/lib/finance";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader } from "@/components/ui/card";
-import { buttonClass } from "@/components/ui/button";
+import { FilterSelect } from "@/components/ui/filter-select";
+import { ExportMenu } from "@/components/reports/export-menu";
 import { PeriodPicker } from "@/components/reports/period-picker";
 import { compactMoney, StatTile } from "@/components/reports/charts";
 
@@ -17,35 +19,52 @@ const lkr = (v: number) => (v ? formatMoney(v, "LKR") : "—");
 
 /**
  * Money clients paid in any period (tax-year and quarter presets), local and export apart, VAT kept out,
- * and the commission earned on it. Expenses, profit and tax are worked out by the accountant from the full books.
+ * and the commission earned on it. Same scope as invoices: Sales their own, Managers theirs and their team's,
+ * Admins everything. Expenses, profit and tax are worked out by the accountant from the full books.
  */
 export default async function IncomePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  await requirePermission("finance:view");
+  const user = await requirePermission("finance:view");
   const sp = await searchParams;
   const period = resolveFinancePeriod({ period: firstParam(sp.period), from: firstParam(sp.from), to: firstParam(sp.to) });
-  const s = await incomeSummary(period);
+  const scope = await financeScope(user, firstParam(sp.person));
+  const [s, signature] = await Promise.all([
+    incomeSummary(period, scope),
+    can(user.role, "document:seal") ? db.userSignature.findUnique({ where: { userId: user.id }, select: { userId: true } }) : Promise.resolve(null),
+  ]);
   const lastDay = new Date(period.to.getTime() - 86_400_000);
 
   const qs = new URLSearchParams();
-  for (const k of ["period", "from", "to"]) {
+  for (const k of ["period", "from", "to", "person"]) {
     const v = firstParam(sp[k]);
     if (v) qs.set(k, v);
   }
+  const exportHref = (extra: Record<string, string>) => `/finance/export?${new URLSearchParams([...qs.entries(), ...Object.entries(extra)]).toString()}`;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         title="Income"
-        description={`${period.label}. Money clients paid, in rupees, without VAT. Expenses, profit and income tax are worked out by your accountant.`}
+        description={`${period.label} · ${scope.label}. Money clients paid, in rupees, without VAT. Expenses, profit and income tax are worked out by your accountant.`}
         actions={
-          <a href={`/finance/export?${qs.toString()}`} className={buttonClass("secondary", "md")}>
-            <FileDown className="size-4" aria-hidden /> Export for accountant
-          </a>
+          <ExportMenu
+            label="Export for accountant"
+            items={[
+              { href: exportHref({ format: "pdf" }), label: "PDF report", hint: "Summary, months, payments and commission", newTab: true },
+              ...(signature ? [{ href: exportHref({ format: "pdf", seal: "1" }), label: "PDF with company seal", hint: "Signed with your signature and the seal", newTab: true }] : []),
+              { href: exportHref({ format: "csv" }), label: "CSV (Excel)", hint: "Every payment and commission line" },
+            ]}
+          />
         }
       />
       <div className="-mt-2 flex flex-wrap items-center gap-2">
         <PeriodPicker from={toDateInput(period.from)} to={toDateInput(lastDay)} options={financePeriodOptions()} defaultValue="this-tax-year" />
+        {scope.people.length > 1 && <FilterSelect param="person" label={scope.all ? "Whole company" : "You and your team"} options={scope.people.map((p) => ({ value: p.id, label: p.name }))} />}
       </div>
+      {can(user.role, "document:seal") && !signature && (
+        <p className="-mt-2 text-xs text-ink-500">
+          To export a sealed PDF, add your signature under <Link href="/settings/profile" className="underline">My profile</Link>.
+        </p>
+      )}
 
       {s.missingLkr.length > 0 && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
