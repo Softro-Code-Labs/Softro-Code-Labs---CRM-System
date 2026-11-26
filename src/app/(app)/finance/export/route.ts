@@ -19,12 +19,12 @@ const money = (v: number | null) => (v == null ? "" : v.toFixed(2));
  * GET /finance/export?format=csv|pdf&period=…|from=…&to=…&person=…
  * For the accountant: every payment received and commission earned in the period, in rupees.
  * CSV for spreadsheets (income +, commission −); PDF as a signable report. Scope as on the Income page:
- * Sales their own, Managers theirs and their team's, Admins everything.
+ * Managers theirs and their team's, Admins everything (Sales can't export).
  */
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.redirect(new URL("/login", request.url));
-  if (!can(user.role, "finance:view")) return new NextResponse("Forbidden", { status: 403 });
+  if (!can(user.role, "finance:export")) return new NextResponse("Forbidden", { status: 403 });
   const sp = request.nextUrl.searchParams;
   const period = resolveFinancePeriod({ period: sp.get("period") ?? undefined, from: sp.get("from") ?? undefined, to: sp.get("to") ?? undefined });
   const personParam = sp.get("person");

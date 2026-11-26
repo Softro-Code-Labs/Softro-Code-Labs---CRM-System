@@ -125,7 +125,8 @@ Support and Viewer can't change owners. A website lead on the New web leads boar
 | Delete tickets | ✅ | ✅ | — | — | — |
 | See reports (your own numbers; managers their team's; admins the whole company) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export reports to CSV | ✅ | ✅ | — | — | — |
-| **Income** page and its PDF and CSV exports (own sales; managers their team's; admins everything) | ✅ | ✅ | ✅ | — | — |
+| **Income** page (own sales; managers their team's; admins everything) | ✅ | ✅ | ✅ | — | — |
+| Income **Export for accountant** (PDF and CSV) | ✅ | ✅ | — | — | — |
 | See commission earned | everyone | self and team | own | own | — |
 | Mark commission paid; change commission and tax rates | ✅ | — | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
@@ -668,7 +669,7 @@ The **Finance** part of the sidebar shows the money clients paid and the commiss
 - **Sales commission** earned on those payments, and a **By month** table with totals.
 - **Whose money you see:** sales people see payments on their own deals, managers see theirs and their team's, and admins see the whole company. Managers and admins can also pick **one person** from the list.
 
-**Export for accountant** has two choices, all for the period (and person) you picked:
+**Export for accountant** (admins and managers) has two choices, all for the period (and person) you picked:
 
 | Choice | What you get |
 |---|---|

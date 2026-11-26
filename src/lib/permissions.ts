@@ -66,6 +66,8 @@ export const PERMISSIONS = {
   // Income: money received, VAT and commission, with CSV and PDF exports. Same scope as invoices: Sales their own,
   // Managers their team's, Admins everything. Commission rates are org:manage (Admin).
   "finance:view": ["ADMIN", "MANAGER", "SALES"],
+  // The PDF and CSV for the accountant.
+  "finance:export": ["ADMIN", "MANAGER"],
   // Everyone who sells sees the commission they earned; Managers also their team's, Admins everyone's.
   "commission:view": ["ADMIN", "MANAGER", "SALES", "SUPPORT"],
   "commission:pay": ["ADMIN"],
