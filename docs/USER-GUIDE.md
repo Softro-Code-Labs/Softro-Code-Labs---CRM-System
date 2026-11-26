@@ -20,7 +20,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 12. [Contracts: maintenance, hosting and support](#12-contracts-maintenance-hosting-and-support)
 13. [Support tickets](#13-support-tickets)
 14. [Project access and delivery](#14-project-access-and-delivery)
-15. [Reports](#15-reports)
+15. [Reports](#15-reports) (and [income, expenses and commission](#income-expenses-and-commission))
 16. [Emails, team chat and your calendar](#16-emails-team-chat-and-your-calendar)
 17. [The dashboard](#17-the-dashboard)
 18. [Enquiries from our website](#18-enquiries-from-our-website)
@@ -124,6 +124,9 @@ Support and Viewer can't change owners. A website lead on the New web leads boar
 | Delete tickets | ✅ | ✅ | — | — | — |
 | See reports (your own numbers; managers their team's; admins the whole company) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export reports to CSV | ✅ | ✅ | — | — | — |
+| **Income & tax** and **Expenses** (add, edit, delete, receipts, export for the accountant) | ✅ | ✅ | — | — | — |
+| See commission earned | everyone | self and team | own | own | — |
+| Mark commission paid; change commission and tax rates | ✅ | — | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
 | Add and edit contacts | ✅ | ✅ | ✅ | ✅ | — |
 | Add notes, log calls and chats, schedule tasks | ✅ | ✅ | ✅ | ✅ | — |
@@ -460,6 +463,9 @@ The advance and balance invoices always add up to the quote total, VAT included.
 
 You can't record more than the balance. Receipts for cheques say *subject to realisation*.
 
+- **Invoice in another currency** (e.g. USD)? Also enter **Rupees credited (LKR)**: what the bank actually put in the account. The income tax estimate and commission use it.
+- **Commission** is added automatically for a deal's invoice (see [Commissions](#commissions)). If the deal owner has no manager, the message after saving says so.
+
 ### Chasing payment
 
 - Each unpaid invoice has a **Follow up payment** task for the deal owner, due the day after the due date. It closes itself when the invoice is paid.
@@ -477,7 +483,7 @@ You can't record more than the balance. Receipts for cheques say *subject to rea
 
 ### Mistakes
 
-- **Wrong payment?** A manager or admin clicks **Cancel** next to it (remove the receipt's seal first if it has one). If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
+- **Wrong payment?** A manager or admin clicks **Cancel** next to it (remove the receipt's seal first if it has one). Its commission is removed too; if that commission is already marked paid, an admin must mark it unpaid first. If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
 - **Wrong invoice?** If nothing has been paid and it isn't sealed, a manager or admin can **Void** it, then create the right one. Invoices are never deleted, so the numbers stay in order for the accountant.
 - **Voided by mistake?** A manager or admin opens it and clicks **Restore invoice**. It's unpaid again with the same number. The CRM won't restore it if the quote has been invoiced again since, because that would bill the client twice: void the replacement first.
 - **Something the screens can't undo** (a wrong number, test invoices on the live CRM): admins use the ready-made scripts in [DATABASE-FIXES.md](DATABASE-FIXES.md).
@@ -647,6 +653,46 @@ Click **Export CSV** and choose **Deals**, **Leads**, **Support tickets** or **T
 
 Reports are only as good as what's entered. Always mark deals **Won** or **Lost** (with a reason), keep **close dates** and **values** current, set the **service** on each deal, and log replies to leads and tickets.
 
+### Income, expenses and commission
+
+The **Finance** part of the sidebar keeps track of the money for income tax. The CRM gives you the figures and a file for the accountant; payslips, EPF/ETF and the tax return itself stay with the accountant.
+
+**Pick the period:** each page opens on **this tax year** (1 April to 31 March). You can also choose **last tax year**, any of the **four quarters** (Apr–Jun, Jul–Sep, Oct–Dec, Jan–Mar), this or last month, or **Custom dates…** for any range.
+
+#### Income & tax (admins and managers)
+
+- **Income** is the money clients actually paid in the period (by the date received), **without VAT**: VAT belongs to the government and is shown separately. Income from clients abroad paid in foreign currency is shown apart, because it's taxed at a lower rate.
+- **Profit** = income − **expenses** − **sales commission**.
+- **Estimated income tax:** the profit is shared between local and export income in proportion, then taxed at the rates in Settings (30% and 15% to start with). A loss means no tax.
+- **By month** shows income, costs and profit for each month, handy for the quarterly payments.
+- **Export for accountant** downloads one CSV: every payment, expense and commission in the period, in rupees, with VAT and references.
+
+> It's a planning figure, not the tax return. Your accountant works out the real amount (capital allowances, tax already paid, and so on). Set money aside for it each quarter.
+
+#### Expenses (admins and managers)
+
+1. Open **Expenses** and fill in **Add an expense**: date paid, category, amount in rupees, what it was for, who you paid, and the bill or bank reference.
+2. Attach the **bill or receipt** (a photo from your phone or a PDF). Big photos are shrunk automatically. Keep the proof: the tax office can ask for it.
+3. Use the pencil to correct an entry, or delete it. Rows without a receipt say *no receipt*.
+
+Salaries go in as one line a month (*Salaries and staff costs*). Don't enter sales commission here: the CRM adds it itself. For a foreign purchase (e.g. a USD subscription), enter the rupees that left the bank.
+
+#### Commissions
+
+Commission is earned **when the client pays**, on the amount **without VAT**, in rupees:
+
+| Who owns the deal | They get | Their manager gets |
+|---|---|---|
+| A sales person (or Support) | 16% | 4% |
+| A Manager or Admin | 20% | — |
+
+- It's added automatically when a payment is recorded on an invoice made for a **deal**. Regular contract fees (maintenance, hosting) don't earn commission.
+- A 50% advance earns half the commission now and the rest when the balance is paid.
+- **Who sees what:** sales people see their own commission, managers their team's, admins everyone's.
+- **Admins** click **Mark paid** once the money has been paid to the person (or **Mark all unpaid as paid** at month end), and **Undo** for a mistake.
+- If a sales person has no manager, the page warns the admin: set their manager in **Settings → Team members**, or the 4% isn't added.
+- Admins change the percentages in **Settings → Commission & tax**. New rates apply to payments recorded afterwards; commission already earned keeps its rate.
+
 ---
 
 ## 16. Emails, team chat and your calendar
@@ -773,6 +819,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 | Sales pipeline | ✅ | ✅ | — |
 | Company details | ✅ | — | — |
 | Warranty & NDA | ✅ | — | — |
+| Commission & tax | ✅ | — | — |
 | Services & prices | ✅ | ✅ | — |
 | Integrations | ✅ | — | — |
 | Security | ✅ | — | — |

@@ -12,6 +12,7 @@ import { nextNumber } from "@/lib/numbering";
 import { colomboDayBounds } from "@/lib/working-days";
 import { SEALED_LOCK_MESSAGE } from "@/lib/seal";
 import { canSee } from "@/lib/visibility";
+import { recordCommissions } from "@/lib/commissions";
 import type { Role } from "@/generated/prisma/enums";
 
 const NOT_YOURS = "You can't see this invoice. It belongs to someone outside your team.";
@@ -206,12 +207,17 @@ export async function recordPayment(invoiceId: string, _prev: FormState, formDat
   const due = balanceDue(inv);
   const amount = Math.round(parsed.data.amount * 100) / 100;
   if (amount > due + 0.005) return { errors: { amount: [`That's more than the balance (${formatMoney(due, inv.currency)}).`] }, values };
+  const foreign = inv.currency !== "LKR";
+  const amountLkr = foreign ? parsed.data.amountLkr : null;
+  if (foreign && !amountLkr) return { errors: { amountLkr: ["Enter the rupees credited to the bank, for income tax and commission."] }, values };
 
   const owner = await dealOwner(inv.dealId);
+  let note: string | null = null;
   const payment = await db.$transaction(async (tx) => {
     const p = await tx.payment.create({
-      data: { receiptNumber: await nextNumber(tx, "RCT"), invoiceId, amount, method: parsed.data.method, paidAt: parsed.data.paidAt!, reference: parsed.data.reference, notes: parsed.data.notes, recordedById: user.id },
+      data: { receiptNumber: await nextNumber(tx, "RCT"), invoiceId, amount, amountLkr, method: parsed.data.method, paidAt: parsed.data.paidAt!, reference: parsed.data.reference, notes: parsed.data.notes, recordedById: user.id },
     });
+    note = await recordCommissions(tx, { id: p.id, amount, amountLkr }, inv);
     const paidInFull = amount >= due - 0.005;
     const updated = await tx.invoice.update({
       where: { id: invoiceId },
@@ -222,7 +228,9 @@ export async function recordPayment(invoiceId: string, _prev: FormState, formDat
   });
   await audit({ actorId: user.id, action: "create", entity: "Invoice", entityId: invoiceId, summary: `${payment.receiptNumber}: ${formatMoney(amount, inv.currency)} received for ${inv.number}` });
   refresh(inv);
-  return { ok: true, message: `Payment recorded. Receipt ${payment.receiptNumber}.`, receiptId: payment.id };
+  revalidatePath("/commissions");
+  revalidatePath("/finance");
+  return { ok: true, message: `Payment recorded. Receipt ${payment.receiptNumber}.${note ? ` ${note}` : ""}`, receiptId: payment.id };
 }
 
 /**
@@ -233,10 +241,12 @@ export async function recordPayment(invoiceId: string, _prev: FormState, formDat
 export async function deletePayment(paymentId: string): Promise<{ message?: string }> {
   const user = await authorizeAction("payment:delete");
   if (!user) return { message: FORBIDDEN_MESSAGE };
-  const p = await db.payment.findUnique({ where: { id: paymentId }, include: { invoice: true, seal: { select: { id: true } } } });
+  const p = await db.payment.findUnique({ where: { id: paymentId }, include: { invoice: true, seal: { select: { id: true } }, commissions: { where: { paidAt: { not: null } }, select: { id: true } } } });
   if (!p) return {};
   if (!(await canSee(user, "invoice", p.invoiceId))) return { message: NOT_YOURS };
   if (p.seal) return { message: "This receipt is sealed. Remove the seal first, then cancel it." };
+  // Its commission goes with it, so don't lose the record of commission already paid out.
+  if (p.commissions.length) return { message: "Commission on this payment is already marked paid. An Admin must mark it unpaid on the Commissions page first." };
   const owner = await dealOwner(p.invoice.dealId);
   let reused = false;
   await db.$transaction(async (tx) => {
@@ -252,6 +262,8 @@ export async function deletePayment(paymentId: string): Promise<{ message?: stri
   });
   await audit({ actorId: user.id, action: "delete", entity: "Invoice", entityId: p.invoiceId, summary: `Cancelled ${p.receiptNumber} (${formatMoney(p.amount, p.invoice.currency)}) on ${p.invoice.number}${reused ? "; number freed for the next payment" : ""}` });
   refresh(p.invoice);
+  revalidatePath("/commissions");
+  revalidatePath("/finance");
   return {};
 }
 

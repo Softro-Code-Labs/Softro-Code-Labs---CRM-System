@@ -192,6 +192,9 @@ model User {
   handoversIssued    Handover[]      @relation("HandoverIssuer")
   invoicesCreated    Invoice[]       @relation("InvoiceCreator")
   paymentsRecorded   Payment[]       @relation("PaymentRecorder")
+  commissions        Commission[]    @relation("CommissionEarner")
+  commissionsPaid    Commission[]    @relation("CommissionPayer")
+  expensesRecorded   Expense[]       @relation("ExpenseRecorder")
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
@@ -570,36 +573,43 @@ model Counter {
  * Softro's own details, printed on quotes. A single row with id "default".
  */
 model OrgSettings {
-  id                  String    @id @default("default")
-  companyName         String    @default("Softro Code Labs")
-  address             String?
-  phone               String?
-  email               String?
-  website             String?
-  registrationNo      String? // business registration (BR) number
-  vatNumber           String? // TIN / VAT number, if registered
-  defaultTaxLabel     String    @default("VAT")
-  defaultTaxRate      Decimal   @default(0) @db.Decimal(5, 2)
-  defaultValidityDays Int       @default(14)
-  defaultTerms        String?
-  invoiceDueDays      Int       @default(14) // invoices are due this many days after the invoice date
-  invoiceTerms        String? // printed on invoices, e.g. how to pay
-  bankDetails         String?
-  quoteFooter         String?
+  id                       String    @id @default("default")
+  companyName              String    @default("Softro Code Labs")
+  address                  String?
+  phone                    String?
+  email                    String?
+  website                  String?
+  registrationNo           String? // business registration (BR) number
+  vatNumber                String? // TIN / VAT number, if registered
+  defaultTaxLabel          String    @default("VAT")
+  defaultTaxRate           Decimal   @default(0) @db.Decimal(5, 2)
+  defaultValidityDays      Int       @default(14)
+  defaultTerms             String?
+  invoiceDueDays           Int       @default(14) // invoices are due this many days after the invoice date
+  invoiceTerms             String? // printed on invoices, e.g. how to pay
+  bankDetails              String?
+  quoteFooter              String?
   // Delivery documents (Settings → Warranty & NDA, admins only). Empty wording uses the built-in starting text.
-  supportMonths       Int       @default(4) // free bug fixes after delivery
-  warrantyMonths      Int       @default(12) // warranty against defects in the delivered work
-  warrantyTerms       String?
-  ndaTerms            String?
+  supportMonths            Int       @default(4) // free bug fixes after delivery
+  warrantyMonths           Int       @default(12) // warranty against defects in the delivered work
+  warrantyTerms            String?
+  ndaTerms                 String?
   // Team chat (Slack, Google Chat, Discord or Teams incoming webhook)
-  chatWebhookUrl      String?
-  chatNotifyLeads     Boolean   @default(true) // new website leads
-  chatNotifyWins      Boolean   @default(true) // deals won
-  chatNotifyTickets   Boolean   @default(true) // urgent and high-priority tickets
-  digestLastRunAt     DateTime?
-  digestLastSent      Int?
-  requireTwoFactor    Boolean   @default(false) // admins and managers must use two-step sign-in
-  updatedAt           DateTime  @updatedAt
+  chatWebhookUrl           String?
+  chatNotifyLeads          Boolean   @default(true) // new website leads
+  chatNotifyWins           Boolean   @default(true) // deals won
+  chatNotifyTickets        Boolean   @default(true) // urgent and high-priority tickets
+  digestLastRunAt          DateTime?
+  digestLastSent           Int?
+  requireTwoFactor         Boolean   @default(false) // admins and managers must use two-step sign-in
+  // Sales commission (Settings → Commission & tax, admins only). Percent of what the client paid, before VAT.
+  commissionSalesPercent   Decimal   @default(16) @db.Decimal(5, 2) // deal owner who is not a Manager or Admin
+  commissionManagerPercent Decimal   @default(4) @db.Decimal(5, 2) // that person's manager
+  commissionLeaderPercent  Decimal   @default(20) @db.Decimal(5, 2) // deal owner who is a Manager or Admin
+  // Income tax estimate on the Income & tax page. The accountant confirms the real figure.
+  incomeTaxPercent         Decimal   @default(30) @db.Decimal(5, 2) // standard company rate
+  exportIncomeTaxPercent   Decimal   @default(15) @db.Decimal(5, 2) // services paid for from abroad, in foreign currency
+  updatedAt                DateTime  @updatedAt
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -969,6 +979,7 @@ model Payment {
   receiptNumber String        @unique // RCT-2026-0001
   invoiceId     String
   amount        Decimal       @db.Decimal(14, 2)
+  amountLkr     Decimal?      @db.Decimal(14, 2) // rupees credited to the bank, for invoices in another currency
   method        PaymentMethod @default(BANK_TRANSFER)
   paidAt        DateTime
   reference     String? // bank reference, cheque number…
@@ -976,10 +987,88 @@ model Payment {
   recordedById  String?
   createdAt     DateTime      @default(now())
 
-  invoice    Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
-  recordedBy User?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
-  seal       DocumentSeal?
+  invoice     Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  recordedBy  User?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+  seal        DocumentSeal?
+  commissions Commission[]
 
   @@index([invoiceId])
   @@index([paidAt])
+}
+
+// ─── Finance: commissions and expenses ───────────────────────────────────────
+// Income comes from payments. Commissions and expenses are what the company spends, so
+// income − expenses − commissions = profit on the Income & tax page. Payroll stays with the accountant.
+
+enum CommissionRole {
+  SELLER // the deal owner
+  MANAGER // the deal owner's manager
+}
+
+/// Earned automatically when a client pays a project invoice. Removed if that payment is cancelled.
+model Commission {
+  id        String         @id @default(cuid())
+  paymentId String
+  userId    String
+  role      CommissionRole
+  percent   Decimal        @db.Decimal(5, 2) // copied from Settings at the time, so later changes don't rewrite history
+  base      Decimal        @db.Decimal(14, 2) // LKR received, without VAT
+  amount    Decimal        @db.Decimal(14, 2) // LKR
+  paidAt    DateTime? // marked paid by an Admin
+  paidById  String?
+  createdAt DateTime       @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  user    User    @relation("CommissionEarner", fields: [userId], references: [id], onDelete: Restrict)
+  paidBy  User?   @relation("CommissionPayer", fields: [paidById], references: [id], onDelete: SetNull)
+
+  @@unique([paymentId, userId, role])
+  @@index([userId])
+  @@index([paidAt])
+}
+
+enum ExpenseCategory {
+  SALARIES
+  RENT
+  UTILITIES
+  INTERNET_PHONE
+  SOFTWARE
+  HOSTING
+  EQUIPMENT
+  MARKETING
+  TRAVEL
+  PROFESSIONAL_FEES
+  BANK_CHARGES
+  GOVERNMENT_FEES
+  OFFICE
+  OTHER
+}
+
+/// A business expense, in LKR (for foreign purchases, the rupees that left the bank).
+model Expense {
+  id          String          @id @default(cuid())
+  date        DateTime
+  category    ExpenseCategory
+  description String
+  supplier    String?
+  amount      Decimal         @db.Decimal(14, 2)
+  reference   String? // bill or bank reference
+  notes       String?
+  receiptName String? // the uploaded bill or receipt; the file itself is in ExpenseReceipt
+  receiptType String?
+  createdById String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  createdBy User?           @relation("ExpenseRecorder", fields: [createdById], references: [id], onDelete: SetNull)
+  receipt   ExpenseReceipt?
+
+  @@index([date])
+  @@index([category])
+}
+
+model ExpenseReceipt {
+  expenseId String  @id
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  data      Bytes
 }

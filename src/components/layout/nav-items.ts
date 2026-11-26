@@ -1,11 +1,13 @@
 import {
   BarChart3,
+  BadgePercent,
   Briefcase,
   Building2,
   CalendarCheck,
   FileSignature,
   KeyRound,
   FileText,
+  Landmark,
   LayoutDashboard,
   LifeBuoy,
   Receipt,
@@ -13,6 +15,7 @@ import {
   Target,
   Users,
   UsersRound,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -48,6 +51,14 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
       { label: "Contracts", href: "/contracts", icon: FileSignature, permission: "contract:view" },
       { label: "Project access", href: "/access", icon: KeyRound, permission: "access:view" },
       { label: "Support", href: "/support", icon: LifeBuoy, permission: "ticket:view" },
+    ],
+  },
+  {
+    title: "Finance",
+    items: [
+      { label: "Income & tax", href: "/finance", icon: Landmark, permission: "finance:view" },
+      { label: "Expenses", href: "/expenses", icon: Wallet, permission: "expense:manage" },
+      { label: "Commissions", href: "/commissions", icon: BadgePercent, permission: "commission:view" },
     ],
   },
   {
