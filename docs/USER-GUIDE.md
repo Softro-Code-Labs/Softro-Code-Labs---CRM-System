@@ -745,7 +745,9 @@ Click any card to go to the full list behind it.
 
 ### My team (managers and admins)
 
-**My team** in the sidebar lists the people you manage, with their open leads, open deals (and their value), quotes with clients, overdue tasks and when they last signed in. Admins see everyone in a Sales, Support or Viewer role, with their manager (the page is called **Teams**).
+**My team** in the sidebar shows your team: the people you manage, with their open leads, open deals (and their value), quotes with clients, overdue tasks and when they last signed in, plus the team's totals.
+
+Admins see it as **Teams**: one card per manager with their members, and a **No manager yet** card for anyone not yet in a team (set their manager in **Settings → Team members**). Admins and managers lead teams rather than belong to one, so they never appear as members.
 
 Click a person to see their profile (job title, email, phone, WhatsApp) and everything they have open: leads, deals, quotes in progress and tasks, each linking to the record.
 

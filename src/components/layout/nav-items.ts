@@ -24,6 +24,8 @@ export type NavItem = {
   href: string;
   icon: LucideIcon;
   permission?: Permission;
+  /** A different name for admins, who see every team rather than their own. */
+  adminLabel?: string;
   /** Modules planned for later steps show as "Soon" and are not clickable. */
   soon?: boolean;
 };
@@ -63,7 +65,7 @@ export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
     title: "Insights",
     items: [
       { label: "Reports", href: "/reports", icon: BarChart3, permission: "report:view" },
-      { label: "My team", href: "/team", icon: UsersRound, permission: "team:view" },
+      { label: "My team", adminLabel: "Teams", href: "/team", icon: UsersRound, permission: "team:view" },
     ],
   },
   {

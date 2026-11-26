@@ -73,7 +73,7 @@ export function Sidebar({ role, open, onClose }: { role: Role; open: boolean; on
                     const content = (
                       <>
                         <Icon className={cn("size-4 shrink-0", active && "text-brand-400")} aria-hidden />
-                        <span className="flex-1">{item.label}</span>
+                        <span className="flex-1">{role === "ADMIN" && item.adminLabel ? item.adminLabel : item.label}</span>
                         {item.soon && (
                           <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-ink-500">Soon</span>
                         )}

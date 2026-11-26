@@ -28,6 +28,17 @@ export async function getTeamMembers(viewer: Viewer) {
   });
 }
 
+/** The team leaders this viewer sees: every Manager for an Admin (active ones, or any who still have people), or just themselves. */
+export async function getTeamLeads(viewer: Viewer & { name: string }) {
+  if (viewer.role !== "ADMIN") return db.user.findMany({ where: { id: viewer.id }, select: leadSelect });
+  return db.user.findMany({
+    where: { role: "MANAGER", OR: [{ isActive: true }, { teamMembers: { some: {} } }] },
+    orderBy: [{ isActive: "desc" }, { name: "asc" }],
+    select: leadSelect,
+  });
+}
+const leadSelect = { id: true, name: true, jobTitle: true, role: true, isActive: true, avatarUpdatedAt: true } as const;
+
 /** One team member, if this viewer may see them: an Admin always, a Manager only for their own team. */
 export async function getTeamMember(viewer: Viewer, id: string) {
   const member = await db.user.findUnique({ where: { id }, select: memberSelect });
