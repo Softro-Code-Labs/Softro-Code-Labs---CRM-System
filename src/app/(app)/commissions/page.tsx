@@ -14,8 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { PeriodPicker } from "@/components/reports/period-picker";
 import { StatTile } from "@/components/reports/charts";
-import { AddMissingButton, PaidToggle, PayAllButton } from "./commission-controls";
-import { PAYMENTS_WITHOUT_COMMISSION } from "@/lib/commissions";
+import { PaidToggle, PayAllButton } from "./commission-controls";
 
 export const metadata: Metadata = { title: "Commissions" };
 
@@ -32,11 +31,10 @@ export default async function CommissionsPage({ searchParams }: { searchParams: 
   const visible = await getVisibleUserIds(user.id, user.role);
   const canPay = can(user.role, "commission:pay");
 
-  const [people, org, noManager, missing] = await Promise.all([
+  const [people, org, noManager] = await Promise.all([
     db.user.findMany({ where: { ...(visible && { id: { in: visible } }), OR: [{ isActive: true }, { commissions: { some: {} } }] }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
     getOrgSettings(),
     canPay ? db.user.findMany({ where: { isActive: true, role: { in: ["SALES", "SUPPORT"] }, managerId: null }, select: { name: true }, orderBy: { name: "asc" } }) : Promise.resolve([]),
-    canPay ? db.payment.count({ where: PAYMENTS_WITHOUT_COMMISSION }) : Promise.resolve(0),
   ]);
   const personParam = firstParam(sp.person);
   const person = people.find((p) => p.id === personParam);
@@ -68,14 +66,7 @@ export default async function CommissionsPage({ searchParams }: { searchParams: 
       <PageHeader
         title="Commissions"
         description={`Earned when the client pays, on the amount without VAT. A sales person gets ${pct(org.commissionSalesPercent)} and their manager ${pct(org.commissionManagerPercent)}; a Manager or Admin who makes the sale gets ${pct(org.commissionLeaderPercent)}.`}
-        actions={
-          canPay && (
-            <div className="flex flex-wrap gap-2">
-              <AddMissingButton count={missing} />
-              <PayAllButton ids={unpaid.map((r) => r.id)} total={formatMoney(sum(unpaid), "LKR")} />
-            </div>
-          )
-        }
+        actions={canPay && <PayAllButton ids={unpaid.map((r) => r.id)} total={formatMoney(sum(unpaid), "LKR")} />}
       />
       <div className="-mt-2 flex flex-wrap items-center gap-2">
         <PeriodPicker from={toDateInput(period.from)} to={toDateInput(lastDay)} options={financePeriodOptions()} defaultValue="this-tax-year" />

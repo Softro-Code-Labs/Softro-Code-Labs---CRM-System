@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { audit } from "@/lib/audit";
@@ -17,10 +16,9 @@ const n = (v: { toString(): string } | null | undefined) => (v == null ? 0 : Num
 const money = (v: number | null) => (v == null ? "" : v.toFixed(2));
 
 /**
- * GET /finance/export?format=csv|pdf&seal=1&period=…|from=…&to=…&person=…
+ * GET /finance/export?format=csv|pdf&period=…|from=…&to=…&person=…
  * For the accountant: every payment received and commission earned in the period, in rupees.
- * CSV for spreadsheets (income +, commission −); PDF as a report, optionally with the company seal and
- * the signer's signature (Admins and Managers with a signature). Scope as on the Income page:
+ * CSV for spreadsheets (income +, commission −); PDF as a signable report. Scope as on the Income page:
  * Sales their own, Managers theirs and their team's, Admins everything.
  */
 export async function GET(request: NextRequest) {
@@ -37,21 +35,11 @@ export async function GET(request: NextRequest) {
   const meta = { type: "finance", from: period.from.toISOString(), to: period.to.toISOString(), person: scope.person?.id ?? null };
 
   if (sp.get("format") === "pdf") {
-    let seal = null;
-    if (sp.get("seal")) {
-      if (!can(user.role, "document:seal")) return new NextResponse("Only Admins and Managers can seal documents.", { status: 403 });
-      const [signature, me] = await Promise.all([
-        db.userSignature.findUnique({ where: { userId: user.id }, select: { data: true } }),
-        db.user.findUniqueOrThrow({ where: { id: user.id }, select: { name: true, jobTitle: true } }),
-      ]);
-      if (!signature) return new NextResponse("Add your signature under My profile first. It's printed next to the seal.", { status: 400 });
-      seal = { signerName: me.name, signerTitle: me.jobTitle, signature: signature.data, sealedAt: new Date() };
-    }
     const org = await getOrgSettings();
-    const pdf = await renderIncomePdf({ sum, org, period: period.label, scope: scope.label, seal, preparedBy: user.name });
-    await audit({ actorId: user.id, action: "export", entity: "Report", summary: `Exported the income report as PDF${seal ? ", sealed" : ""} (${period.label}, ${scope.label})`, meta: { ...meta, format: "pdf", sealed: Boolean(seal) } });
+    const pdf = await renderIncomePdf({ sum, org, period: period.label, scope: scope.label, preparedBy: user.name });
+    await audit({ actorId: user.id, action: "export", entity: "Report", summary: `Exported the income report as PDF (${period.label}, ${scope.label})`, meta: { ...meta, format: "pdf" } });
     return new NextResponse(new Uint8Array(pdf), {
-      headers: { "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="${base}${seal ? "-sealed" : ""}.pdf"`, "Cache-Control": "private, no-store" },
+      headers: { "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="${base}.pdf"`, "Cache-Control": "private, no-store" },
     });
   }
 

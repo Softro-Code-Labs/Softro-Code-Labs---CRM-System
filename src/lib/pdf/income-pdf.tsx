@@ -1,6 +1,5 @@
 import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
-import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED, SealedSignaturePdf } from "./shared";
-import type { SealInfo } from "@/lib/seal";
+import { CRIMSON, INK, LIGHT, LINE, Mark, MUTED } from "./shared";
 import type { getOrgSettings } from "@/lib/queries/org";
 import type { IncomeSummary } from "@/lib/finance";
 import { PAYMENT_METHOD_LABELS } from "@/lib/crm-meta";
@@ -66,7 +65,7 @@ function Table({ cols, rows, total }: { cols: Col[]; rows: (string | number)[][]
   );
 }
 
-function IncomePdf({ sum, org, period, scope, seal, preparedBy }: { sum: IncomeSummary; org: Org; period: string; scope: string; seal: SealInfo | null; preparedBy: string }) {
+function IncomePdf({ sum, org, period, scope, preparedBy }: { sum: IncomeSummary; org: Org; period: string; scope: string; preparedBy: string }) {
   const orgLine = [org.phone, org.email, org.website?.replace(/^https?:\/\//, "")].filter(Boolean).join("  ·  ");
   const idLine = [org.registrationNo && `BR ${org.registrationNo}`, org.vatNumber && `TIN/VAT ${org.vatNumber}`].filter(Boolean).join("  ·  ");
   const party = (l: IncomeSummary["lines"][number]) => l.p.invoice.company?.name ?? (l.p.invoice.contact ? fullName(l.p.invoice.contact) : "—");
@@ -195,21 +194,17 @@ function IncomePdf({ sum, org, period, scope, seal, preparedBy }: { sum: IncomeS
         {/* Fills the rest of the page, so the signature sits at the bottom of the last page. */}
         <View style={{ flexGrow: 1 }} />
         <View style={[s.row, { justifyContent: "flex-end", marginTop: 40 }]} wrap={false}>
-          {seal ? (
-            <SealedSignaturePdf seal={seal} registrationNo={org.registrationNo} width={230} caption={`For ${org.companyName}`} />
-          ) : (
-            <View style={{ width: 210 }}>
-              <View style={s.signLine} />
-              <Text style={s.small}>Prepared by: {preparedBy}</Text>
-              <Text style={s.small}>For {org.companyName}</Text>
-            </View>
-          )}
+          <View style={{ width: 210 }}>
+            <View style={s.signLine} />
+            <Text style={s.small}>Prepared by: {preparedBy}</Text>
+            <Text style={s.small}>For {org.companyName}</Text>
+          </View>
         </View>
       </Page>
     </Document>
   );
 }
 
-export function renderIncomePdf(args: { sum: IncomeSummary; org: Org; period: string; scope: string; seal: SealInfo | null; preparedBy: string }) {
+export function renderIncomePdf(args: { sum: IncomeSummary; org: Org; period: string; scope: string; preparedBy: string }) {
   return renderToBuffer(<IncomePdf {...args} />);
 }

@@ -126,7 +126,6 @@ Support and Viewer can't change owners. A website lead on the New web leads boar
 | See reports (your own numbers; managers their team's; admins the whole company) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export reports to CSV | ✅ | ✅ | — | — | — |
 | **Income** page and its PDF and CSV exports (own sales; managers their team's; admins everything) | ✅ | ✅ | ✅ | — | — |
-| Export the Income report as a **sealed PDF** (needs your signature) | ✅ | ✅ | — | — | — |
 | See commission earned | everyone | self and team | own | own | — |
 | Mark commission paid; change commission and tax rates | ✅ | — | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
@@ -669,15 +668,14 @@ The **Finance** part of the sidebar shows the money clients paid and the commiss
 - **Sales commission** earned on those payments, and a **By month** table with totals.
 - **Whose money you see:** sales people see payments on their own deals, managers see theirs and their team's, and admins see the whole company. Managers and admins can also pick **one person** from the list.
 
-**Export for accountant** has three choices, all for the period (and person) you picked:
+**Export for accountant** has two choices, all for the period (and person) you picked:
 
 | Choice | What you get |
 |---|---|
 | **PDF report** | A branded report: totals, by month, every payment received, and commission by person, with a *Prepared by* line to sign |
-| **PDF with company seal** | The same report with the company seal and your signature at the bottom of the last page. Admins and managers only, once they've added a signature under **My profile** |
 | **CSV (Excel)** | Every payment and commission line, in rupees, for spreadsheets |
 
-Send the sealed PDF and the CSV to the accountant each quarter and at year end. Every export is recorded in the audit log.
+Send the PDF and the CSV to the accountant each quarter and at year end. Every export is recorded in the audit log.
 
 #### Commissions
 
@@ -693,7 +691,6 @@ Commission is earned **when the client pays**, on the amount **without VAT**, in
 - **Who sees what:** sales people see their own commission, managers their team's, admins everyone's.
 - **Admins** click **Mark paid** once the money has been paid to the person (or **Mark all unpaid as paid** at month end), and **Undo** for a mistake.
 - If a sales person has no manager, the page warns the admin: set their manager in **Settings → Team members**, or the 4% isn't added.
-- **Payments recorded before commission was switched on** have none. Admins click **Add missing commission** on the Commissions page once: it adds commission for those payments at today's rates. Running it again adds nothing.
 - Admins change the percentages in **Settings → Commission**. New rates apply to payments recorded afterwards; commission already earned keeps its rate.
 
 ---

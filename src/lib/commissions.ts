@@ -2,12 +2,6 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { commissionSplits, splitPayment } from "@/lib/finance-math";
 
-/** Payments on project invoices that have no commission yet: recorded before commission existed, or when it couldn't be worked out. */
-export const PAYMENTS_WITHOUT_COMMISSION = {
-  commissions: { none: {} },
-  invoice: { dealId: { not: null }, contractId: null, deal: { ownerId: { not: null } } },
-} satisfies Prisma.PaymentWhereInput;
-
 const n = (v: { toString(): string } | number | null | undefined) => (v == null ? 0 : Number(v.toString()));
 
 export function commissionRates(org: { commissionSalesPercent: { toString(): string }; commissionManagerPercent: { toString(): string }; commissionLeaderPercent: { toString(): string } }) {

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePermission } from "@/lib/auth";
-import { can } from "@/lib/permissions";
-import { db } from "@/lib/db";
 import { firstParam, formatMoney, toDateInput } from "@/lib/utils";
 import { financePeriodOptions, resolveFinancePeriod } from "@/lib/finance-math";
 import { financeScope, incomeSummary } from "@/lib/finance";
@@ -27,10 +25,7 @@ export default async function IncomePage({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   const period = resolveFinancePeriod({ period: firstParam(sp.period), from: firstParam(sp.from), to: firstParam(sp.to) });
   const scope = await financeScope(user, firstParam(sp.person));
-  const [s, signature] = await Promise.all([
-    incomeSummary(period, scope),
-    can(user.role, "document:seal") ? db.userSignature.findUnique({ where: { userId: user.id }, select: { userId: true } }) : Promise.resolve(null),
-  ]);
+  const s = await incomeSummary(period, scope);
   const lastDay = new Date(period.to.getTime() - 86_400_000);
 
   const qs = new URLSearchParams();
@@ -50,7 +45,6 @@ export default async function IncomePage({ searchParams }: { searchParams: Promi
             label="Export for accountant"
             items={[
               { href: exportHref({ format: "pdf" }), label: "PDF report", hint: "Summary, months, payments and commission", newTab: true },
-              ...(signature ? [{ href: exportHref({ format: "pdf", seal: "1" }), label: "PDF with company seal", hint: "Signed with your signature and the seal", newTab: true }] : []),
               { href: exportHref({ format: "csv" }), label: "CSV (Excel)", hint: "Every payment and commission line" },
             ]}
           />
@@ -60,11 +54,7 @@ export default async function IncomePage({ searchParams }: { searchParams: Promi
         <PeriodPicker from={toDateInput(period.from)} to={toDateInput(lastDay)} options={financePeriodOptions()} defaultValue="this-tax-year" />
         {scope.people.length > 1 && <FilterSelect param="person" label={scope.all ? "Whole company" : "You and your team"} options={scope.people.map((p) => ({ value: p.id, label: p.name }))} />}
       </div>
-      {can(user.role, "document:seal") && !signature && (
-        <p className="-mt-2 text-xs text-ink-500">
-          To export a sealed PDF, add your signature under <Link href="/settings/profile" className="underline">My profile</Link>.
-        </p>
-      )}
+
 
       {s.missingLkr.length > 0 && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
