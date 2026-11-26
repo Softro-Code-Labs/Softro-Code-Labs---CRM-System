@@ -20,7 +20,7 @@ Softro CRM is where Softro Code Labs keeps track of every client, every enquiry 
 12. [Contracts: maintenance, hosting and support](#12-contracts-maintenance-hosting-and-support)
 13. [Support tickets](#13-support-tickets)
 14. [Project access and delivery](#14-project-access-and-delivery)
-15. [Reports](#15-reports)
+15. [Reports](#15-reports) (and [income and commission](#income-and-commission))
 16. [Emails, team chat and your calendar](#16-emails-team-chat-and-your-calendar)
 17. [The dashboard](#17-the-dashboard)
 18. [Enquiries from our website](#18-enquiries-from-our-website)
@@ -83,6 +83,7 @@ One rule decides whose records you see, everywhere: lists, pages, PDFs, dropdown
 - **Your team:** an admin sets each person's **Manager (team)** under **Settings → Team members**.
 - **New website enquiries** are the exception: they wait on the shared **New web leads** board, which everyone sees, until someone takes one (see [section 5](#5-leads-new-enquiries)).
 - **Invoices and receipts** are visible to whoever can see their deal or quotation, and to the person who created them.
+- **Income and commission** follow the invoices: Sales see the money paid on their own deals and their own commission, a Manager their team's, an Admin the whole company's.
 - **Who you can make the owner:** Sales only themselves, a Manager themselves or someone in their team, an Admin anyone.
 - **Companies and contacts:** the ones you (or your team) own, plus any company or contact tied to a deal or lead you can see, so you can always open your client.
 - **Contracts:** the ones you (or your team) own, or that belong to a deal you can see. **Project access** goes with its deal.
@@ -124,6 +125,10 @@ Support and Viewer can't change owners. A website lead on the New web leads boar
 | Delete tickets | ✅ | ✅ | — | — | — |
 | See reports (your own numbers; managers their team's; admins the whole company) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export reports to CSV | ✅ | ✅ | — | — | — |
+| **Income** page (own sales; managers their team's; admins everything) | ✅ | ✅ | ✅ | — | — |
+| Income **Export for accountant** (PDF and CSV) | ✅ | ✅ | — | — | — |
+| See commission earned | everyone | self and team | own | own | — |
+| Mark commission paid; change commission and tax rates | ✅ | — | — | — | — |
 | Add and edit companies | ✅ | ✅ | ✅ | — | — |
 | Add and edit contacts | ✅ | ✅ | ✅ | ✅ | — |
 | Add notes, log calls and chats, schedule tasks | ✅ | ✅ | ✅ | ✅ | — |
@@ -460,6 +465,9 @@ The advance and balance invoices always add up to the quote total, VAT included.
 
 You can't record more than the balance. Receipts for cheques say *subject to realisation*.
 
+- **Invoice in another currency** (e.g. USD)? Also enter **Rupees credited (LKR)**: what the bank actually put in the account. The Income page and commission use it.
+- **Commission** is added automatically for a deal's invoice (see [Commissions](#commissions)). If the deal owner has no manager, the message after saving says so.
+
 ### Chasing payment
 
 - Each unpaid invoice has a **Follow up payment** task for the deal owner, due the day after the due date. It closes itself when the invoice is paid.
@@ -477,7 +485,7 @@ You can't record more than the balance. Receipts for cheques say *subject to rea
 
 ### Mistakes
 
-- **Wrong payment?** A manager or admin clicks **Cancel** next to it (remove the receipt's seal first if it has one). If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
+- **Wrong payment?** A manager or admin clicks **Cancel** next to it (remove the receipt's seal first if it has one). Its commission is removed too; if that commission is already marked paid, an admin must mark it unpaid first. If it was the **latest** receipt, its number is freed and the next payment gets it again (cancel RCT-2026-0001 and the next is RCT-2026-0001). If newer receipts exist, the number stays unused, so there's no duplicate. Either way, if the client already has that receipt, tell them to ignore it.
 - **Wrong invoice?** If nothing has been paid and it isn't sealed, a manager or admin can **Void** it, then create the right one. Invoices are never deleted, so the numbers stay in order for the accountant.
 - **Voided by mistake?** A manager or admin opens it and clicks **Restore invoice**. It's unpaid again with the same number. The CRM won't restore it if the quote has been invoiced again since, because that would bill the client twice: void the replacement first.
 - **Something the screens can't undo** (a wrong number, test invoices on the live CRM): admins use the ready-made scripts in [DATABASE-FIXES.md](DATABASE-FIXES.md).
@@ -647,6 +655,45 @@ Click **Export CSV** and choose **Deals**, **Leads**, **Support tickets** or **T
 
 Reports are only as good as what's entered. Always mark deals **Won** or **Lost** (with a reason), keep **close dates** and **values** current, set the **service** on each deal, and log replies to leads and tickets.
 
+### Income and commission
+
+The **Finance** part of the sidebar shows the money clients paid and the commission earned on it, with a file for the accountant. Expenses, payroll, EPF/ETF, profit and the tax return stay with the accountant: they need the full books.
+
+**Pick the period:** each page opens on **this tax year** (1 April to 31 March). You can also choose **last tax year**, any of the **four quarters** (Apr–Jun, Jul–Sep, Oct–Dec, Jan–Mar), this or last month, or **Custom dates…** for any range.
+
+#### Income (sales people, managers and admins)
+
+- **Income** is the money clients actually paid in the period (by the date received), **without VAT**.
+- Income from clients **abroad**, paid in foreign currency, is shown apart, because it's usually taxed at a lower rate.
+- **VAT collected** is shown separately: it belongs to the government.
+- **Sales commission** earned on those payments, and a **By month** table with totals.
+- **Whose money you see:** sales people see payments on their own deals, managers see theirs and their team's, and admins see the whole company. Managers and admins can also pick **one person** from the list.
+
+**Export for accountant** (admins and managers) has two choices, all for the period (and person) you picked:
+
+| Choice | What you get |
+|---|---|
+| **PDF report** | A branded report: totals, by month, every payment received, and commission by person, with a *Prepared by* line to sign |
+| **CSV (Excel)** | Every payment and commission line, in rupees, for spreadsheets |
+
+Send the PDF and the CSV to the accountant each quarter and at year end. Every export is recorded in the audit log.
+
+#### Commissions
+
+Commission is earned **when the client pays**, on the amount **without VAT**, in rupees:
+
+| Who owns the deal | They get | Their manager gets |
+|---|---|---|
+| A sales person (or Support) | 16% | 4% |
+| A Manager or Admin | 20% | — |
+
+- It's added automatically when a payment is recorded on an invoice made for a **deal**. Regular contract fees (maintenance, hosting) don't earn commission.
+- A 50% advance earns half the commission now and the rest when the balance is paid.
+- **Who sees what:** sales people see their own commission, managers their team's, admins everyone's.
+- **Admins** click **Mark paid** once the money has been paid to the person (or **Mark all unpaid as paid** at month end), and **Undo** for a mistake.
+- If a sales person has no manager, the page warns the admin: set their manager in **Settings → Team members**, or the 4% isn't added.
+- Admins change the percentages in **Settings → Commission**. New rates apply to payments recorded afterwards; commission already earned keeps its rate.
+
 ---
 
 ## 16. Emails, team chat and your calendar
@@ -699,7 +746,9 @@ Click any card to go to the full list behind it.
 
 ### My team (managers and admins)
 
-**My team** in the sidebar lists the people you manage, with their open leads, open deals (and their value), quotes with clients, overdue tasks and when they last signed in. Admins see everyone in a Sales, Support or Viewer role, with their manager (the page is called **Teams**).
+**My team** in the sidebar shows your team: the people you manage, with their open leads, open deals (and their value), quotes with clients, overdue tasks and when they last signed in, plus the team's totals.
+
+Admins see it as **Teams**: one card per manager with their members, and a **No manager yet** card for anyone not yet in a team (set their manager in **Settings → Team members**). Admins and managers lead teams rather than belong to one, so they never appear as members.
 
 Click a person to see their profile (job title, email, phone, WhatsApp) and everything they have open: leads, deals, quotes in progress and tasks, each linking to the record.
 
@@ -773,6 +822,7 @@ Turning it on signs you out of your other devices. From now on, sign in with you
 | Sales pipeline | ✅ | ✅ | — |
 | Company details | ✅ | — | — |
 | Warranty & NDA | ✅ | — | — |
+| Commission | ✅ | — | — |
 | Services & prices | ✅ | ✅ | — |
 | Integrations | ✅ | — | — |
 | Security | ✅ | — | — |

@@ -1,4 +1,4 @@
-import type { AccountOwner, PaymentMethod, ServiceCategory, SignInMethod, TwoStepMethod } from "@/generated/prisma/enums";
+import type { AccountOwner, CommissionRole, PaymentMethod, ServiceCategory, SignInMethod, TwoStepMethod } from "@/generated/prisma/enums";
 import type { DealStatus, LeadSource, LeadStatus, PreferredLanguage, ServiceType } from "@/generated/prisma/enums";
 import type { BadgeTone } from "@/components/ui/badge";
 
@@ -249,3 +249,8 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   OTHER: "Other",
 };
 export const PAYMENT_METHOD_OPTIONS = options(PAYMENT_METHOD_LABELS);
+
+export const COMMISSION_ROLE_LABELS: Record<CommissionRole, string> = {
+  SELLER: "Sale",
+  MANAGER: "Team sale",
+};

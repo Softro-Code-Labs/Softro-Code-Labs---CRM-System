@@ -20,10 +20,12 @@ export function PaymentForm({
   invoiceId,
   balance,
   today,
+  currency = "LKR",
 }: {
   invoiceId: string;
   balance: string;
   today: string;
+  currency?: string;
 }) {
   const [state, action] = useActionState<
     FormState & { receiptId?: string },
@@ -54,13 +56,24 @@ export function PaymentForm({
       )}
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField
-          label="Amount received"
+          label={currency === "LKR" ? "Amount received" : `Amount received (${currency})`}
           name="amount"
           inputMode="decimal"
           required
           defaultValue={v?.amount ?? balance}
           error={state.errors?.amount}
         />
+        {currency !== "LKR" && (
+          <TextField
+            label="Rupees credited (LKR)"
+            name="amountLkr"
+            inputMode="decimal"
+            required
+            defaultValue={v?.amountLkr}
+            error={state.errors?.amountLkr}
+            hint={`What the bank credited for this ${currency} payment. Used for income tax and commission.`}
+          />
+        )}
         <TextField
           label="Date received"
           name="paidAt"

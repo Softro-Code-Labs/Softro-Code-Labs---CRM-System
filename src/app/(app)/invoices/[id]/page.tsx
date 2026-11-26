@@ -98,7 +98,7 @@ export default async function InvoicePage({ params }: Props) {
             <Card>
               <CardHeader title="Record a payment" description="Makes a numbered receipt you can send the client." />
               <CardBody>
-                <PaymentForm invoiceId={invoice.id} balance={balance.toFixed(2)} today={toDateInput(new Date())} />
+                <PaymentForm invoiceId={invoice.id} balance={balance.toFixed(2)} today={toDateInput(new Date())} currency={invoice.currency} />
               </CardBody>
             </Card>
           )}
@@ -113,7 +113,7 @@ export default async function InvoicePage({ params }: Props) {
                     id={p.id}
                     receipt={p.receiptNumber}
                     amount={formatMoney(p.amount, invoice.currency)}
-                    detail={[formatDate(p.paidAt), PAYMENT_METHOD_LABELS[p.method], p.reference].filter(Boolean).join(" · ")}
+                    detail={[formatDate(p.paidAt), PAYMENT_METHOD_LABELS[p.method], p.reference, p.amountLkr != null && `${formatMoney(p.amountLkr, "LKR")} credited`].filter(Boolean).join(" · ")}
                     canCancel={can(user.role, "payment:delete") && !p.seal}
                     seal={
                       <SealControl

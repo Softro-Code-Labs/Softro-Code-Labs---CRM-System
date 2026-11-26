@@ -6,8 +6,21 @@ import { PERIOD_OPTIONS } from "./period-options";
 
 const control = "h-9 rounded-lg border border-ink-300 bg-white px-2.5 text-sm text-ink-700 shadow-sm focus:border-ink-700 focus:ring-2 focus:ring-ink-900/10 focus:outline-none";
 
-/** Period presets plus a custom date range, written to ?period= or ?from=&to=. */
-export function PeriodPicker({ from, to }: { from: string; to: string }) {
+/**
+ * Period presets plus a custom date range, written to ?period= or ?from=&to=.
+ * Reports use the calendar presets; the finance pages pass tax-year ones.
+ */
+export function PeriodPicker({
+  from,
+  to,
+  options = PERIOD_OPTIONS,
+  defaultValue = "last-12",
+}: {
+  from: string;
+  to: string;
+  options?: readonly { value: string; label: string }[];
+  defaultValue?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -27,19 +40,19 @@ export function PeriodPicker({ from, to }: { from: string; to: string }) {
       <select
         aria-label="Period"
         className={control}
-        value={showCustom ? "custom" : sp.get("period") ?? "last-12"}
+        value={showCustom ? "custom" : sp.get("period") ?? defaultValue}
         onChange={(e) => {
           if (e.target.value === "custom") return setShowCustom(true);
           setShowCustom(false);
           go((p) => {
             p.delete("from");
             p.delete("to");
-            if (e.target.value === "last-12") p.delete("period");
+            if (e.target.value === defaultValue) p.delete("period");
             else p.set("period", e.target.value);
           });
         }}
       >
-        {PERIOD_OPTIONS.map((o) => (
+        {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
           </option>

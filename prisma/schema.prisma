@@ -192,6 +192,8 @@ model User {
   handoversIssued    Handover[]      @relation("HandoverIssuer")
   invoicesCreated    Invoice[]       @relation("InvoiceCreator")
   paymentsRecorded   Payment[]       @relation("PaymentRecorder")
+  commissions        Commission[]    @relation("CommissionEarner")
+  commissionsPaid    Commission[]    @relation("CommissionPayer")
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
@@ -570,36 +572,40 @@ model Counter {
  * Softro's own details, printed on quotes. A single row with id "default".
  */
 model OrgSettings {
-  id                  String    @id @default("default")
-  companyName         String    @default("Softro Code Labs")
-  address             String?
-  phone               String?
-  email               String?
-  website             String?
-  registrationNo      String? // business registration (BR) number
-  vatNumber           String? // TIN / VAT number, if registered
-  defaultTaxLabel     String    @default("VAT")
-  defaultTaxRate      Decimal   @default(0) @db.Decimal(5, 2)
-  defaultValidityDays Int       @default(14)
-  defaultTerms        String?
-  invoiceDueDays      Int       @default(14) // invoices are due this many days after the invoice date
-  invoiceTerms        String? // printed on invoices, e.g. how to pay
-  bankDetails         String?
-  quoteFooter         String?
+  id                       String    @id @default("default")
+  companyName              String    @default("Softro Code Labs")
+  address                  String?
+  phone                    String?
+  email                    String?
+  website                  String?
+  registrationNo           String? // business registration (BR) number
+  vatNumber                String? // TIN / VAT number, if registered
+  defaultTaxLabel          String    @default("VAT")
+  defaultTaxRate           Decimal   @default(0) @db.Decimal(5, 2)
+  defaultValidityDays      Int       @default(14)
+  defaultTerms             String?
+  invoiceDueDays           Int       @default(14) // invoices are due this many days after the invoice date
+  invoiceTerms             String? // printed on invoices, e.g. how to pay
+  bankDetails              String?
+  quoteFooter              String?
   // Delivery documents (Settings → Warranty & NDA, admins only). Empty wording uses the built-in starting text.
-  supportMonths       Int       @default(4) // free bug fixes after delivery
-  warrantyMonths      Int       @default(12) // warranty against defects in the delivered work
-  warrantyTerms       String?
-  ndaTerms            String?
+  supportMonths            Int       @default(4) // free bug fixes after delivery
+  warrantyMonths           Int       @default(12) // warranty against defects in the delivered work
+  warrantyTerms            String?
+  ndaTerms                 String?
   // Team chat (Slack, Google Chat, Discord or Teams incoming webhook)
-  chatWebhookUrl      String?
-  chatNotifyLeads     Boolean   @default(true) // new website leads
-  chatNotifyWins      Boolean   @default(true) // deals won
-  chatNotifyTickets   Boolean   @default(true) // urgent and high-priority tickets
-  digestLastRunAt     DateTime?
-  digestLastSent      Int?
-  requireTwoFactor    Boolean   @default(false) // admins and managers must use two-step sign-in
-  updatedAt           DateTime  @updatedAt
+  chatWebhookUrl           String?
+  chatNotifyLeads          Boolean   @default(true) // new website leads
+  chatNotifyWins           Boolean   @default(true) // deals won
+  chatNotifyTickets        Boolean   @default(true) // urgent and high-priority tickets
+  digestLastRunAt          DateTime?
+  digestLastSent           Int?
+  requireTwoFactor         Boolean   @default(false) // admins and managers must use two-step sign-in
+  // Sales commission (Settings → Commission & tax, admins only). Percent of what the client paid, before VAT.
+  commissionSalesPercent   Decimal   @default(16) @db.Decimal(5, 2) // deal owner who is not a Manager or Admin
+  commissionManagerPercent Decimal   @default(4) @db.Decimal(5, 2) // that person's manager
+  commissionLeaderPercent  Decimal   @default(20) @db.Decimal(5, 2) // deal owner who is a Manager or Admin
+  updatedAt                DateTime  @updatedAt
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -969,6 +975,7 @@ model Payment {
   receiptNumber String        @unique // RCT-2026-0001
   invoiceId     String
   amount        Decimal       @db.Decimal(14, 2)
+  amountLkr     Decimal?      @db.Decimal(14, 2) // rupees credited to the bank, for invoices in another currency
   method        PaymentMethod @default(BANK_TRANSFER)
   paidAt        DateTime
   reference     String? // bank reference, cheque number…
@@ -976,10 +983,41 @@ model Payment {
   recordedById  String?
   createdAt     DateTime      @default(now())
 
-  invoice    Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
-  recordedBy User?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
-  seal       DocumentSeal?
+  invoice     Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  recordedBy  User?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+  seal        DocumentSeal?
+  commissions Commission[]
 
   @@index([invoiceId])
+  @@index([paidAt])
+}
+
+// ─── Finance: sales commission ───────────────────────────────────────
+// Income comes from payments; commission is earned on them. Expenses, payroll and tax stay with the accountant.
+
+enum CommissionRole {
+  SELLER // the deal owner
+  MANAGER // the deal owner's manager
+}
+
+/// Earned automatically when a client pays a project invoice. Removed if that payment is cancelled.
+model Commission {
+  id        String         @id @default(cuid())
+  paymentId String
+  userId    String
+  role      CommissionRole
+  percent   Decimal        @db.Decimal(5, 2) // copied from Settings at the time, so later changes don't rewrite history
+  base      Decimal        @db.Decimal(14, 2) // LKR received, without VAT
+  amount    Decimal        @db.Decimal(14, 2) // LKR
+  paidAt    DateTime? // marked paid by an Admin
+  paidById  String?
+  createdAt DateTime       @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  user    User    @relation("CommissionEarner", fields: [userId], references: [id], onDelete: Restrict)
+  paidBy  User?   @relation("CommissionPayer", fields: [paidById], references: [id], onDelete: SetNull)
+
+  @@unique([paymentId, userId, role])
+  @@index([userId])
   @@index([paidAt])
 }

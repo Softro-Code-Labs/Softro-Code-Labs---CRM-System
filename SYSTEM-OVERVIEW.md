@@ -47,7 +47,8 @@ What each role may **do** lives in `src/lib/permissions.ts`; whose records each 
 | **Contracts** | Maintenance, hosting, support retainers and subscriptions | Numbered **C-…**. A renewal task appears before the end date; one click renews. |
 | **Support** | Client problems as tickets, with replies and internal notes | Numbered **T-…**. First reply due by priority (4 h urgent → 72 h low) or the contract's promise. |
 | **Project access** | Each project's Google account, the services made with it, who owns them, renewals, a **Project Delivery Pack** PDF for the client (optionally with a **warranty** and an **NDA**, worded by admins), and a password-locked **login sheet** | **No secrets stored**: passwords stay in Google Password Manager; the login sheet is made from passwords typed in at that moment and never saved. A 6-monthly sign-in check keeps each project Gmail alive. |
-| **My team** | Managers see each team member's profile and open leads, deals, quotes and tasks, and can hand one person's open work to someone else | Managers only see and move work within their own team; admins see every team. |
+| **Finance** | **Income** for any period (tax-year and quarter presets): money received without VAT, local and export apart, VAT collected and commission, with a PDF report and a CSV for the accountant. Sales see their own, Managers their team's, Admins everything. **Commissions** earned automatically when clients pay | Commission: a sales person 16% + their manager 4%, or 20% when a Manager or Admin sells, on what the client paid without VAT; Admins set the rates and mark commission paid. Expenses, payroll, EPF/ETF, profit and the tax return stay with the accountant. |
+| **My team** (**Teams** for admins) | One card per manager with their members' open leads, deals, quotes and tasks and the team's totals; managers can hand one person's open work to someone else | Managers only see and move work within their own team; admins see every team, plus a *No manager yet* card. |
 | **Reports** | Revenue, win rate, forecast, lead sources, team and support performance | Pick any period or person, and export to CSV. |
 | **Settings** | Team, pipeline, company details, price list, integrations, security, system health, audit log | Most are admin-only. |
 
@@ -245,7 +246,7 @@ Nine steps, each one usable on its own before the next began.
 | **8. Integrations** | Emails through Resend, the morning summary, team chat alerts, calendar links, accounting export |
 | **9. Hardening** | Two-step sign-in, rate limits, error monitoring, health check, tests, CI, auto-migrations, nightly backups |
 
-Added since: dark mode, a plan-usage panel for admins (Neon storage and compute, with an 80% warning in the morning email), profile photos, the project access register with a Project Delivery Pack and a password-locked login sheet, and **invoices and receipts** (advance and balance invoices from accepted quotes, contract invoices, payments with receipts, a Tax Invoice layout, and an *Accepted by* block on quotes).
+Added since: dark mode, a plan-usage panel for admins (Neon storage and compute, with an 80% warning in the morning email), profile photos, the project access register with a Project Delivery Pack and a password-locked login sheet, and **invoices and receipts** (advance and balance invoices from accepted quotes, contract invoices, payments with receipts, a Tax Invoice layout, and an *Accepted by* block on quotes), and **finance** (automatic sales commission, and an Income page with an export for the accountant).
 
 ---
 
